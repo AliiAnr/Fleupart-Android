@@ -36,6 +36,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.course.fleura.ui.screen.navigation.NavItem
 import com.course.fleura.ui.screen.navigation.Screen
 import com.course.fleura.ui.screen.navigation.getNavItem
@@ -44,12 +45,20 @@ import com.course.fleura.R
 
 @Composable
 fun BottomNavBar(
-    context : Context,
+    context: Context,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     var selectedItem by rememberSaveable { mutableStateOf(Screen.Home.route) }
+
+    LaunchedEffect(currentRoute) {
+        if (currentRoute != null) {
+            selectedItem = currentRoute
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -72,7 +81,6 @@ fun BottomNavBar(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             getNavItem(context = context).forEach { item ->
                 BottomNavBarItem(
                     item = item,
@@ -81,7 +89,7 @@ fun BottomNavBar(
                         if (selectedItem != item.screen.route) {
                             selectedItem = item.screen.route
                             navController.navigate(item.screen.route) {
-                                popUpTo(Screen.Home.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
                                 restoreState = true
@@ -91,7 +99,6 @@ fun BottomNavBar(
                     }
                 )
             }
-
         }
     }
 }

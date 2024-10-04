@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = onPrimaryLight
                 ) {
-                    FleuraApp(context = this)
+                    FleuraApp(context = this, modifier = Modifier)
                 }
             }
         }
