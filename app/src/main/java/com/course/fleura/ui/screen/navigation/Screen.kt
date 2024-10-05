@@ -5,5 +5,6 @@ sealed class Screen(val route: String) {
     object Cart : Screen("cart")
     object Point : Screen("point")
     object Order : Screen("order")
-    object Profile : Screen("Profile")
+    object Profile : Screen("profile")
+    object DetailTest : Screen("detailtest")
 }
