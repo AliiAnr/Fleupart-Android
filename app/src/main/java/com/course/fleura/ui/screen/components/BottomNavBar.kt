@@ -76,7 +76,7 @@ fun FleuraBottomBar(
                     )
                 }
                 .fillMaxWidth()
-                .height(80.dp)
+                .height(70.dp)
                 .background(onPrimaryLight),
             contentAlignment = Alignment.Center
         ) {
