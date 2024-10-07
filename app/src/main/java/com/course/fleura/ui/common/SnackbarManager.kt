@@ -1,4 +1,4 @@
-package com.course.fleura.ui.screen.common
+package com.course.fleura.ui.common
 
 import androidx.annotation.StringRes
 import kotlinx.coroutines.flow.MutableStateFlow

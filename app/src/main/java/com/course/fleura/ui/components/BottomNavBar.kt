@@ -1,4 +1,4 @@
-package com.course.fleura.ui.screen.components
+package com.course.fleura.ui.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background

@@ -2,6 +2,8 @@ package com.course.fleura.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+val base80 = Color(0xFF949494)
+val base60 = Color(0xFFB0B0B0)
 val base40 = Color(0xFFA8A8A8)
 val primaryLight = Color(0xFFF06AA8)
 val onPrimaryLight = Color(0xFFFFFFFF)

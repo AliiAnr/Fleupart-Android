@@ -16,7 +16,7 @@ import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.course.fleura.LocalNavAnimatedVisibilityScope
-import com.course.fleura.ui.screen.components.HomeSections
+import com.course.fleura.ui.components.HomeSections
 import com.course.fleura.ui.screen.dashboard.cart.Cart
 import com.course.fleura.ui.screen.dashboard.home.Home
 import com.course.fleura.ui.screen.dashboard.order.Order

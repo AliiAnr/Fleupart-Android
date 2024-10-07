@@ -1,4 +1,4 @@
-package com.course.fleura.ui.screen.common
+package com.course.fleura.ui.common
 
 import android.app.Activity
 import androidx.compose.runtime.Composable

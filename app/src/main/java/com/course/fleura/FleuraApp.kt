@@ -25,8 +25,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
-import com.course.fleura.ui.screen.components.FleuraBottomBar
-import com.course.fleura.ui.screen.components.HomeSections
+import com.course.fleura.ui.components.FleuraBottomBar
+import com.course.fleura.ui.components.HomeSections
 import com.course.fleura.ui.screen.dashboard.detail.home.DetailTest
 import com.course.fleura.ui.screen.navigation.FleuraScaffold
 import com.course.fleura.ui.screen.navigation.MainDestinations
@@ -36,6 +36,7 @@ import com.course.fleura.ui.screen.navigation.nonSpatialExpressiveSpring
 import com.course.fleura.ui.screen.navigation.rememberFleuraNavController
 import com.course.fleura.ui.screen.navigation.rememberFleuraScaffoldState
 import com.course.fleura.ui.screen.navigation.spatialExpressiveSpring
+import com.course.fleura.ui.screen.onBoarding.OnboardingScreen
 import com.course.fleura.ui.theme.FleuraTheme
 
 @Composable
@@ -48,9 +49,15 @@ fun FleuraApp() {
             ) {
                 NavHost(
                     navController = fleuraNavController.navController,
-                    startDestination = MainDestinations.DASHBOARD_ROUTE,
+                    startDestination = MainDestinations.ONBOARDING_ROUTE,
                     contentAlignment = Alignment.Center
                 ) {
+                    composableWithCompositionLocal(
+                        route = MainDestinations.ONBOARDING_ROUTE
+                    ) { backStackEntry ->
+                        OnboardingScreen()
+                    }
+
                     composableWithCompositionLocal(
                         route = MainDestinations.DASHBOARD_ROUTE
                     ) { backStackEntry ->
@@ -58,6 +65,7 @@ fun FleuraApp() {
                             onSnackSelected = fleuraNavController::navigateToSnackDetail
                         )
                     }
+
                     composableWithCompositionLocal(
                         "${MainDestinations.SNACK_DETAIL_ROUTE}/" +
                                 "{${MainDestinations.SNACK_ID_KEY}}" +

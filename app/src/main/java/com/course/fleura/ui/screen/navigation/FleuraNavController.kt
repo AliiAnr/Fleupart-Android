@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 
 object MainDestinations {
     const val DASHBOARD_ROUTE = "dashboard"
+    const val ONBOARDING_ROUTE = "onboarding"
     const val SNACK_DETAIL_ROUTE = "snack"
     const val SNACK_ID_KEY = "snackId"
     const val ORIGIN = "origin"
