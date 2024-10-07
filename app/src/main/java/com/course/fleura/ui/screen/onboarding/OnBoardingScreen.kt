@@ -30,8 +30,6 @@ import com.course.fleura.ui.theme.primaryLight
 
 @Composable
 fun OnBoardingScreen(
-//    navController: NavHostController,
-//    context: MainActivity
 ) {
     val vectorImages = listOf(
         R.drawable.ob_1,

@@ -46,6 +46,7 @@ fun CustomButton(
     fontWeight: FontWeight = FontWeight.Bold,
     icon: Painter? = null, // Parameter untuk ikon atau gambar
     iconSpacing: Dp = 8.dp, // Jarak antara ikon dan teks
+    borderWidth: Dp = 1.dp,
     onClick: () -> Unit
 ) {
     val buttonModifier = modifier
@@ -57,7 +58,7 @@ fun CustomButton(
         Box(
             contentAlignment = Alignment.Center,
             modifier = buttonModifier
-                .border(width = 2.dp, color = outlinedColor, shape = shape)
+                .border(width = borderWidth, color = outlinedColor, shape = shape)
                 .clickable(onClick = onClick,
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() })
