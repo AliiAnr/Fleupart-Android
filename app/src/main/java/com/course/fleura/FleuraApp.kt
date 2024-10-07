@@ -27,6 +27,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.course.fleura.ui.components.FleuraBottomBar
 import com.course.fleura.ui.components.HomeSections
+import com.course.fleura.ui.screen.authentication.welcome.WelcomeScreen
 import com.course.fleura.ui.screen.dashboard.detail.home.DetailTest
 import com.course.fleura.ui.screen.navigation.FleuraScaffold
 import com.course.fleura.ui.screen.navigation.MainDestinations
@@ -36,7 +37,7 @@ import com.course.fleura.ui.screen.navigation.nonSpatialExpressiveSpring
 import com.course.fleura.ui.screen.navigation.rememberFleuraNavController
 import com.course.fleura.ui.screen.navigation.rememberFleuraScaffoldState
 import com.course.fleura.ui.screen.navigation.spatialExpressiveSpring
-import com.course.fleura.ui.screen.onBoarding.OnboardingScreen
+import com.course.fleura.ui.screen.onboarding.OnBoardingScreen
 import com.course.fleura.ui.theme.FleuraTheme
 
 @Composable
@@ -49,13 +50,19 @@ fun FleuraApp() {
             ) {
                 NavHost(
                     navController = fleuraNavController.navController,
-                    startDestination = MainDestinations.ONBOARDING_ROUTE,
+                    startDestination = MainDestinations.WELCOME_ROUTE,
                     contentAlignment = Alignment.Center
                 ) {
                     composableWithCompositionLocal(
                         route = MainDestinations.ONBOARDING_ROUTE
                     ) { backStackEntry ->
-                        OnboardingScreen()
+                        OnBoardingScreen()
+                    }
+
+                    composableWithCompositionLocal(
+                        route = MainDestinations.WELCOME_ROUTE
+                    ) { backStackEntry ->
+                        WelcomeScreen()
                     }
 
                     composableWithCompositionLocal(

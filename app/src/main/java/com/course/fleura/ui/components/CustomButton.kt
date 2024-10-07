@@ -1,57 +1,121 @@
 package com.course.fleura.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.course.fleura.ui.theme.onPrimaryLight
 import com.course.fleura.ui.theme.primaryLight
 
 @Composable
 fun CustomButton(
-    text: String,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
+    modifier: Modifier = Modifier, // Modifier default tanpa ukuran
+    defaultWidth: Dp = 370.dp, // Ukuran default yang dapat diubah
+    defaultHeight: Dp = 55.dp,
+    text: String = "",
+    isOutlined: Boolean = false,
+    backgroundColor: Color = primaryLight,
+    outlinedColor: Color = primaryLight,
+    textColor: Color = onPrimaryLight,
+    shape: RoundedCornerShape = RoundedCornerShape(50.dp),
+    fontSize: Int = 16,
+    fontWeight: FontWeight = FontWeight.Bold,
+    icon: Painter? = null, // Parameter untuk ikon atau gambar
+    iconSpacing: Dp = 8.dp, // Jarak antara ikon dan teks
+    onClick: () -> Unit
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = modifier
-            .width(370.dp)
-            .height(55.dp)
-            .background(
-                color = primaryLight,
-                shape = RoundedCornerShape(50.dp)
-            )
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp, horizontal = 24.dp)
-    ) {
+    val buttonModifier = modifier
+        .width(defaultWidth)
+        .height(defaultHeight)
 
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.onPrimary,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-        )
-
+    if (isOutlined) {
+        // Outlined Button
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = buttonModifier
+                .border(width = 2.dp, color = outlinedColor, shape = shape)
+                .clickable(onClick = onClick,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() })
+                .padding(vertical = 12.dp, horizontal = 24.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (icon != null) {
+                    Image(
+                        painter = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(iconSpacing))
+                }
+                Text(
+                    text = text,
+                    color = outlinedColor,
+                    fontSize = fontSize.sp,
+                    fontWeight = fontWeight
+                )
+            }
+        }
+    } else {
+        // Filled Button
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = buttonModifier
+                .background(
+                    color = backgroundColor,
+                    shape = shape
+                )
+                .clickable(onClick = onClick,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() })
+                .padding(vertical = 12.dp, horizontal = 24.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (icon != null) {
+                    Image(
+                        painter = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(iconSpacing))
+                }
+                Text(
+                    text = text,
+                    color = textColor,
+                    fontSize = fontSize.sp,
+                    fontWeight = fontWeight
+                )
+            }
+        }
     }
 }
-
-@Preview (showBackground = true)
-@Composable
-fun CustomButtonPreview() {
-    CustomButton(text = "Button", onClick = {}, modifier = Modifier.padding(16.dp))
-}
-

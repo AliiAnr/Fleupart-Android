@@ -1,4 +1,4 @@
-package com.course.fleura.ui.screen.onBoarding
+package com.course.fleura.ui.screen.onboarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,7 +29,7 @@ import com.course.fleura.ui.theme.onPrimaryLight
 import com.course.fleura.ui.theme.primaryLight
 
 @Composable
-fun OnboardingScreen(
+fun OnBoardingScreen(
 //    navController: NavHostController,
 //    context: MainActivity
 ) {
