@@ -1,7 +1,6 @@
 package com.course.fleura.ui.screen.authentication.welcome
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -116,7 +115,6 @@ fun WelcomeScreen(
                 backgroundColor = primaryLight,
                 textColor = Color.White,
                 shape = RoundedCornerShape(50.dp),
-                fontSize = 18,
                 fontWeight = FontWeight.Bold,
                 onClick = { /* TODO: Add Login Navigation */ },
                 modifier = Modifier
@@ -131,7 +129,6 @@ fun WelcomeScreen(
                 isOutlined = true,
                 outlinedColor = Color.Black,
                 shape = RoundedCornerShape(50.dp),
-                fontSize = 18,
                 fontWeight = FontWeight.Bold,
                 onClick = { /* TODO: Add Register Navigation */ },
                 modifier = Modifier

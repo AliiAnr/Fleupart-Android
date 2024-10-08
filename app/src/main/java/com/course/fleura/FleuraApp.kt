@@ -28,6 +28,7 @@ import androidx.navigation.navArgument
 import com.course.fleura.ui.components.FleuraBottomBar
 import com.course.fleura.ui.components.HomeSections
 import com.course.fleura.ui.screen.authentication.login.LoginScreen
+import com.course.fleura.ui.screen.authentication.register.RegisterScreen
 import com.course.fleura.ui.screen.authentication.welcome.WelcomeScreen
 import com.course.fleura.ui.screen.dashboard.detail.home.DetailTest
 import com.course.fleura.ui.screen.navigation.FleuraScaffold
@@ -64,6 +65,12 @@ fun FleuraApp() {
                         route = MainDestinations.LOGIN_ROUTE
                     ) { backStackEntry ->
                         LoginScreen()
+                    }
+
+                    composableWithCompositionLocal(
+                        route = MainDestinations.REGISTER_ROUTE
+                    ) { backStackEntry ->
+                        RegisterScreen()
                     }
 
                     composableWithCompositionLocal(

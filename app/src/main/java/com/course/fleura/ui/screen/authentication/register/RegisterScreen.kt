@@ -1,4 +1,4 @@
-package com.course.fleura.ui.screen.authentication.login
+package com.course.fleura.ui.screen.authentication.register
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,21 +42,18 @@ import com.course.fleura.ui.screen.navigation.FleuraSurface
 import com.course.fleura.ui.theme.primaryLight
 
 @Composable
-fun LoginScreen(
-//    navController: NavHostController,
-//    context: MainActivity,
+fun RegisterScreen(
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: LoginScreenViewModel = remember { LoginScreenViewModel() }
+    val viewModel: RegisterScreenViewModel = remember { RegisterScreenViewModel() }
     val isLoading by viewModel.loading.collectAsState(initial = false)
     val focusManager = LocalFocusManager.current
-
     val title = buildAnnotatedString {
         withStyle(style = SpanStyle(color = Color(0xFFFFD700), fontWeight = FontWeight.ExtraBold)) {
-            append("Welcome back!")
+            append("Hello! ")
         }
         withStyle(style = SpanStyle(color = primaryLight, fontWeight = FontWeight.ExtraBold)) {
-            append("\nGlad to see you")
+            append("Register to get started")
         }
 
     }
@@ -105,24 +102,28 @@ fun LoginScreen(
                         isPassword = true,
                         errorMessage = viewModel.passwordError,
                     )
-                    Text(
-                        text = "Forgot Password?",
-                        modifier = Modifier
-                            .clickable {
-//                            navController.navigate(Graph.FORGOT_PASSWORD)
-                            }
-                            .align(Alignment.End)
-                            .padding(bottom = 35.dp),
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
+                    Spacer(modifier = Modifier.height(15.dp))
+                    CustomTextField(
+                        value = viewModel.confirmPasswordValue,
+                        onChange = viewModel::setConfirmPassword,
+                        placeholder = "Password",
+                        isError = viewModel.confirmPasswordError.isNotEmpty(),
+                        icon = Icons.Rounded.Lock,
+                        isPassword = true,
+                        errorMessage = viewModel.confirmPasswordError,
                     )
                 }
 
+
                 CustomButton(
-                    text = "Login",
+                    text = "Register",
+                    isOutlined = true,
+                    outlinedColor = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
                     onClick = {
                         focusManager.clearFocus()
-                        viewModel.login(
+                        viewModel.register(
                             onSuccess = {
 //                            navController.popBackStack()
 //                            navController.navigate(Screen.Home.route)
@@ -132,6 +133,7 @@ fun LoginScreen(
                             }
                         )
                     },
+                    modifier = Modifier.padding(top = 30.dp)
                 )
 
                 Row(
@@ -146,7 +148,7 @@ fun LoginScreen(
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        text = " Or Login with ",
+                        text = " Or Register with ",
                         color = Color(0xFF1C1C1C),
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 8.dp)
@@ -178,12 +180,12 @@ fun LoginScreen(
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
                     Text(
-                        text = "Don't Have Account?",
+                        text = "Already have an account?",
                         fontWeight = FontWeight.Normal,
                         color = Color.Black,
                     )
                     Text(
-                        text = " Register!",
+                        text = " Login!",
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .clickable(

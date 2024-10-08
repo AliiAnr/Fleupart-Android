@@ -1,4 +1,4 @@
-package com.course.fleura.ui.components
+package com.course.fleura.ui.screen.authentication.login
 
 import android.util.Patterns
 import androidx.compose.runtime.getValue
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class TextFieldViewModel() : ViewModel() {
+class LoginScreenViewModel : ViewModel() {
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
@@ -23,43 +23,51 @@ class TextFieldViewModel() : ViewModel() {
     var emailError by mutableStateOf("")
         private set
 
-    fun setEmail(value: String) {
-        emailValue = value
-    }
-
     var passwordValue by mutableStateOf("")
         private set
     var passwordError by mutableStateOf("")
         private set
 
+    fun setEmail(value: String) {
+        emailValue = value
+        validateEmail()
+    }
+
     fun setPassword(value: String) {
         passwordValue = value
+        validatePassword()
     }
 
     private fun validateEmail(): Boolean {
         val email = emailValue.trim()
-        var isValid = true
-        if (email.isEmpty() || email.isBlank()) {
+        return if (email.isBlank()) {
             emailError = "Email is required"
-            isValid = false
+            false
         } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             emailError = "Invalid email address"
-            isValid = false
+            false
+        } else {
+            emailError = ""
+            true
         }
-        return isValid
     }
 
     private fun validatePassword(): Boolean {
         val password = passwordValue.trim()
-        var isValid = true
-        if (password.isBlank() || password.isEmpty()) {
-            passwordError = "Please fill password field"
-            isValid = false
-        } else if (password.length < 6) {
-            passwordError = "Password must be at least 6 characters"
-            isValid = false
+        return when {
+            password.isBlank() -> {
+                passwordError = "Please fill password field"
+                false
+            }
+            password.length < 6 -> {
+                passwordError = "Password must be at least 6 characters"
+                false
+            }
+            else -> {
+                passwordError = ""
+                true
+            }
         }
-        return isValid
     }
 
     fun login(onSuccess: () -> Unit, onError: (String) -> Unit) {
@@ -68,9 +76,9 @@ class TextFieldViewModel() : ViewModel() {
             viewModelScope.launch {
                 delay(2000)
                 _loading.value = false
+                onSuccess()
             }
         } else {
-            _isValid.value = false
             onError("Invalid email or password")
         }
     }
