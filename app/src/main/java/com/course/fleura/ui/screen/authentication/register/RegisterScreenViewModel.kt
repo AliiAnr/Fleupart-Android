@@ -62,7 +62,6 @@ class RegisterScreenViewModel : ViewModel() {
         validateConfirmPassword()
     }
 
-    // Validation Functions
     private fun validateUsername(): Boolean {
         val username = usernameValue.trim()
         return if (username.isBlank()) {

@@ -16,6 +16,7 @@ object MainDestinations {
     const val WELCOME_ROUTE = "welcome"
     const val LOGIN_ROUTE = "login"
     const val REGISTER_ROUTE = "register"
+    const val USERNAME_ROUTE = "username"
     const val SNACK_DETAIL_ROUTE = "snack"
     const val SNACK_ID_KEY = "snackId"
     const val ORIGIN = "origin"

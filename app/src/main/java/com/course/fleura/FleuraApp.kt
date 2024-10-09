@@ -29,6 +29,7 @@ import com.course.fleura.ui.components.FleuraBottomBar
 import com.course.fleura.ui.components.HomeSections
 import com.course.fleura.ui.screen.authentication.login.LoginScreen
 import com.course.fleura.ui.screen.authentication.register.RegisterScreen
+import com.course.fleura.ui.screen.authentication.username.UsernameScreen
 import com.course.fleura.ui.screen.authentication.welcome.WelcomeScreen
 import com.course.fleura.ui.screen.dashboard.detail.home.DetailTest
 import com.course.fleura.ui.screen.navigation.FleuraScaffold
@@ -52,13 +53,19 @@ fun FleuraApp() {
             ) {
                 NavHost(
                     navController = fleuraNavController.navController,
-                    startDestination = MainDestinations.LOGIN_ROUTE,
+                    startDestination = MainDestinations.USERNAME_ROUTE,
                     contentAlignment = Alignment.Center
                 ) {
                     composableWithCompositionLocal(
                         route = MainDestinations.ONBOARDING_ROUTE
                     ) { backStackEntry ->
                         OnBoardingScreen()
+                    }
+
+                    composableWithCompositionLocal(
+                        route = MainDestinations.WELCOME_ROUTE
+                    ) { backStackEntry ->
+                        WelcomeScreen()
                     }
 
                     composableWithCompositionLocal(
@@ -74,9 +81,9 @@ fun FleuraApp() {
                     }
 
                     composableWithCompositionLocal(
-                        route = MainDestinations.WELCOME_ROUTE
+                        route = MainDestinations.USERNAME_ROUTE
                     ) { backStackEntry ->
-                        WelcomeScreen()
+                        UsernameScreen()
                     }
 
                     composableWithCompositionLocal(
