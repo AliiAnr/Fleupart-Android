@@ -53,19 +53,19 @@ fun FleuraApp() {
             ) {
                 NavHost(
                     navController = fleuraNavController.navController,
-                    startDestination = MainDestinations.USERNAME_ROUTE,
+                    startDestination = MainDestinations.WELCOME_ROUTE,
                     contentAlignment = Alignment.Center
                 ) {
-                    composableWithCompositionLocal(
-                        route = MainDestinations.ONBOARDING_ROUTE
-                    ) { backStackEntry ->
-                        OnBoardingScreen()
-                    }
-
                     composableWithCompositionLocal(
                         route = MainDestinations.WELCOME_ROUTE
                     ) { backStackEntry ->
                         WelcomeScreen()
+                    }
+
+                    composableWithCompositionLocal(
+                        route = MainDestinations.ONBOARDING_ROUTE
+                    ) { backStackEntry ->
+                        OnBoardingScreen()
                     }
 
                     composableWithCompositionLocal(
