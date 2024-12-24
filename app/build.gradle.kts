@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.course.fleura"
+    namespace = "com.course.fleupart"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.course.fleura"
+        applicationId = "com.course.fleupart"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

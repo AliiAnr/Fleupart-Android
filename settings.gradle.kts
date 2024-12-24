@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Fleura"
+rootProject.name = "Fleupart"
 include(":app")
