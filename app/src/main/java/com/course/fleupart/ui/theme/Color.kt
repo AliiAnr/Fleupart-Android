@@ -2,9 +2,12 @@ package com.course.fleupart.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+val base20 = Color(0xFFF5F5F5)
+val base100 = Color(0xFF757575)
 val base80 = Color(0xFF949494)
 val base60 = Color(0xFFB0B0B0)
-val base40 = Color(0xFFA8A8A8)
+val base40 = Color(0xFFDEDEDE)
+val base300 = Color(0xFF575757)
 val tfbackground = Color(0xFFF8F5F4)
 val primaryLight = Color(0xFFF06AA8)
 val onPrimaryLight = Color(0xFFFFFFFF)

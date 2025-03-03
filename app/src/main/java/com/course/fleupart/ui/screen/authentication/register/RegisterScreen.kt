@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.course.fleupart.R
 import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.components.CustomTextField
-import com.course.fleupart.ui.screen.navigation.FleupartaSurface
+import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.primaryLight
 
 @Composable
@@ -58,7 +58,7 @@ fun RegisterScreen(
 
     }
 
-    FleupartaSurface(modifier = modifier.fillMaxSize()) {
+    FleupartSurface(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier

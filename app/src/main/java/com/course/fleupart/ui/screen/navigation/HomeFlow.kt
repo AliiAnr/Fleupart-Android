@@ -17,10 +17,10 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.course.fleupart.LocalNavAnimatedVisibilityScope
 import com.course.fleupart.ui.components.HomeSections
-import com.course.fleupart.ui.screen.dashboard.cart.Cart
+import com.course.fleupart.ui.screen.dashboard.finance.Finance
 import com.course.fleupart.ui.screen.dashboard.home.Home
 import com.course.fleupart.ui.screen.dashboard.order.Order
-import com.course.fleupart.ui.screen.dashboard.point.Point
+import com.course.fleupart.ui.screen.dashboard.product.Product
 import com.course.fleupart.ui.screen.dashboard.profile.Profile
 
 fun <T> spatialExpressiveSpring() = spring<T>(
@@ -89,14 +89,14 @@ fun NavGraphBuilder.addHomeGraph(
             modifier = modifier
         )
     }
-    composable(HomeSections.Cart.route) { from ->
-        Cart(
-
+    composable(HomeSections.Product.route) { from ->
+        Product(
+            modifier = modifier
         )
     }
-    composable(HomeSections.Point.route) { from ->
-        Point(
-
+    composable(HomeSections.Finance.route) { from ->
+        Finance(
+            modifier = modifier
         )
     }
     composable(HomeSections.Order.route) {

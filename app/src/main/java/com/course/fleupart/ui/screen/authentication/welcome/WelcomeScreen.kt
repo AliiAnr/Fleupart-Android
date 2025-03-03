@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.course.fleupart.R
 import com.course.fleupart.ui.components.CustomButton
-import com.course.fleupart.ui.screen.navigation.FleupartaSurface
+import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base80
 import com.course.fleupart.ui.theme.primaryLight
 
@@ -26,7 +26,7 @@ import com.course.fleupart.ui.theme.primaryLight
 fun WelcomeScreen(
     modifier: Modifier = Modifier
 ) {
-    FleupartaSurface(modifier = modifier.fillMaxSize()) {
+    FleupartSurface(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

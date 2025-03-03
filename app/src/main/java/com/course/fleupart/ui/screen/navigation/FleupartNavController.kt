@@ -15,11 +15,23 @@ object MainDestinations {
     const val ONBOARDING_ROUTE = "onboarding"
     const val WELCOME_ROUTE = "welcome"
     const val LOGIN_ROUTE = "login"
+    const val REGISTER_PENDING_ROUTE = "register_pending"
     const val REGISTER_ROUTE = "register"
     const val USERNAME_ROUTE = "username"
+    const val ADDRESS_ROUTE = "address"
+    const val CITIZEN_ROUTE = "citizen"
+    const val PHOTO_ROUTE = "photo"
     const val SNACK_DETAIL_ROUTE = "snack"
     const val SNACK_ID_KEY = "snackId"
     const val ORIGIN = "origin"
+}
+
+object DetailDestinations {
+    const val PRODUCT_STATUS_ROUTE = "productStatus"
+    const val ADD_PRODUCT_ROUTE = "addProduct"
+    const val WITHDRAW_BALANCE_ROUTE = "withdrawBalance"
+    const val BALANCE_AMOUNT_ROUTE = "balanceAmount"
+    const val ADD_BANK_ACCOUNT_ROUTE = "addBankAccount"
 }
 
 @Composable

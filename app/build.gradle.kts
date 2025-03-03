@@ -70,5 +70,13 @@ dependencies {
     implementation(libs.ui.tooling)
     implementation(libs.androidx.animation)
 
+    implementation(libs.ucrop)
+    implementation(libs.coil.compose)
+    implementation(libs.accompanist.permissions)
+
     implementation(libs.androidx.core.splashscreen)
+
+    implementation(libs.kotlinx.datetime)
+
+    implementation(libs.kmp.date.time.picker)
 }

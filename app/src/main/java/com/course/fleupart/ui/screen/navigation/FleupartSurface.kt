@@ -21,7 +21,7 @@ import androidx.compose.ui.zIndex
 import kotlin.math.ln
 
 @Composable
-fun FleupartaSurface(
+fun FleupartSurface(
     modifier: Modifier = Modifier,
     shape: Shape = RectangleShape,
     color: Color = White,

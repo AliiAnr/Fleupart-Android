@@ -35,6 +35,7 @@ fun CustomButton(
     defaultWidth: Dp = 370.dp, // Ukuran default yang dapat diubah
     defaultHeight: Dp = 55.dp,
     text: String = "",
+    isEnabled: Boolean = true,
     isOutlined: Boolean = false,
     backgroundColor: Color = primaryLight,
     outlinedColor: Color = primaryLight,
@@ -87,7 +88,7 @@ fun CustomButton(
             contentAlignment = Alignment.Center,
             modifier = buttonModifier
                 .background(
-                    color = backgroundColor,
+                    color = if (isEnabled) backgroundColor else Color(0xFFF59DC6),
                     shape = shape
                 )
                 .clickable(onClick = onClick,

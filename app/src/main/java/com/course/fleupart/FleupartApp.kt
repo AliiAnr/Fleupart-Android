@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,10 +29,20 @@ import androidx.navigation.navArgument
 import com.course.fleupart.ui.components.FleupartBottomBar
 import com.course.fleupart.ui.components.HomeSections
 import com.course.fleupart.ui.screen.authentication.login.LoginScreen
+import com.course.fleupart.ui.screen.authentication.onDataBoarding.AddressScreen
+import com.course.fleupart.ui.screen.authentication.onDataBoarding.CitizenScreen
+import com.course.fleupart.ui.screen.authentication.onDataBoarding.PhotoScreen
+import com.course.fleupart.ui.screen.authentication.onDataBoarding.RegistrationPendingScreen
 import com.course.fleupart.ui.screen.authentication.register.RegisterScreen
 import com.course.fleupart.ui.screen.authentication.username.UsernameScreen
 import com.course.fleupart.ui.screen.authentication.welcome.WelcomeScreen
+import com.course.fleupart.ui.screen.dashboard.detail.finance.AddBankAccount
+import com.course.fleupart.ui.screen.dashboard.detail.finance.BalanceValue
+import com.course.fleupart.ui.screen.dashboard.detail.finance.WithdrawBalance
 import com.course.fleupart.ui.screen.dashboard.detail.home.DetailTest
+import com.course.fleupart.ui.screen.dashboard.detail.product.AddProduct
+import com.course.fleupart.ui.screen.dashboard.detail.product.DetailProduct
+import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartScaffold
 import com.course.fleupart.ui.screen.navigation.MainDestinations
 import com.course.fleupart.ui.screen.navigation.addHomeGraph
@@ -53,7 +64,7 @@ fun FleupartApp() {
             ) {
                 NavHost(
                     navController = fleupartNavController.navController,
-                    startDestination = MainDestinations.WELCOME_ROUTE,
+                    startDestination = DetailDestinations.ADD_PRODUCT_ROUTE,
                     contentAlignment = Alignment.Center
                 ) {
                     composableWithCompositionLocal(
@@ -81,6 +92,44 @@ fun FleupartApp() {
                     }
 
                     composableWithCompositionLocal(
+                        route = DetailDestinations.PRODUCT_STATUS_ROUTE
+                    ) { backStackEntry ->
+                        DetailProduct()
+                    }
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.ADD_PRODUCT_ROUTE
+                    ) { backStackEntry ->
+                        AddProduct(
+
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.WITHDRAW_BALANCE_ROUTE
+                    ) { backStackEntry ->
+                        WithdrawBalance(
+
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.ADD_PRODUCT_ROUTE
+                    ) { backStackEntry ->
+                        AddBankAccount(
+
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.BALANCE_AMOUNT_ROUTE
+                    ) { backStackEntry ->
+                        BalanceValue(
+
+                        )
+                    }
+
+                    composableWithCompositionLocal(
                         route = MainDestinations.USERNAME_ROUTE
                     ) { backStackEntry ->
                         UsernameScreen()
@@ -93,6 +142,10 @@ fun FleupartApp() {
                             onSnackSelected = fleupartNavController::navigateToSnackDetail
                         )
                     }
+
+                    onDataGraph(
+                        onSnackSelected = fleupartNavController::navigateToSnackDetail
+                    )
 
                     composableWithCompositionLocal(
                         "${MainDestinations.SNACK_DETAIL_ROUTE}/" +
@@ -166,7 +219,7 @@ fun MainContainer(
     ) { padding ->
         NavHost(
             navController = nestedNavController.navController,
-            startDestination = HomeSections.Home.route,
+            startDestination = HomeSections.Finance.route,
             contentAlignment = Alignment.Center
         ) {
             addHomeGraph(
@@ -176,6 +229,42 @@ fun MainContainer(
                     .consumeWindowInsets(padding)
             )
         }
+    }
+}
+
+fun NavGraphBuilder.onDataGraph(
+    onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
+) {
+    composableWithCompositionLocal(
+        route = MainDestinations.CITIZEN_ROUTE
+    ) { backStackEntry ->
+        CitizenScreen(
+
+        )
+    }
+
+    composableWithCompositionLocal(
+        route = MainDestinations.PHOTO_ROUTE
+    ) { backStackEntry ->
+        PhotoScreen(
+
+        )
+    }
+
+    composableWithCompositionLocal(
+        route = MainDestinations.ADDRESS_ROUTE
+    ) { backStackEntry ->
+        AddressScreen(
+
+        )
+    }
+
+    composableWithCompositionLocal(
+        route = MainDestinations.REGISTER_PENDING_ROUTE
+    ) { backStackEntry ->
+        RegistrationPendingScreen(
+
+        )
     }
 }
 

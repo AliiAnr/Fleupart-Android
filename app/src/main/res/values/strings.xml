@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Fleupart</string>
     <string name="menu_home">Home</string>
-    <string name="menu_cart">Cart</string>
-    <string name="menu_point">Point</string>
+    <string name="menu_cart">Product</string>
+    <string name="menu_point">Finance</string>
     <string name="menu_order">Order</string>
     <string name="menu_profile">Profile</string>
     <string name="next_page">NEXT</string>
