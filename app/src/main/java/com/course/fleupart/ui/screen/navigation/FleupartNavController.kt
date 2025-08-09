@@ -24,6 +24,7 @@ object MainDestinations {
     const val SNACK_DETAIL_ROUTE = "snack"
     const val SNACK_ID_KEY = "snackId"
     const val ORIGIN = "origin"
+    const val OTP_ROUTE = "otp"
 }
 
 object DetailDestinations {
@@ -33,6 +34,10 @@ object DetailDestinations {
     const val BALANCE_AMOUNT_ROUTE = "balanceAmount"
     const val ADD_BANK_ACCOUNT_ROUTE = "addBankAccount"
     const val SALES_REPORT_ROUTE = "salesReport"
+}
+
+object QueryKeys {
+    const val EMAIL = "email"
 }
 
 @Composable

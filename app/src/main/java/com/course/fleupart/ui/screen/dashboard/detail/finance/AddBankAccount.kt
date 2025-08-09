@@ -92,7 +92,7 @@ private fun AddBankAccount(
                     CustomButton(
                         text = "Add Bank Account",
                         onClick = { },
-                        isEnabled = isButtonEnabled
+                        isAvailable = isButtonEnabled
                     )
                 }
             }

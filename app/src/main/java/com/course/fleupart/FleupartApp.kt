@@ -29,6 +29,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.course.fleupart.data.resource.Resource
 import com.course.fleupart.di.factory.OnBoardingViewModelFactory
+import com.course.fleupart.di.factory.RegisterViewModelFactory
 import com.course.fleupart.ui.components.FleupartBottomBar
 import com.course.fleupart.ui.components.HomeSections
 import com.course.fleupart.ui.screen.authentication.login.LoginScreen
@@ -36,7 +37,9 @@ import com.course.fleupart.ui.screen.authentication.onDataBoarding.AddressScreen
 import com.course.fleupart.ui.screen.authentication.onDataBoarding.CitizenScreen
 import com.course.fleupart.ui.screen.authentication.onDataBoarding.PhotoScreen
 import com.course.fleupart.ui.screen.authentication.onDataBoarding.RegistrationPendingScreen
+import com.course.fleupart.ui.screen.authentication.otp.OtpScreen
 import com.course.fleupart.ui.screen.authentication.register.RegisterScreen
+import com.course.fleupart.ui.screen.authentication.register.RegisterScreenViewModel
 import com.course.fleupart.ui.screen.authentication.username.UsernameScreen
 import com.course.fleupart.ui.screen.authentication.welcome.WelcomeScreen
 import com.course.fleupart.ui.screen.dashboard.detail.finance.AddBankAccount
@@ -49,6 +52,7 @@ import com.course.fleupart.ui.screen.dashboard.detail.product.DetailProduct
 import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartScaffold
 import com.course.fleupart.ui.screen.navigation.MainDestinations
+import com.course.fleupart.ui.screen.navigation.QueryKeys
 import com.course.fleupart.ui.screen.navigation.addHomeGraph
 import com.course.fleupart.ui.screen.navigation.composableWithCompositionLocal
 import com.course.fleupart.ui.screen.navigation.nonSpatialExpressiveSpring
@@ -66,6 +70,12 @@ fun FleupartApp() {
             factory = OnBoardingViewModelFactory.getInstance(
                 Resource.appContext
             )
+    )
+
+    val registerViewModel: RegisterScreenViewModel = viewModel(
+        factory = RegisterViewModelFactory.getInstance(
+            Resource.appContext
+        )
     )
 
     FleupartTheme {
@@ -109,6 +119,19 @@ fun FleupartApp() {
                         route = MainDestinations.REGISTER_ROUTE
                     ) { backStackEntry ->
                         RegisterScreen(
+                            navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute,
+                            onBackClick = fleupartNavController::upPress,
+                            registerViewModel = registerViewModel
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = "${MainDestinations.OTP_ROUTE}?" + "email={${QueryKeys.EMAIL}}"
+                    ) { backStackEntry ->
+                        val arguments = requireNotNull(backStackEntry.arguments)
+                        val email = arguments.getString(QueryKeys.EMAIL) ?: "Email tidak ditemukan"
+                        OtpScreen(
+                            email = email,
                             navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute,
                             onBackClick = fleupartNavController::upPress
                         )

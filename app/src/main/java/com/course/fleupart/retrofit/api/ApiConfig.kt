@@ -3,6 +3,8 @@ package com.course.fleupart.retrofit.api
 import android.content.Context
 import com.course.fleupart.BuildConfig
 import com.course.fleupart.retrofit.AuthInterceptor
+import com.course.fleupart.retrofit.services.OtpService
+import com.course.fleupart.retrofit.services.RegisterService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -35,5 +37,13 @@ object ApiConfig {
             .client(provideOkHttpClient(context))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    fun getRegisterService(context: Context): RegisterService {
+        return provideRetrofit(context).create(RegisterService::class.java)
+    }
+
+    fun getOtpService(context: Context): OtpService {
+        return provideRetrofit(context).create(OtpService::class.java)
     }
 }

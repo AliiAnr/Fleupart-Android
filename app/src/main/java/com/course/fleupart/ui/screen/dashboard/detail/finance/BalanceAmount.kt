@@ -89,7 +89,7 @@ private fun BalanceValue(
                     CustomButton(
                         text = "Save",
                         onClick = { },
-                        isEnabled = isButtonEnabled
+                        isAvailable = isButtonEnabled
                     )
                 }
             }
