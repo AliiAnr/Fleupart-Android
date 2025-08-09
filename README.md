@@ -1,7 +1,7 @@
-# Fleura
+# Fleupart
 
 <div align="center">
-  <img src="https://github.com/AliiAnr/Fleura-Android/blob/main/Mockup.png" width="900"/>
+  <img src="https://github.com/AliiAnr/Fleupart-Android/blob/main/Mockup.png" width="900"/>
 </div>
 
 ## 🛠️ Tech stack & Open-source libraries
