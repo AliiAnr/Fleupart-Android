@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Lock
@@ -38,12 +39,32 @@ import androidx.compose.ui.unit.sp
 import com.course.fleupart.R
 import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.components.CustomTextField
+import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
+import com.course.fleupart.ui.screen.navigation.MainDestinations
 import com.course.fleupart.ui.theme.primaryLight
 
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
+    navigateToRoute: (String, Boolean) -> Unit,
+    onBackClick: () -> Unit
+) {
+    RegisterScreen(
+        modifier = modifier,
+        navigateToRoute = navigateToRoute,
+        onBackClick = onBackClick,
+        id = 0 // You can pass an ID or any other parameter if needed
+    )
+}
+
+
+@Composable
+private fun RegisterScreen(
+    modifier: Modifier = Modifier,
+    id: Int,
+    navigateToRoute: (String, Boolean) -> Unit,
+    onBackClick: () -> Unit
 ) {
     val viewModel: RegisterScreenViewModel = remember { RegisterScreenViewModel() }
     val isLoading by viewModel.loading.collectAsState(initial = false)
@@ -63,9 +84,23 @@ fun RegisterScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .clickable(
+                        onClick = {
+                            focusManager.clearFocus()
+                        },
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    )
+                    .statusBarsPadding()
                     .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                CustomTopAppBar(
+                    title = "",
+                    showNavigationIcon = true,
+                    horizontalPadding = 0.dp,
+                    onBackClick = onBackClick
+                )
                 Text(
                     text = title,
                     textAlign = TextAlign.Start,
@@ -74,7 +109,7 @@ fun RegisterScreen(
                     fontWeight = FontWeight.ExtraBold,
                     lineHeight = 50.sp,
                     modifier = Modifier
-                        .padding(top = 120.dp, bottom = 30.dp)
+                        .padding(top = 30.dp, bottom = 30.dp)
                         .align(Alignment.Start)
                 )
 
@@ -167,6 +202,7 @@ fun RegisterScreen(
                     outlinedColor = Color.Gray,
                     icon = painterResource(id = R.drawable.google_ic),
                     onClick = {
+                        focusManager.clearFocus()
                         // Handle Google login action
                     },
                     modifier = Modifier
@@ -190,8 +226,7 @@ fun RegisterScreen(
                         modifier = Modifier
                             .clickable(
                                 onClick = {
-//                                navController.popBackStack()
-//                                navController.navigate(Graph.REGISTER)
+                                    navigateToRoute(MainDestinations.LOGIN_ROUTE, true)
                                 },
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }

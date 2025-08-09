@@ -19,12 +19,14 @@ import androidx.compose.ui.unit.sp
 import com.course.fleupart.R
 import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
+import com.course.fleupart.ui.screen.navigation.MainDestinations
 import com.course.fleupart.ui.theme.base80
 import com.course.fleupart.ui.theme.primaryLight
 
 @Composable
 fun WelcomeScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navigateToRoute: (String, Boolean) -> Unit
 ) {
     FleupartSurface(modifier = modifier.fillMaxSize()) {
         Column(
@@ -52,7 +54,7 @@ fun WelcomeScreen(
                             fontWeight = FontWeight.ExtraBold
                         )
                     ) {
-                        append("Every ")
+                        append("Start ")
                     }
                     withStyle(
                         style = SpanStyle(
@@ -60,7 +62,7 @@ fun WelcomeScreen(
                             fontWeight = FontWeight.ExtraBold
                         )
                     ) {
-                        append("flower ")
+                        append("growing ")
                     }
                     withStyle(
                         style = SpanStyle(
@@ -68,7 +70,7 @@ fun WelcomeScreen(
                             fontWeight = FontWeight.ExtraBold
                         )
                     ) {
-                        append("you need is in ")
+                        append("your ")
                     }
                     withStyle(
                         style = SpanStyle(
@@ -76,7 +78,7 @@ fun WelcomeScreen(
                             fontWeight = FontWeight.ExtraBold
                         )
                     ) {
-                        append("this ")
+                        append("business ")
                     }
                     withStyle(
                         style = SpanStyle(
@@ -84,7 +86,7 @@ fun WelcomeScreen(
                             fontWeight = FontWeight.ExtraBold
                         )
                     ) {
-                        append("place !")
+                        append("here. ")
                     }
                 },
                 fontSize = 34.sp,
@@ -98,7 +100,7 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Make every occasion special with our handpicked flowers, designed to bring joy to your moments",
+                text = "Grow your flower business with our platform, connecting you to customers who appreciate quality blooms",
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
                 textAlign = TextAlign.Start,
@@ -116,7 +118,9 @@ fun WelcomeScreen(
                 textColor = Color.White,
                 shape = RoundedCornerShape(50.dp),
                 fontWeight = FontWeight.Bold,
-                onClick = { /* TODO: Add Login Navigation */ },
+                onClick = {
+                    navigateToRoute(MainDestinations.LOGIN_ROUTE, false)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(55.dp)
@@ -130,7 +134,9 @@ fun WelcomeScreen(
                 outlinedColor = Color.Black,
                 shape = RoundedCornerShape(50.dp),
                 fontWeight = FontWeight.Bold,
-                onClick = { /* TODO: Add Register Navigation */ },
+                onClick = {
+                    navigateToRoute(MainDestinations.REGISTER_ROUTE, false)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(55.dp)

@@ -1,7 +1,12 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -10,16 +15,27 @@ android {
 
     defaultConfig {
         applicationId = "com.course.fleupart"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val properties = Properties().apply {
+            load(FileInputStream(rootProject.file("local.properties")))
+        }
+        buildConfigField("String", "BASE_URL", "\"${properties["BASE_URL"]}\"")
+        buildConfigField("String", "SOCKET_URL", "\"${properties["SOCKET_URL"]}\"")
+
     }
 
     buildTypes {
+        debug {
+            buildConfigField("Boolean", "DEBUG", "true")
+        }
         release {
+            buildConfigField("Boolean", "DEBUG", "false")
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -28,19 +44,23 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     sourceSets {
         getByName("main") {
             res {
-                srcDirs("src\\main\\res", "src\\main\\res\\values-23")
+                srcDirs("src/main/res")
             }
         }
     }
@@ -75,8 +95,32 @@ dependencies {
     implementation(libs.accompanist.permissions)
 
     implementation(libs.androidx.core.splashscreen)
-
     implementation(libs.kotlinx.datetime)
 
     implementation(libs.kmp.date.time.picker)
+    implementation(libs.yml.ycharts)
+
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.preferences.rxjava2)
+    implementation(libs.androidx.datastore.preferences.rxjava3)
+
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
+    implementation(libs.coil.network.okhttp)
+    implementation(platform(libs.okhttp.bom))
+    implementation(libs.okhttp)
+    implementation(libs.okhttp3.logging.interceptor)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
+
+    // di module build.gradle
+    implementation("io.socket:socket.io-client:2.1.2") {
+        // required untuk OkHttp
+        exclude(group = "org.json", module = "json")
+    }
+    implementation(libs.json)
+
 }

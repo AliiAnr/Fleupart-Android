@@ -20,12 +20,15 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.course.fleupart.data.resource.Resource
+import com.course.fleupart.di.factory.OnBoardingViewModelFactory
 import com.course.fleupart.ui.components.FleupartBottomBar
 import com.course.fleupart.ui.components.HomeSections
 import com.course.fleupart.ui.screen.authentication.login.LoginScreen
@@ -38,6 +41,7 @@ import com.course.fleupart.ui.screen.authentication.username.UsernameScreen
 import com.course.fleupart.ui.screen.authentication.welcome.WelcomeScreen
 import com.course.fleupart.ui.screen.dashboard.detail.finance.AddBankAccount
 import com.course.fleupart.ui.screen.dashboard.detail.finance.BalanceValue
+import com.course.fleupart.ui.screen.dashboard.detail.finance.SalesReport
 import com.course.fleupart.ui.screen.dashboard.detail.finance.WithdrawBalance
 import com.course.fleupart.ui.screen.dashboard.detail.home.DetailTest
 import com.course.fleupart.ui.screen.dashboard.detail.product.AddProduct
@@ -52,10 +56,18 @@ import com.course.fleupart.ui.screen.navigation.rememberFleupartNavController
 import com.course.fleupart.ui.screen.navigation.rememberFleupartScaffoldState
 import com.course.fleupart.ui.screen.navigation.spatialExpressiveSpring
 import com.course.fleupart.ui.screen.onboarding.OnBoardingScreen
+import com.course.fleupart.ui.screen.onboarding.OnBoardingViewModel
 import com.course.fleupart.ui.theme.FleupartTheme
 
 @Composable
 fun FleupartApp() {
+
+    val onBoardingViewModel: OnBoardingViewModel = viewModel(
+            factory = OnBoardingViewModelFactory.getInstance(
+                Resource.appContext
+            )
+    )
+
     FleupartTheme {
         val fleupartNavController = rememberFleupartNavController()
         SharedTransitionLayout {
@@ -64,31 +76,42 @@ fun FleupartApp() {
             ) {
                 NavHost(
                     navController = fleupartNavController.navController,
-                    startDestination = DetailDestinations.ADD_PRODUCT_ROUTE,
+                    startDestination = MainDestinations.ONBOARDING_ROUTE,
                     contentAlignment = Alignment.Center
                 ) {
                     composableWithCompositionLocal(
                         route = MainDestinations.WELCOME_ROUTE
                     ) { backStackEntry ->
-                        WelcomeScreen()
+                        WelcomeScreen(
+                            navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute
+                        )
                     }
 
                     composableWithCompositionLocal(
                         route = MainDestinations.ONBOARDING_ROUTE
                     ) { backStackEntry ->
-                        OnBoardingScreen()
+                        OnBoardingScreen(
+                            navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute,
+                            setOnBoardingCompleted = onBoardingViewModel::setOnBoardingCompleted
+                        )
                     }
 
                     composableWithCompositionLocal(
                         route = MainDestinations.LOGIN_ROUTE
                     ) { backStackEntry ->
-                        LoginScreen()
+                        LoginScreen(
+                            navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute,
+                            onBackClick = fleupartNavController::upPress
+                        )
                     }
 
                     composableWithCompositionLocal(
                         route = MainDestinations.REGISTER_ROUTE
                     ) { backStackEntry ->
-                        RegisterScreen()
+                        RegisterScreen(
+                            navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute,
+                            onBackClick = fleupartNavController::upPress
+                        )
                     }
 
                     composableWithCompositionLocal(
@@ -125,6 +148,14 @@ fun FleupartApp() {
                         route = DetailDestinations.BALANCE_AMOUNT_ROUTE
                     ) { backStackEntry ->
                         BalanceValue(
+
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.SALES_REPORT_ROUTE
+                    ) { backStackEntry ->
+                        SalesReport(
 
                         )
                     }
@@ -219,7 +250,7 @@ fun MainContainer(
     ) { padding ->
         NavHost(
             navController = nestedNavController.navController,
-            startDestination = HomeSections.Finance.route,
+            startDestination = HomeSections.Order.route,
             contentAlignment = Alignment.Center
         ) {
             addHomeGraph(

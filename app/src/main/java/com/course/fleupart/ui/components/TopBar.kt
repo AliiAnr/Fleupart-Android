@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.course.fleupart.ui.theme.base60
@@ -32,6 +34,7 @@ fun CustomTopAppBar(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {},
     title: String,
+    horizontalPadding: Dp = 20.dp,
     showNavigationIcon: Boolean = false
 ) {
     Box(
@@ -39,7 +42,7 @@ fun CustomTopAppBar(
             .fillMaxWidth()
             .height(60.dp)
             .background(Color.White)
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = horizontalPadding),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -78,4 +81,11 @@ fun CustomTopAppBar(
             }
         }
     }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewTopBar() {
+    CustomTopAppBar(title = "Title")
 }

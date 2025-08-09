@@ -317,8 +317,11 @@ private fun ListProduct(
 }
 
 @Composable
-private fun EmptyProduct(
-    modifier: Modifier = Modifier
+fun EmptyProduct(
+    modifier: Modifier = Modifier,
+    title: String = "You have not added any product yet",
+    icon: Int = R.drawable.empty_product,
+    description: String = "Start adding your product now!"
 ) {
     Box(
         modifier = modifier
@@ -332,20 +335,21 @@ private fun EmptyProduct(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.empty_product),
+                painter = painterResource(id = icon),
                 contentDescription = "Empty Product",
                 tint = Color.Unspecified,
                 modifier = Modifier.width(250.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "You have not added any product yet",
+                text = title,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
             )
             Text(
-                text = "Start adding your product now!",
+                text = description,
                 color = base100,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
@@ -364,49 +368,50 @@ private fun ListCategory(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-
-            item.forEach { category ->
-                // Header untuk kategori
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 8.dp)
-                    ) {
-                        Text(
-                            text = category.title,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                        )
-                        Icon(
-                            painter = painterResource(id = R.drawable.back_arrow),
-                            contentDescription = "More",
-                            tint = Color.Black,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                itemsIndexed(category.items) { index, item ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.White)
-                            .padding(horizontal = 20.dp)
-                    ) {
-                        OrderItemCard(
-                            item = item,
-                        )
+        if (item.isEmpty()) {
+            EmptyProduct()
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                item.forEach { category ->
+                    item {
                         Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 8.dp)
+                        ) {
+                            Text(
+                                text = category.title,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black,
+                            )
+                            Icon(
+                                painter = painterResource(id = R.drawable.back_arrow),
+                                contentDescription = "More",
+                                tint = Color.Black,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
 
+                    itemsIndexed(category.items) { index, item ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White)
+                                .padding(horizontal = 20.dp)
+                        ) {
+                            OrderItemCard(
+                                item = item,
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
                 }
             }
         }

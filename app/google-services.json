@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "963665406291",
+    "project_id": "fleura-39ea0",
+    "storage_bucket": "fleura-39ea0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:963665406291:android:cfdef8db9abf46b425d9a6",
+        "android_client_info": {
+          "package_name": "com.course.fleupart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApzCJuhOWz8Dq94H7pAohKshFp807L5Fs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:963665406291:android:3dd0e7ea41964b3725d9a6",
+        "android_client_info": {
+          "package_name": "com.course.fleura"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApzCJuhOWz8Dq94H7pAohKshFp807L5Fs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

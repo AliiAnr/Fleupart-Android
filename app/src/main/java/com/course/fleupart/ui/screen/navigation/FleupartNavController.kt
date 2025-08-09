@@ -32,6 +32,7 @@ object DetailDestinations {
     const val WITHDRAW_BALANCE_ROUTE = "withdrawBalance"
     const val BALANCE_AMOUNT_ROUTE = "balanceAmount"
     const val ADD_BANK_ACCOUNT_ROUTE = "addBankAccount"
+    const val SALES_REPORT_ROUTE = "salesReport"
 }
 
 @Composable
@@ -58,6 +59,18 @@ class FleupartNavController(
                 popUpTo(findStartDestination(navController.graph).id) {
                     saveState = true
                 }
+            }
+        }
+    }
+
+    fun navigateToNonBottomBarRoute(route: String, isPopBackStack: Boolean = false) {
+        if (route != navController.currentDestination?.route) {
+            if (isPopBackStack) {
+                navController.popBackStack()
+            }
+            navController.navigate(route) {
+                launchSingleTop = true
+                restoreState = true
             }
         }
     }
