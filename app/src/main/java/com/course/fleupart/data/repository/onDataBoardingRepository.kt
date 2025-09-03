@@ -1,6 +1,7 @@
 package com.course.fleupart.data.repository
 
 import android.content.Context
+import com.course.fleupart.data.model.remote.AddressDataRequest
 import com.course.fleupart.data.model.remote.CitizenDataRequest
 import com.course.fleupart.data.model.remote.PersonalizeResponse
 import com.course.fleupart.retrofit.api.ApiConfig
@@ -35,6 +36,26 @@ class OnDataBoardingRepository private constructor(
             emit(ResultResponse.Error(e.localizedMessage ?: "Network error"))
         }
     }.flowOn(Dispatchers.IO)
+
+    fun inputAddressData(addressDataRequest: AddressDataRequest): Flow<ResultResponse<PersonalizeResponse>> = flow {
+        emit(ResultResponse.Loading)
+
+        try {
+            val response = personalizeService.inputAddressData(
+                addressData = addressDataRequest
+            )
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    emit(ResultResponse.Success(it))
+                } ?: emit(ResultResponse.Error("Failed to update address data, response body empty"))
+            } else {
+                emit(ResultResponse.Error("Error: ${response.errorBody()?.string() ?: "Unknown error"}"))
+            }
+        } catch (e: Exception) {
+            emit(ResultResponse.Error(e.localizedMessage ?: "Network error"))
+        }
+    }
+
 
     companion object {
         @Volatile

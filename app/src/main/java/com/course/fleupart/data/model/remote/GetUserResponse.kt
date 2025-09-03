@@ -50,8 +50,8 @@ data class Detail(
 		return !name.isNullOrBlank() &&
 				!identityNumber.isNullOrBlank() &&
 				!phone.isNullOrBlank() &&
-				!picture.isNullOrBlank() &&
-				!account.isNullOrBlank() &&
-				!identityPicture.isNullOrBlank()
+//				!picture.isNullOrBlank() &&
+				!account.isNullOrBlank()
+//				!identityPicture.isNullOrBlank()
 	}
 }

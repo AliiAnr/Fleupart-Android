@@ -1,11 +1,11 @@
 package com.course.fleupart.ui.screen.authentication.onDataBoarding
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.course.fleupart.data.model.remote.AddressDataRequest
 import com.course.fleupart.data.model.remote.CitizenDataRequest
 import com.course.fleupart.data.model.remote.PersonalizeResponse
 import com.course.fleupart.data.repository.OnDataBoardingRepository
@@ -43,6 +43,25 @@ class OnDataBoardingViewModel(
     var bankAccountNumberErrorValue by mutableStateOf("")
         private set
 
+    var streetNameValue by mutableStateOf("")
+        private set
+
+    var subDistrictValue by mutableStateOf("")
+        private set
+
+
+    var cityValue by mutableStateOf("")
+        private set
+
+    var provinceValue by mutableStateOf("")
+        private set
+
+    var postalCodeValue by mutableStateOf("")
+        private set
+
+    var additionalDetailValue by mutableStateOf("")
+        private set
+
     fun setName(value: String) {
         nameValue = value
         validateName()
@@ -61,6 +80,30 @@ class OnDataBoardingViewModel(
     fun setBankAccountNumber(value: String) {
         bankAccountNumberValue = value
         validateBankAccountNumber()
+    }
+
+    fun setStreetName(value: String) {
+        streetNameValue = value
+    }
+
+    fun setSubDistrict(value: String) {
+        subDistrictValue = value
+    }
+
+    fun setCity(value: String) {
+        cityValue = value
+    }
+
+    fun setProvince(value: String) {
+        provinceValue = value
+    }
+
+    fun setPostalCode(value: String) {
+        postalCodeValue = value
+    }
+
+    fun setAdditionalDetail(value: String) {
+        additionalDetailValue = value
     }
 
     private fun validateName(): Boolean {
@@ -179,11 +222,34 @@ class OnDataBoardingViewModel(
                         }
                 } catch (e: Exception) {
                     _personalizeState.value =
-                        ResultResponse.Error("Registration failed: ${e.message}")
+                        ResultResponse.Error("Add citizen data failed: ${e.message}")
                 }
             }
         } else {
             _personalizeState.value = ResultResponse.Error("Please correct the errors above.")
+        }
+    }
+
+    fun inputAddressData() {
+        viewModelScope.launch {
+            try {
+                _personalizeState.value = ResultResponse.Loading
+                onDataBoardingRepository.inputAddressData(
+                    AddressDataRequest(
+                        road = streetNameValue,
+                        subDistrict = subDistrictValue,
+                        city = cityValue,
+                        province = provinceValue,
+                        postCode = postalCodeValue,
+                        additionalDetail = additionalDetailValue
+                    )
+                ).collect { result ->
+                        _personalizeState.value = result
+                    }
+            } catch (e: Exception) {
+                _personalizeState.value =
+                    ResultResponse.Error("Add address data failed: ${e.message}")
+            }
         }
     }
 }

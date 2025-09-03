@@ -2,6 +2,7 @@ package com.course.fleupart.ui.screen.authentication.onDataBoarding
 
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,8 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,22 +33,83 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.components.CustomTextField
 import com.course.fleupart.ui.components.CustomTopAppBar
-import com.course.fleupart.ui.components.ImagePickerCard
+import com.course.fleupart.ui.screen.authentication.login.LoginScreenViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
+import com.course.fleupart.ui.screen.navigation.MainDestinations
 import com.course.fleupart.ui.theme.primaryLight
 
 @Composable
 fun AddressScreen(
     modifier: Modifier = Modifier,
-    viewModel: OnDataBoardingViewModel? = null
+    navigateToRoute: (String, Boolean) -> Unit,
+    onDataBoardingViewModel: OnDataBoardingViewModel,
+    loginViewModel: LoginScreenViewModel
 ) {
+
+    var showCircularProgress by remember { mutableStateOf(false) }
+
+    val personalizeState by onDataBoardingViewModel.personalizeState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+
+    val userState by loginViewModel.userState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+
+    LaunchedEffect(personalizeState) {
+        when (personalizeState) {
+            is ResultResponse.Success -> {
+                showCircularProgress = true
+                loginViewModel.getUser()
+            }
+            is ResultResponse.Loading -> {
+                showCircularProgress = true
+            }
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+            }
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(userState) {
+        when (userState) {
+            is ResultResponse.Success -> {
+                showCircularProgress = false
+                val detail = (userState as ResultResponse.Success).data.data
+                Log.e("AddressScreen", "User detail: $detail")
+                if (detail.isProfileComplete()) {
+                    loginViewModel.setPersonalizeCompleted()
+                    navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
+                    onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
+                } else {
+                    navigateToRoute(MainDestinations.CITIZEN_ROUTE, true)
+                    onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
+                }
+            }
+            is ResultResponse.Loading -> {
+                showCircularProgress = true
+            }
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
+            }
+            else -> {}
+        }
+    }
 
     AddressScreen(
         modifier = modifier,
-        id = 0
+        showCircularProgress = showCircularProgress,
+        setCircularProgress = { value ->
+            showCircularProgress = value
+        },
+        onDataBoardingViewModel = onDataBoardingViewModel,
     )
 
 }
@@ -53,10 +117,13 @@ fun AddressScreen(
 @Composable
 private fun AddressScreen(
     modifier: Modifier = Modifier,
-    id: Int = 0
+    showCircularProgress: Boolean,
+    setCircularProgress: (Boolean) -> Unit,
+    onDataBoardingViewModel: OnDataBoardingViewModel,
 ) {
 
     val focusManager = LocalFocusManager.current
+
     val title = buildAnnotatedString {
         withStyle(style = SpanStyle(color = Color(0xFFFFD700), fontWeight = FontWeight.ExtraBold)) {
             append("Yeay ")
@@ -94,7 +161,7 @@ private fun AddressScreen(
             ) {
                 CustomTopAppBar(
                     title = "",
-                    showNavigationIcon = true
+                    showNavigationIcon = false
                 )
                 LazyColumn(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -116,10 +183,8 @@ private fun AddressScreen(
 
                     item {
                         CustomTextField(
-                            value = "",
-                            onChange = {
-
-                            },
+                            value = onDataBoardingViewModel.streetNameValue,
+                            onChange = onDataBoardingViewModel::setStreetName,
                             placeholder = "Street Name",
                             isError = false,
                             errorMessage = "",
@@ -129,10 +194,8 @@ private fun AddressScreen(
 
                     item {
                         CustomTextField(
-                            value = "",
-                            onChange = {
-
-                            },
+                            value = onDataBoardingViewModel.subDistrictValue,
+                            onChange = onDataBoardingViewModel::setSubDistrict,
                             placeholder = "Sub-District",
                             isError = false,
                             errorMessage = "",
@@ -143,10 +206,8 @@ private fun AddressScreen(
 
                     item {
                         CustomTextField(
-                            value = "",
-                            onChange = {
-
-                            },
+                            value = onDataBoardingViewModel.cityValue,
+                            onChange = onDataBoardingViewModel::setCity,
                             placeholder = "City/District",
                             isError = false,
                             errorMessage = "",
@@ -157,10 +218,8 @@ private fun AddressScreen(
 
                     item {
                         CustomTextField(
-                            value = "",
-                            onChange = {
-
-                            },
+                            value = onDataBoardingViewModel.provinceValue,
+                            onChange = onDataBoardingViewModel::setProvince,
                             placeholder = "Province",
                             isError = false,
                             errorMessage = "",
@@ -171,10 +230,8 @@ private fun AddressScreen(
 
                     item {
                         CustomTextField(
-                            value = "",
-                            onChange = {
-
-                            },
+                            value = onDataBoardingViewModel.postalCodeValue,
+                            onChange = onDataBoardingViewModel::setPostalCode,
                             placeholder = "Postal Code",
                             isError = false,
                             errorMessage = "",
@@ -183,25 +240,23 @@ private fun AddressScreen(
                         Spacer(modifier = Modifier.height(6.dp))
                     }
 
-                    item {
-                        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                            ImagePickerCard(
-                                label = "Shop Photo",
-                                imageUri = citizenCardUri,
-                                onImagePicked = { uri ->
-                                    citizenCardUri = uri
-                                }
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(20.dp))
-                    }
+//                    item {
+//                        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+//                            ImagePickerCard(
+//                                label = "Shop Photo",
+//                                imageUri = citizenCardUri,
+//                                onImagePicked = { uri ->
+//                                    citizenCardUri = uri
+//                                }
+//                            )
+//                        }
+//                        Spacer(modifier = Modifier.height(20.dp))
+//                    }
 
                     item {
                         CustomTextField(
-                            value = "",
-                            onChange = {
-
-                            },
+                            value = onDataBoardingViewModel.additionalDetailValue,
+                            onChange = onDataBoardingViewModel::setAdditionalDetail,
                             placeholder = "Additional Detail",
                             isError = false,
                             errorMessage = "",
@@ -217,23 +272,39 @@ private fun AddressScreen(
                             outlinedColor = Color.Black,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
+                            isAvailable = onDataBoardingViewModel.streetNameValue.isNotEmpty() &&
+                                    onDataBoardingViewModel.subDistrictValue.isNotEmpty() &&
+                                    onDataBoardingViewModel.cityValue.isNotEmpty() &&
+                                    onDataBoardingViewModel.provinceValue.isNotEmpty() &&
+                                    onDataBoardingViewModel.postalCodeValue.isNotEmpty() &&
+                                    onDataBoardingViewModel.additionalDetailValue.isNotEmpty() &&
+                                    !showCircularProgress,
                             onClick = {
-//                        focusManager.clearFocus()
-//                        viewModel.register(
-//                            onSuccess = {
-////                            navController.popBackStack()
-////                            navController.navigate(Screen.Home.route)
-//                            },
-//                            onError = { errorMessage ->
-////                            handleLoginError(context, errorMessage)
-//                            }
-//                        )
+                                setCircularProgress(true)
+                                focusManager.clearFocus()
+                                onDataBoardingViewModel.inputAddressData()
                             },
                             modifier = Modifier.padding(top = 30.dp)
                         )
                         Spacer(modifier = Modifier.height(100.dp))
                     }
+                }
+            }
 
+            if (showCircularProgress) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.3f))
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            // Do nothing - this prevents clicks from passing through
+                        }
+                ) {
+                    CircularProgressIndicator(color = primaryLight)
                 }
             }
         }

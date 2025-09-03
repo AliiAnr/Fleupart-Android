@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.components.CustomTextField
 import com.course.fleupart.ui.components.CustomTopAppBar
@@ -38,12 +39,14 @@ import com.course.fleupart.ui.theme.primaryLight
 @Composable
 fun PhotoScreen(
     modifier: Modifier = Modifier,
-    viewModel: OnDataBoardingViewModel? = null
+    onDataBoardingViewModel: OnDataBoardingViewModel,
+    navigateToRoute: (String, Boolean) -> Unit,
 ) {
 
     PhotoScreen(
         modifier = modifier,
-        id = 0
+        onDataBoardingViewModel = onDataBoardingViewModel,
+        id = 1
     )
 
 }
@@ -51,6 +54,7 @@ fun PhotoScreen(
 @Composable
 private fun PhotoScreen(
     modifier: Modifier = Modifier,
+    onDataBoardingViewModel: OnDataBoardingViewModel,
     id: Int = 0
 ) {
 
@@ -97,7 +101,7 @@ private fun PhotoScreen(
             ) {
                 CustomTopAppBar(
                     title = "",
-                    showNavigationIcon = true
+                    showNavigationIcon = false
                 )
                 Text(
                     text = title,

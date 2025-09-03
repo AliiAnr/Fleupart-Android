@@ -74,9 +74,9 @@ import kotlinx.coroutines.flow.first
 fun FleupartApp() {
 
     val onBoardingViewModel: OnBoardingViewModel = viewModel(
-            factory = OnBoardingViewModelFactory.getInstance(
-                Resource.appContext
-            )
+        factory = OnBoardingViewModelFactory.getInstance(
+            Resource.appContext
+        )
     )
 
     val registerViewModel: RegisterScreenViewModel = viewModel(
@@ -250,7 +250,8 @@ fun FleupartApp() {
                         route = MainDestinations.PHOTO_ROUTE
                     ) { backStackEntry ->
                         PhotoScreen(
-
+                            onDataBoardingViewModel = onDataBoardingViewModel,
+                            navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute,
                         )
                     }
 
@@ -258,7 +259,9 @@ fun FleupartApp() {
                         route = MainDestinations.ADDRESS_ROUTE
                     ) { backStackEntry ->
                         AddressScreen(
-
+                            navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute,
+                            onDataBoardingViewModel = onDataBoardingViewModel,
+                            loginViewModel = loginViewModel
                         )
                     }
 

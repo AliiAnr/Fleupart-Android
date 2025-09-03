@@ -59,19 +59,20 @@ fun CitizenScreen(
         when (personalizeState) {
             is ResultResponse.Success -> {
                 showCircularProgress = false
-                navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
+//                navigateToRoute(MainDestinations.PHOTO_ROUTE, false) MASIH BUG
+                navigateToRoute(MainDestinations.ADDRESS_ROUTE, true)
+                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
             is ResultResponse.Loading -> {
                 showCircularProgress = true
             }
             is ResultResponse.Error -> {
                 showCircularProgress = false
-                // Show error message
+                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
             else -> {}
         }
     }
-
 
     CitizenScreen(
         modifier = modifier,
