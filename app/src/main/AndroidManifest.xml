@@ -36,9 +36,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:theme="@style/CustomUCropTheme"/>
+
+        <service
+            android:name=".data.model.notification.FleupartPushMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

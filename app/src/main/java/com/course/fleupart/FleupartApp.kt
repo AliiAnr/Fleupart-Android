@@ -16,10 +16,12 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -28,13 +30,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.course.fleupart.data.resource.Resource
+import com.course.fleupart.di.factory.LoginViewModelFactory
 import com.course.fleupart.di.factory.OnBoardingViewModelFactory
+import com.course.fleupart.di.factory.OnDataBoardingViewModelFactory
 import com.course.fleupart.di.factory.RegisterViewModelFactory
 import com.course.fleupart.ui.components.FleupartBottomBar
 import com.course.fleupart.ui.components.HomeSections
 import com.course.fleupart.ui.screen.authentication.login.LoginScreen
+import com.course.fleupart.ui.screen.authentication.login.LoginScreenViewModel
 import com.course.fleupart.ui.screen.authentication.onDataBoarding.AddressScreen
 import com.course.fleupart.ui.screen.authentication.onDataBoarding.CitizenScreen
+import com.course.fleupart.ui.screen.authentication.onDataBoarding.OnDataBoardingViewModel
 import com.course.fleupart.ui.screen.authentication.onDataBoarding.PhotoScreen
 import com.course.fleupart.ui.screen.authentication.onDataBoarding.RegistrationPendingScreen
 import com.course.fleupart.ui.screen.authentication.otp.OtpScreen
@@ -62,6 +68,7 @@ import com.course.fleupart.ui.screen.navigation.spatialExpressiveSpring
 import com.course.fleupart.ui.screen.onboarding.OnBoardingScreen
 import com.course.fleupart.ui.screen.onboarding.OnBoardingViewModel
 import com.course.fleupart.ui.theme.FleupartTheme
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun FleupartApp() {
@@ -78,6 +85,36 @@ fun FleupartApp() {
         )
     )
 
+    val loginViewModel: LoginScreenViewModel = viewModel(
+        factory = LoginViewModelFactory.getInstance(
+            Resource.appContext
+        )
+    )
+
+    val onDataBoardingViewModel: OnDataBoardingViewModel = viewModel(
+        factory = OnDataBoardingViewModelFactory.getInstance(
+            Resource.appContext
+        )
+    )
+
+    val navigationViewModel: NavigationDestinationViewModel = viewModel(
+        factory = StartupNavigationViewModelFactory(
+            onBoardingViewModel,
+            loginViewModel
+        )
+    )
+
+    val destination by navigationViewModel.startDestination.collectAsStateWithLifecycle(
+        initialValue = MainDestinations.ONBOARDING_ROUTE
+    )
+
+    LaunchedEffect(key1 = Unit) {
+        val isLoggedIn = loginViewModel.isUserLoggedIn().first()
+        if (isLoggedIn) {
+            loginViewModel.saveToken()
+        }
+    }
+
     FleupartTheme {
         val fleupartNavController = rememberFleupartNavController()
         SharedTransitionLayout {
@@ -86,7 +123,7 @@ fun FleupartApp() {
             ) {
                 NavHost(
                     navController = fleupartNavController.navController,
-                    startDestination = MainDestinations.ONBOARDING_ROUTE,
+                    startDestination = destination,
                     contentAlignment = Alignment.Center
                 ) {
                     composableWithCompositionLocal(
@@ -111,7 +148,8 @@ fun FleupartApp() {
                     ) { backStackEntry ->
                         LoginScreen(
                             navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute,
-                            onBackClick = fleupartNavController::upPress
+                            onBackClick = fleupartNavController::upPress,
+                            loginViewModel = loginViewModel
                         )
                     }
 
@@ -197,9 +235,40 @@ fun FleupartApp() {
                         )
                     }
 
-                    onDataGraph(
-                        onSnackSelected = fleupartNavController::navigateToSnackDetail
-                    )
+
+                    //MARK: Personalize Screen
+                    composableWithCompositionLocal(
+                        route = MainDestinations.CITIZEN_ROUTE
+                    ) { backStackEntry ->
+                        CitizenScreen(
+                            onDataBoardingViewModel = onDataBoardingViewModel,
+                            navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = MainDestinations.PHOTO_ROUTE
+                    ) { backStackEntry ->
+                        PhotoScreen(
+
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = MainDestinations.ADDRESS_ROUTE
+                    ) { backStackEntry ->
+                        AddressScreen(
+
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = MainDestinations.REGISTER_PENDING_ROUTE
+                    ) { backStackEntry ->
+                        RegistrationPendingScreen(
+
+                        )
+                    }
 
                     composableWithCompositionLocal(
                         "${MainDestinations.SNACK_DETAIL_ROUTE}/" +
@@ -283,42 +352,6 @@ fun MainContainer(
                     .consumeWindowInsets(padding)
             )
         }
-    }
-}
-
-fun NavGraphBuilder.onDataGraph(
-    onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
-) {
-    composableWithCompositionLocal(
-        route = MainDestinations.CITIZEN_ROUTE
-    ) { backStackEntry ->
-        CitizenScreen(
-
-        )
-    }
-
-    composableWithCompositionLocal(
-        route = MainDestinations.PHOTO_ROUTE
-    ) { backStackEntry ->
-        PhotoScreen(
-
-        )
-    }
-
-    composableWithCompositionLocal(
-        route = MainDestinations.ADDRESS_ROUTE
-    ) { backStackEntry ->
-        AddressScreen(
-
-        )
-    }
-
-    composableWithCompositionLocal(
-        route = MainDestinations.REGISTER_PENDING_ROUTE
-    ) { backStackEntry ->
-        RegistrationPendingScreen(
-
-        )
     }
 }
 

@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.course.fleupart.data.model.remote.Detail
 //import com.course.fleura.data.model.remote.AddressItem
 //import com.course.fleura.data.model.remote.Detail
 import com.google.gson.Gson
@@ -59,24 +60,24 @@ class DataStoreManager(private val context: Context) {
     val personalizedFilled: Flow<Boolean> = context.dataStore.data
         .map { preferences -> preferences[PERSONALIZED_KEY] ?: false }
 
-//    suspend fun saveUserDetail(detail: Detail) {
-//        val gson = Gson()
-//        val detailJson = gson.toJson(detail)
-//        context.dataStore.edit { preferences ->
-//            preferences[USER_DATA_KEY] = detailJson
-//        }
-//    }
-//
-//    suspend fun getUserDetail(): Detail? {
-//        val preferences = context.dataStore.data.first()
-//        val detailJson = preferences[USER_DATA_KEY] ?: return null
-//        return Gson().fromJson(detailJson, Detail::class.java)
-//    }
-//
-//    suspend fun isPersonalizeCompleted(): Boolean {
-//        val detail = getUserDetail()
-//        return detail?.isProfileComplete() ?: false
-//    }
+    suspend fun saveUserDetail(detail: Detail) {
+        val gson = Gson()
+        val detailJson = gson.toJson(detail)
+        context.dataStore.edit { preferences ->
+            preferences[USER_DATA_KEY] = detailJson
+        }
+    }
+
+    suspend fun getUserDetail(): Detail? {
+        val preferences = context.dataStore.data.first()
+        val detailJson = preferences[USER_DATA_KEY] ?: return null
+        return Gson().fromJson(detailJson, Detail::class.java)
+    }
+
+    suspend fun isPersonalizeCompleted(): Boolean {
+        val detail = getUserDetail()
+        return detail?.isProfileComplete() ?: false
+    }
 
 //    val addressListFlow: Flow<List<AddressItem>> = context.dataStore.data
 //        .map { prefs ->

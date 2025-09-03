@@ -204,10 +204,9 @@ private fun RegisterScreen(
                 CustomButton(
                     text = "Register",
                     isOutlined = true,
-                    isAvailable = registerViewModel.emailError.isEmpty() && registerViewModel.emailValue.isNotEmpty() && registerViewModel.passwordError.isEmpty() && registerViewModel.passwordValue.isNotEmpty() && registerViewModel.confirmPasswordError.isEmpty() && registerViewModel.confirmPasswordValue.isNotEmpty() || !showCircularProgress,
+                    isAvailable = registerViewModel.emailError.isEmpty() && registerViewModel.emailValue.isNotEmpty() && registerViewModel.passwordError.isEmpty() && registerViewModel.passwordValue.isNotEmpty() && registerViewModel.confirmPasswordError.isEmpty() && registerViewModel.confirmPasswordValue.isNotEmpty() && !showCircularProgress,
                     outlinedColor = Color.Black,
                     fontSize = 18.sp,
-//                    isAvailable = registerViewModel.isButtonEnabled,
                     fontWeight = FontWeight.Bold,
                     onClick = {
                         focusManager.clearFocus()
@@ -275,6 +274,7 @@ private fun RegisterScreen(
                             .clickable(
                                 onClick = {
                                     navigateToRoute(MainDestinations.LOGIN_ROUTE, true)
+                                    registerViewModel.resetState()
                                 },
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }

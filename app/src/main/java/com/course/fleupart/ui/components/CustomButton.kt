@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.course.fleupart.ui.theme.noAvail
+import com.course.fleupart.ui.theme.noAvailOutline
 import com.course.fleupart.ui.theme.onPrimaryLight
 import com.course.fleupart.ui.theme.primaryLight
 
@@ -64,7 +65,7 @@ fun CustomButton(
         Box(
             contentAlignment = Alignment.Center,
             modifier = buttonModifier
-                .border(width = borderWidth, color = outlinedColor, shape = shape)
+                .border(width = borderWidth, color = if (isAvailable) outlinedColor else noAvailOutline, shape = shape)
                 .clickable(
                     enabled = isAvailable,
                     onClick = onClick,
@@ -86,7 +87,7 @@ fun CustomButton(
                 }
                 Text(
                     text = text,
-                    color = outlinedColor,
+                    color = if (isAvailable) outlinedColor else noAvailOutline,
                     fontSize = fontSize,
                     fontWeight = fontWeight
                 )

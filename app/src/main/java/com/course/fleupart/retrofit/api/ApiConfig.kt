@@ -3,7 +3,10 @@ package com.course.fleupart.retrofit.api
 import android.content.Context
 import com.course.fleupart.BuildConfig
 import com.course.fleupart.retrofit.AuthInterceptor
+import com.course.fleupart.retrofit.services.LoginService
+import com.course.fleupart.retrofit.services.NotificationService
 import com.course.fleupart.retrofit.services.OtpService
+import com.course.fleupart.retrofit.services.PersonalizeService
 import com.course.fleupart.retrofit.services.RegisterService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -39,11 +42,23 @@ object ApiConfig {
             .build()
     }
 
+    fun getNotificationService(context: Context): NotificationService {
+        return provideRetrofit(context).create(NotificationService::class.java)
+    }
+
     fun getRegisterService(context: Context): RegisterService {
         return provideRetrofit(context).create(RegisterService::class.java)
     }
 
     fun getOtpService(context: Context): OtpService {
         return provideRetrofit(context).create(OtpService::class.java)
+    }
+
+    fun getPersonalizeService(context: Context): PersonalizeService {
+        return provideRetrofit(context).create(PersonalizeService::class.java)
+    }
+
+    fun getLoginService(context: Context): LoginService {
+        return provideRetrofit(context).create(LoginService::class.java)
     }
 }

@@ -139,7 +139,7 @@ fun ButtonSection(
                 CustomButton(
                     text = stringResource(R.string.start),
                     onClick = {
-//                        setOnBoardingCompleted(true)
+                        setOnBoardingCompleted(true)
                         navigateToRoute(MainDestinations.WELCOME_ROUTE, true)
                     },
                     modifier = Modifier.align(Alignment.BottomCenter)
