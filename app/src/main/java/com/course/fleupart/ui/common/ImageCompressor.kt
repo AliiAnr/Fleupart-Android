@@ -151,6 +151,7 @@ object ImageCompressor {
     /**
      * Gets file size in bytes
      */
+
     fun getFileSize(file: File): Long {
         return if (file.exists()) file.length() else 0
     }
