@@ -85,6 +85,13 @@ class FleupartNavController(
             navController.navigate("${MainDestinations.SNACK_DETAIL_ROUTE}/$snackId?origin=$origin")
         }
     }
+
+    fun navigateToProductDetail(to: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(DetailDestinations.ADD_PRODUCT_ROUTE)
+        }
+    }
+
 }
 
 private fun NavBackStackEntry.lifecycleIsResumed() =

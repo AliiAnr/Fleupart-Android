@@ -63,11 +63,13 @@ import com.course.fleupart.ui.theme.primaryLight
 
 @Composable
 fun Product(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onProductDetail: (String) -> Unit
 ) {
 
     Product(
         modifier = modifier,
+        onProductDetail = onProductDetail,
         id = 0
     )
 }
@@ -75,6 +77,7 @@ fun Product(
 @Composable
 private fun Product(
     modifier: Modifier = Modifier,
+    onProductDetail: (String) -> Unit,
     id: Int = 0
 ) {
     val tabItems: List<String> = listOf(
@@ -193,7 +196,7 @@ private fun Product(
                                                     .padding(horizontal = 18.dp, vertical = 8.dp)
                                                     .clickable(
                                                         onClick = {
-                                                            // Handle action
+                                                            onProductDetail("addProduct")
                                                         },
                                                         indication = null,
                                                         interactionSource = remember { MutableInteractionSource() }

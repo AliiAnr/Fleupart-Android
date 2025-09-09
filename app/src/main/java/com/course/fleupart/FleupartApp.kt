@@ -8,9 +8,12 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
@@ -24,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -149,7 +151,8 @@ fun FleupartApp() {
                         LoginScreen(
                             navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute,
                             onBackClick = fleupartNavController::upPress,
-                            loginViewModel = loginViewModel
+                            loginViewModel = loginViewModel,
+                            onDataBoardingViewModel = onDataBoardingViewModel
                         )
                     }
 
@@ -182,10 +185,38 @@ fun FleupartApp() {
                     }
 
                     composableWithCompositionLocal(
-                        route = DetailDestinations.ADD_PRODUCT_ROUTE
+                        route = DetailDestinations.ADD_PRODUCT_ROUTE,
+                        enterTransition = {
+                            // Muncul dari kanan
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        exitTransition = {
+                            // Keluar ke kanan
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popEnterTransition = {
+                            // Jika balik (back), bisa juga dari kiri ke posisi normal
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popExitTransition = {
+                            // Jika back, keluar ke kanan
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        }
                     ) { backStackEntry ->
                         AddProduct(
-
+                            onBackClick = fleupartNavController::upPress
                         )
                     }
 
@@ -198,7 +229,7 @@ fun FleupartApp() {
                     }
 
                     composableWithCompositionLocal(
-                        route = DetailDestinations.ADD_PRODUCT_ROUTE
+                        route = DetailDestinations.ADD_BANK_ACCOUNT_ROUTE
                     ) { backStackEntry ->
                         AddBankAccount(
 
@@ -231,10 +262,10 @@ fun FleupartApp() {
                         route = MainDestinations.DASHBOARD_ROUTE
                     ) { backStackEntry ->
                         MainContainer(
-                            onSnackSelected = fleupartNavController::navigateToSnackDetail
+                            onSnackSelected = fleupartNavController::navigateToSnackDetail,
+                            onProductDetail = fleupartNavController::navigateToProductDetail
                         )
                     }
-
 
                     //MARK: Personalize Screen
                     composableWithCompositionLocal(
@@ -302,7 +333,8 @@ fun FleupartApp() {
 @Composable
 fun MainContainer(
     modifier: Modifier = Modifier,
-    onSnackSelected: (Long, String, NavBackStackEntry) -> Unit
+    onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
+    onProductDetail: (String, NavBackStackEntry) -> Unit,
 ) {
     val fleuraScaffoldState = rememberFleupartScaffoldState()
     val nestedNavController = rememberFleupartNavController()
@@ -345,11 +377,12 @@ fun MainContainer(
     ) { padding ->
         NavHost(
             navController = nestedNavController.navController,
-            startDestination = HomeSections.Order.route,
+            startDestination = HomeSections.Home.route,
             contentAlignment = Alignment.Center
         ) {
             addHomeGraph(
                 onSnackSelected = onSnackSelected,
+                onProductDetail = onProductDetail,
                 modifier = Modifier
                     .padding(padding)
                     .consumeWindowInsets(padding)

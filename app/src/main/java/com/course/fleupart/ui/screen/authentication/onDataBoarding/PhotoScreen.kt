@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,12 +30,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.yml.charts.common.extensions.isNotNull
 import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.components.CustomButton
-import com.course.fleupart.ui.components.CustomTextField
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.ImagePickerCard
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
+import com.course.fleupart.ui.screen.navigation.MainDestinations
 import com.course.fleupart.ui.theme.primaryLight
 
 @Composable
@@ -43,8 +47,36 @@ fun PhotoScreen(
     navigateToRoute: (String, Boolean) -> Unit,
 ) {
 
+    var showCircularProgress by remember { mutableStateOf(false) }
+
+    val personalizeState by onDataBoardingViewModel.personalizeState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+
+    LaunchedEffect(personalizeState) {
+        when (personalizeState) {
+            is ResultResponse.Success -> {
+                showCircularProgress = false
+                navigateToRoute(MainDestinations.ADDRESS_ROUTE, true)
+                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
+            }
+            is ResultResponse.Loading -> {
+                showCircularProgress = true
+            }
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
+            }
+            else -> {}
+        }
+    }
+
     PhotoScreen(
         modifier = modifier,
+        showCircularProgress = showCircularProgress,
+        setCircularProgress = { value ->
+            showCircularProgress = value
+        },
         onDataBoardingViewModel = onDataBoardingViewModel,
         id = 1
     )
@@ -55,6 +87,8 @@ fun PhotoScreen(
 private fun PhotoScreen(
     modifier: Modifier = Modifier,
     onDataBoardingViewModel: OnDataBoardingViewModel,
+    showCircularProgress: Boolean,
+    setCircularProgress : (Boolean) -> Unit = {},
     id: Int = 0
 ) {
 
@@ -119,9 +153,9 @@ private fun PhotoScreen(
                     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                         ImagePickerCard(
                             label = "Citizen Card Picture",
-                            imageUri = citizenCardUri,
+                            imageUri = onDataBoardingViewModel.citizenCardPictureValue,
                             onImagePicked = { uri ->
-                                citizenCardUri = uri
+                                onDataBoardingViewModel.setCitizenCardPicture(uri)
                             }
                         )
                     }
@@ -130,32 +164,43 @@ private fun PhotoScreen(
                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                     ImagePickerCard(
                         label = "Self Picture",
-                        imageUri = selfPictureUri,
+                        imageUri = onDataBoardingViewModel.selfPictureValue,
                         onImagePicked = { uri ->
-                            selfPictureUri = uri
+                            onDataBoardingViewModel.setSelfPicture(uri)
                         }
                     )
                 }
+
                 CustomButton(
                     text = "Next",
                     isOutlined = true,
+                    isAvailable = onDataBoardingViewModel.selfPictureValue.isNotNull() && onDataBoardingViewModel.citizenCardPictureValue.isNotNull(),
                     outlinedColor = Color.Black,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     onClick = {
-//                        focusManager.clearFocus()
-//                        viewModel.register(
-//                            onSuccess = {
-////                            navController.popBackStack()
-////                            navController.navigate(Screen.Home.route)
-//                            },
-//                            onError = { errorMessage ->
-////                            handleLoginError(context, errorMessage)
-//                            }
-//                        )
+                        setCircularProgress(true)
+                        onDataBoardingViewModel.uploadUserPhotos()
                     },
                     modifier = Modifier.padding(top = 30.dp)
                 )
+            }
+
+            if (showCircularProgress) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.3f))
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            // Do nothing - this prevents clicks from passing through
+                        }
+                ) {
+                    CircularProgressIndicator(color = primaryLight)
+                }
             }
         }
     }

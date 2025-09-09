@@ -53,6 +53,7 @@ import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.components.CustomTextField
 import com.course.fleupart.ui.components.CustomTopAppBar
+import com.course.fleupart.ui.screen.authentication.onDataBoarding.OnDataBoardingViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.screen.navigation.MainDestinations
 import com.course.fleupart.ui.theme.primaryLight
@@ -64,9 +65,9 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     navigateToRoute: (String, Boolean) -> Unit,
     loginViewModel: LoginScreenViewModel,
+    onDataBoardingViewModel: OnDataBoardingViewModel,
     onBackClick: () -> Unit
 ) {
-
 
     var showCircularProgress by remember { mutableStateOf(false) }
     var showInvalidMessage by remember { mutableStateOf(false) }
@@ -74,6 +75,10 @@ fun LoginScreen(
     val loginState by loginViewModel.loginState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
 
     val userState by loginViewModel.userState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+
+    val addressState by onDataBoardingViewModel.userAddressData.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
 
     LaunchedEffect(loginState) {
         when (loginState) {
@@ -104,16 +109,21 @@ fun LoginScreen(
 
     LaunchedEffect(userState) {
         when (userState) {
+
             is ResultResponse.Success -> {
-                showCircularProgress = false
                 val detail = (userState as ResultResponse.Success).data.data
                 Log.e("LoginScreen", "User detail: $detail")
+
                 if (detail.isProfileComplete()) {
-                    loginViewModel.setPersonalizeCompleted()
-                    navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
+                    onDataBoardingViewModel.getUserAddress()
+                } else if (detail.picture.isNullOrEmpty() || detail.identityPicture.isNullOrEmpty()) {
+                    showCircularProgress = false
+                    navigateToRoute(MainDestinations.PHOTO_ROUTE, true)
                 } else {
+                    showCircularProgress = false
                     navigateToRoute(MainDestinations.CITIZEN_ROUTE, true)
                 }
+                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
 
             is ResultResponse.Loading -> {
@@ -123,6 +133,38 @@ fun LoginScreen(
             is ResultResponse.Error -> {
                 showCircularProgress = false
                 Log.e("LoginScreen", "Get user error: ${(userState as ResultResponse.Error).error}")
+            }
+
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(addressState) {
+        when (addressState) {
+            is ResultResponse.Success -> {
+                showCircularProgress = false
+                val address = (addressState as ResultResponse.Success).data.data
+                Log.e("AddressScreen", "Address detail: $address")
+                if (address.isNotEmpty() && address.first().isAddressCompleted()) {
+                    loginViewModel.setPersonalizeCompleted()
+                    navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
+                    onDataBoardingViewModel.resetDataBoardingValue()
+                } else {
+                    navigateToRoute(MainDestinations.ADDRESS_ROUTE, true)
+                }
+                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
+            }
+
+            is ResultResponse.Loading -> {
+                showCircularProgress = true
+            }
+
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+                Log.e(
+                    "LoginScreen",
+                    "Get address error: ${(addressState as ResultResponse.Error).error}"
+                )
             }
 
             else -> {}

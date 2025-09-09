@@ -1,6 +1,7 @@
 package com.course.fleupart.data.model.remote
 
 import com.google.gson.annotations.SerializedName
+import java.io.File
 
 data class PersonalizeResponse(
 
@@ -27,5 +28,38 @@ data class CitizenDataRequest(
 
 	@field:SerializedName("account")
 	val account: String
+)
+
+data class UserSelfPictureRequest(
+
+	@field:SerializedName("file")
+	val picture: File
+)
+
+data class UserCitizenPictureRequest(
+
+	@field:SerializedName("file")
+	val picture: File
+)
+
+data class AddressDataRequest(
+
+	@field:SerializedName("province")
+	val province: String,
+
+	@field:SerializedName("road")
+	val road: String,
+
+	@field:SerializedName("city")
+	val city: String,
+
+	@field:SerializedName("district")
+	val subDistrict: String,
+
+	@field:SerializedName("postcode")
+	val postCode: String,
+
+	@field:SerializedName("detail")
+	val additionalDetail: String
 )
 

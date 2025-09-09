@@ -123,4 +123,6 @@ dependencies {
     }
     implementation(libs.json)
 
+    implementation(libs.androidx.exifinterface)
+
 }

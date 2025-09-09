@@ -6,6 +6,7 @@ import com.course.fleupart.data.repository.NotificationRepository
 import com.course.fleupart.data.repository.OnBoardingRepository
 import com.course.fleupart.data.repository.OnDataBoardingRepository
 import com.course.fleupart.data.repository.OtpRepository
+import com.course.fleupart.data.repository.ProductRepository
 import com.course.fleupart.data.repository.RegisterRepository
 
 object Injection {
@@ -32,6 +33,10 @@ object Injection {
 
     fun provideLoginRepository(context: Context): LoginRepository {
         return LoginRepository.getInstance(context)
+    }
+
+    fun provideProductRepository(context: Context): ProductRepository {
+        return ProductRepository.getInstance(context)
     }
 
 }

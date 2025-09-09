@@ -3,6 +3,10 @@ package com.course.fleupart.ui.common
 import android.app.Activity
 import android.app.TimePickerDialog
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,7 +60,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import com.course.fleupart.ui.components.getUCropOptions
 import com.course.fleupart.ui.theme.primaryLight
+import com.yalantis.ucrop.UCrop
+import java.io.File
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
@@ -262,6 +269,47 @@ fun convertMinutesToHours(minutes: Int): String {
         hours > 0 -> "$hours hour(s)"
         else -> "$remainingMinutes minute(s)"
     }
+}
+
+fun cleanupTempFiles(context: Context) {
+    try {
+        val cacheDir = context.cacheDir
+        val tempFiles = cacheDir.listFiles()?.filter { file ->
+            file.name.startsWith("temp_image_") ||
+                    file.name.startsWith("cropped_camera_image_") ||
+                    file.name.startsWith("cropped_gallery_image_") ||
+                    file.name.startsWith("cropped_image_")
+        }
+
+        tempFiles?.forEach { file ->
+            if (file.exists()) {
+                val deleted = file.delete()
+                // Optional: Add logging
+                 Log.d("ImagePicker", "Deleted temp file: ${file.name}, success: $deleted")
+            }
+        }
+    } catch (e: Exception) {
+        // Optional: Add error logging
+         Log.e("ImagePicker", "Error cleaning up temp files", e)
+    }
+}
+
+ fun startCropping(
+     context: Context,
+     sourceUri: Uri,
+     cropLauncher: ActivityResultLauncher<Intent>
+) {
+    val destinationUri = Uri.fromFile(
+        File(
+            context.cacheDir,
+            "cropped_image_${System.currentTimeMillis()}.jpg"
+        )
+    )
+    val uCrop = UCrop.of(sourceUri, destinationUri)
+        .withAspectRatio(1f, 1f)
+        .withMaxResultSize(1000, 1000)
+        .withOptions(getUCropOptions(context))
+    cropLauncher.launch(uCrop.getIntent(context))
 }
 
 

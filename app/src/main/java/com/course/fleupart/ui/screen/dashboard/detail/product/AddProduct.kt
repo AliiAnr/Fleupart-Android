@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -75,11 +76,13 @@ import kotlin.rem
 
 @Composable
 fun AddProduct(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit
 ) {
 
     AddProduct(
-        id = 0
+        id = 0,
+        onBackClick = onBackClick,
     )
 }
 
@@ -88,14 +91,23 @@ fun AddProduct(
 @Composable
 private fun AddProduct(
     modifier: Modifier = Modifier,
-    id: Int = 0
+    id: Int = 0,
+    onBackClick: () -> Unit
 ) {
     var temp by remember { mutableStateOf("") }
     var arrangeValue by remember { mutableIntStateOf(0) }
 
+    var productName by remember { mutableStateOf("") }
+    var shortDescription by remember {mutableStateOf("") }
+    var price by remember { mutableStateOf("") }
+    var arrangeTime by remember { mutableStateOf("") }
+    var stock by remember { mutableStateOf("") }
+
     var imageList by remember { mutableStateOf(listOf<Uri>()) }
 
     var isPreOrder by remember { mutableStateOf(false) }
+
+    val focusManager = LocalFocusManager.current
 
     FleupartSurface(
         modifier = modifier.fillMaxSize(),
@@ -103,6 +115,13 @@ private fun AddProduct(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .clickable(
+                    onClick = {
+                        focusManager.clearFocus()
+                    },
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                )
                 .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
@@ -115,7 +134,8 @@ private fun AddProduct(
             ) {
                 CustomTopAppBar(
                     title = "Add Product",
-                    showNavigationIcon = true
+                    showNavigationIcon = true,
+                    onBackClick = onBackClick
                 )
                 HorizontalDivider(
                     color = base20,
@@ -133,10 +153,11 @@ private fun AddProduct(
                             Spacer(modifier = Modifier.height(16.dp))
                             EditItem(
                                 label = "Product Name",
-                                value = temp,
+                                value = productName,
                                 onChage = {
-                                    temp = it
+                                    productName = it
                                 },
+                                placeHolder = "Lily Flower",
                                 borderColor = Color.Black,
                             )
                         }
@@ -144,10 +165,12 @@ private fun AddProduct(
                         item {
                             EditItem(
                                 label = "Short Description",
-                                value = temp,
+                                value = shortDescription,
                                 onChage = {
-                                    temp = it
+                                    shortDescription = it
                                 },
+                                isLongText = true,
+                                placeHolder = "This is a flower made from ...",
                                 height = 100.dp,
                                 borderColor = Color.Black,
                             )
@@ -156,11 +179,12 @@ private fun AddProduct(
                         item {
                             EditItem(
                                 label = "Price",
-                                value = temp,
+                                value = price,
                                 onChage = {
-                                    temp = it
+                                    price = it
                                 },
                                 leadingText = "Rp",
+                                placeHolder = "10000",
                                 borderColor = Color.Black,
                                 keyboardType = KeyboardType.NumberPassword,
                             )
@@ -181,34 +205,34 @@ private fun AddProduct(
 
                         item {
                             EditItem(
-                                label = "Price",
-                                value = temp,
+                                label = "Arrange Time",
+                                value = arrangeTime,
                                 onChage = {
-                                    temp = it
+                                    arrangeTime = it
                                 },
-                                leadingText = "Rp",
+                                placeHolder = "30 - 60 minutes",
                                 borderColor = Color.Black,
                                 keyboardType = KeyboardType.NumberPassword,
                             )
                         }
 
-                        item {
-                            Text(
-                                text = "Arrange Time",
-                                color = Color.Black,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.W600,
-                                modifier = Modifier.padding(horizontal = 20.dp)
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            ArrangeTime(
-                                onSelectedValue = {
-                                    arrangeValue = it
-                                },
-                                arrangeValue = arrangeValue
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
+//                        item {
+//                            Text(
+//                                text = "Arrange Time",
+//                                color = Color.Black,
+//                                fontSize = 14.sp,
+//                                fontWeight = FontWeight.W600,
+//                                modifier = Modifier.padding(horizontal = 20.dp)
+//                            )
+//                            Spacer(modifier = Modifier.height(4.dp))
+//                            ArrangeTime(
+//                                onSelectedValue = {
+//                                    arrangeValue = it
+//                                },
+//                                arrangeValue = arrangeValue
+//                            )
+//                            Spacer(modifier = Modifier.height(16.dp))
+//                        }
 
                         item {
                             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -217,6 +241,9 @@ private fun AddProduct(
                                     imageUri = imageList,
                                     onImagePicked = {
                                         imageList = imageList + it
+                                    },
+                                    onImageRemoved = { removedUri ->
+                                        imageList = imageList.filter { it != removedUri }
                                     }
                                 )
                             }
@@ -226,10 +253,11 @@ private fun AddProduct(
                         item {
                             EditItem(
                                 label = "Stock",
-                                value = temp,
+                                value = stock,
                                 onChage = {
-                                    temp = it
+                                    stock = it
                                 },
+                                placeHolder = "10",
                                 keyboardType = KeyboardType.NumberPassword,
                                 borderColor = Color.Black,
                             )
@@ -263,8 +291,10 @@ private fun AddProduct(
                     contentAlignment = Alignment.Center
                 ) {
                     CustomButton(
-                        text = "Save",
-                        onClick = { }
+                        text = "Add Product",
+                        onClick = {
+
+                        }
                     )
                 }
             }
@@ -306,7 +336,6 @@ fun PreOrderSwitch(
         )
     }
 }
-
 @Composable
 private fun EditItem(
     modifier: Modifier = Modifier,
@@ -320,6 +349,7 @@ private fun EditItem(
     isError: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     errorMessage: String = "",
+    isLongText: Boolean = false, // Tambahkan parameter ini
     onChage: (String) -> Unit
 ) {
     Column(
@@ -344,9 +374,11 @@ private fun EditItem(
             borderColor = borderColor,
             keyboardType = keyboardType,
             height = height,
+            isLongText = isLongText // Tambahkan parameter ini
         )
     }
 }
+
 
 @Composable
 private fun ArrangeTime(
@@ -455,10 +487,10 @@ fun CustomDropdownMenu(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedItem by remember { mutableStateOf("Emails") }
+    var selectedItem by remember { mutableStateOf("Graduation") }
     val menuItems = listOf(
-        Pair(Icons.Default.Home, "Home"),
-        Pair(Icons.Default.Person, "Person"),
+        Pair(Icons.Default.Home, "Graduation"),
+        Pair(Icons.Default.Person, "Birthday"),
         Pair(Icons.Default.ShoppingCart, "Cart"),
         Pair(Icons.Default.Settings, "Settings"),
         Pair(Icons.Default.Call, "Calls"),
@@ -492,7 +524,7 @@ fun CustomDropdownMenu(
             Text(
                 text = selectedItem,
                 color = Color.Black,
-                fontSize = 12.sp,
+                fontSize = 16.sp,
                 modifier = Modifier.padding(start = 12.dp)
             )
 
@@ -529,6 +561,7 @@ fun CustomDropdownMenu(
                     text = {
                         Text(
                             text = title,
+                            fontSize = 16.sp,
                             color = Color.Black,
                             modifier = Modifier.padding(start = 16.dp)
                         )

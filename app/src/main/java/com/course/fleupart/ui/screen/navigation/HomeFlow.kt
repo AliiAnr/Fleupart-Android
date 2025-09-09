@@ -81,6 +81,7 @@ fun NavGraphBuilder.composableWithCompositionLocal(
 
 fun NavGraphBuilder.addHomeGraph(
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
+    onProductDetail: (String, NavBackStackEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
     composable(HomeSections.Home.route) { from ->
@@ -91,7 +92,10 @@ fun NavGraphBuilder.addHomeGraph(
     }
     composable(HomeSections.Product.route) { from ->
         Product(
-            modifier = modifier
+            modifier = modifier,
+            onProductDetail = { to ->
+                onProductDetail(to, from)
+            }
         )
     }
     composable(HomeSections.Finance.route) { from ->

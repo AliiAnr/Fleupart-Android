@@ -60,6 +60,7 @@ import com.course.fleupart.ui.theme.tfbackground
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.collections.plusAssign
+import kotlin.comparisons.then
 import kotlin.text.format
 
 @Composable
@@ -322,52 +323,66 @@ fun CustomTextInput(
                     color = if (isError) errorLight else borderColor,
                     shape = RoundedCornerShape(10.dp)
                 ),
-            contentAlignment = if (isLongText) Alignment.TopStart else Alignment.CenterStart
+            contentAlignment = Alignment.CenterStart
         ) {
             Row(
-                verticalAlignment = if (isLongText) Alignment.Top else Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
             ) {
                 if (leadingIcon != null) {
-                    Spacer(modifier = Modifier.width(12.dp))
                     Icon(
                         painter = painterResource(id = leadingIcon),
                         contentDescription = null,
                         tint = base300,
                         modifier = Modifier.size(24.dp),
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                 } else if (leadingText != null) {
                     Text(
                         text = leadingText,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Normal,
                         color = base80,
-                        modifier = Modifier.padding(start = 12.dp)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
 
-                Box(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .then(
+                            if (isLongText) {
+                                Modifier.fillMaxSize()
+                            } else {
+                                Modifier
+                            }
+                        ),
+                    contentAlignment = if (isLongText) Alignment.TopStart else Alignment.CenterStart
+                ) {
                     if (value.isEmpty()) {
                         Text(
                             text = placeholder,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Normal,
                             color = base80,
-                            modifier = Modifier.padding(start = 12.dp)
+                            modifier = if (isLongText) Modifier.padding(top = 0.dp) else Modifier
                         )
                     }
 
                     BasicTextField(
                         value = value,
-                        onValueChange = {
-                            if (!it.contains("\n"))
-                                onChange(it)
+                        onValueChange = { newValue ->
+                            if (isLongText || !newValue.contains("\n")) {
+                                onChange(newValue)
+                            }
                         },
                         singleLine = !isLongText,
                         textStyle = LocalTextStyle.current.copy(
                             color = Color.Black,
                             fontWeight = FontWeight.Normal,
-                            fontSize = 12.sp,
+                            fontSize = 16.sp,
                             textAlign = TextAlign.Start
                         ),
                         cursorBrush = SolidColor(primaryLight),
@@ -375,12 +390,12 @@ fun CustomTextInput(
                             keyboardType = keyboardType,
                             imeAction = imeAction
                         ),
-                        maxLines = 4,
+                        maxLines = if (isLongText) Int.MAX_VALUE else 1,
                         modifier = if (isLongText) {
                             Modifier.fillMaxSize()
                         } else {
                             Modifier.fillMaxWidth()
-                        }.padding(start = 12.dp)
+                        }
                     )
                 }
             }
@@ -393,7 +408,7 @@ fun CustomTextInput(
                 color = errorLight,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontalPadding),
+                    .padding(horizontal = horizontalPadding),
                 textAlign = TextAlign.Start
             )
         } else {

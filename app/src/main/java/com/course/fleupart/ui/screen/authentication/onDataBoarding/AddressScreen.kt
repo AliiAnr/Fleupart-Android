@@ -67,12 +67,16 @@ fun AddressScreen(
                 showCircularProgress = true
                 loginViewModel.getUser()
             }
+
             is ResultResponse.Loading -> {
                 showCircularProgress = true
             }
+
             is ResultResponse.Error -> {
                 showCircularProgress = false
+                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
+
             else -> {}
         }
     }
@@ -86,19 +90,23 @@ fun AddressScreen(
                 if (detail.isProfileComplete()) {
                     loginViewModel.setPersonalizeCompleted()
                     navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
-                    onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
+                    onDataBoardingViewModel.resetDataBoardingValue()
                 } else {
                     navigateToRoute(MainDestinations.CITIZEN_ROUTE, true)
-                    onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
+                    onDataBoardingViewModel.resetDataBoardingValue()
                 }
+                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
+
             is ResultResponse.Loading -> {
                 showCircularProgress = true
             }
+
             is ResultResponse.Error -> {
                 showCircularProgress = false
                 onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
+
             else -> {}
         }
     }
