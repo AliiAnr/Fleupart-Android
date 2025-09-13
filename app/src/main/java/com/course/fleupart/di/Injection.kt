@@ -39,4 +39,6 @@ object Injection {
         return ProductRepository.getInstance(context)
     }
 
+    fun provideProfileRepository(context: Context) = com.course.fleupart.data.repository.ProfileRepository.getInstance(context)
+
 }
