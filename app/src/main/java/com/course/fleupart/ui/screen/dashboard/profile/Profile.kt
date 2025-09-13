@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +30,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,40 +46,80 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.course.fleupart.R
+import com.course.fleupart.data.model.remote.StoreAddressResponse
+import com.course.fleupart.data.model.remote.StoreDetailData
+import com.course.fleupart.data.model.remote.StoreDetailResponse
+import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.components.AccountList
 import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.FakeCategory
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base40
+import com.course.fleupart.ui.theme.primaryLight
 
 @Composable
 fun Profile(
     modifier: Modifier,
     onProfileDetailClick: (String) -> Unit,
-//    profileViewModel: ProfileViewModel,
+    profileViewModel: ProfileViewModel,
     id: Long = 0L,
 ) {
 
-//    LaunchedEffect(Unit) {
-//        profileViewModel.loadInitialData()
-//    }
-//
-//    val profileState by profileViewModel.profileDetailState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
-//
-//    LaunchedEffect(profileState) {
-//        Log.e("PROFILE STATE", profileState.toString())
-//    }
-//
-//    val userData = when (profileState) {
-//        is ResultResponse.Success -> (profileState as ResultResponse.Success<Detail?>).data
-//        else -> null
-//    }
+    var showCircularProgress by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        profileViewModel.loadInitialData()
+    }
+
+    val storeDetailState by profileViewModel.storeDetailState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+
+    val storeAddressState by profileViewModel.storeAddressState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+
+    LaunchedEffect(storeDetailState, storeAddressState) {
+        // Cek apakah masih ada yang loading
+        val anyLoading = storeDetailState is ResultResponse.Loading ||
+                storeAddressState is ResultResponse.Loading
+
+        // Cek apakah keduanya sudah selesai (success atau error)
+        val bothCompleted = (storeDetailState is ResultResponse.Success || storeDetailState is ResultResponse.Error) &&
+                (storeAddressState is ResultResponse.Success || storeAddressState is ResultResponse.Error)
+
+        showCircularProgress = anyLoading || !bothCompleted
+
+        // Log untuk debugging
+        when {
+            storeDetailState is ResultResponse.Success && storeAddressState is ResultResponse.Success -> {
+                Log.e("PROFILE", "Both APIs loaded successfully")
+            }
+            storeDetailState is ResultResponse.Error -> {
+                Log.e("PROFILE", "Store detail error: ${(storeDetailState as ResultResponse.Error).error}")
+            }
+            storeAddressState is ResultResponse.Error -> {
+                Log.e("PROFILE", "Store address error: ${(storeAddressState as ResultResponse.Error).error}")
+            }
+        }
+    }
+
+    val storeDetailData = when (storeDetailState) {
+        is ResultResponse.Success -> (storeDetailState as ResultResponse.Success<StoreDetailResponse>).data.data
+        else -> null
+    }
+
+    val storeAddressData = when (storeAddressState) {
+        is ResultResponse.Success -> (storeAddressState as ResultResponse.Success<StoreAddressResponse>).data.data
+        else -> null
+    }
 
     Profile(
         modifier = modifier,
         onProfileDetailClick = onProfileDetailClick,
-//        userData = userData
+        storeDetailData = storeDetailData ?: StoreDetailData(),
+        showCircularProgress = showCircularProgress
     )
 }
 
@@ -83,7 +127,8 @@ fun Profile(
 private fun Profile(
     modifier: Modifier = Modifier,
     onProfileDetailClick: (String) -> Unit,
-//    userData: Detail?
+    storeDetailData: StoreDetailData,
+    showCircularProgress: Boolean
 ) {
 
     FleupartSurface(
@@ -93,59 +138,70 @@ private fun Profile(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                item {
-                    CustomTopAppBar(
-                        title = "Profile",
-                    )
-                }
+            if (showCircularProgress) {
+                // Show empty state when there's no data and not loading
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {}
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    item {
+                        CustomTopAppBar(
+                            title = "Profile",
+                        )
+                    }
 
-                item {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Header(
-                        name = "No Name",
-                        email = "No Email",
-                    )
-                }
+                    item {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Header(
+                            storeData = storeDetailData
+                        )
+                    }
 
-                item {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    AccountList(
-                        data = FakeCategory.accountItem,
-                        onProfileDetailClick = onProfileDetailClick
-                    )
-                }
+                    item {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        AccountList(
+                            data = FakeCategory.accountItem,
+                            onProfileDetailClick = onProfileDetailClick
+                        )
+                    }
 
-                item {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    GeneralList(
-                        data = FakeCategory.generalItem,
-                        onProfileDetailClick = onProfileDetailClick
-                    )
+                    item {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        GeneralList(
+                            data = FakeCategory.generalItem,
+                            onProfileDetailClick = onProfileDetailClick
+                        )
+                    }
+                }
+            }
+            if (showCircularProgress) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    CircularProgressIndicator(color = primaryLight)
                 }
             }
         }
+
     }
 }
-
-data class StoreData(
-    val picture: String? = null
-)
-
-var storeData: StoreData? = StoreData(
-    picture = ""
-)
 
 @Composable
 private fun Header(
     modifier: Modifier = Modifier,
-    name: String,
-    email: String
+    storeData: StoreDetailData
 ) {
     Row(
         modifier = Modifier
@@ -161,7 +217,7 @@ private fun Header(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
-            if (storeData?.picture.isNullOrEmpty()) {
+            if (storeData.picture.isNullOrEmpty()) {
 //            Log.e("WOIII KOSONG", "${storeData?.picture}")
                 Image(
                     painter = painterResource(id = R.drawable.placeholder),  // Use a placeholder image
@@ -190,7 +246,7 @@ private fun Header(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = name,
+                text = storeData.name ?: "No Name",
                 color = Color.Black,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium

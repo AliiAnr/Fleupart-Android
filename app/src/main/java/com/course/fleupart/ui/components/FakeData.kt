@@ -167,7 +167,7 @@ object FakeCategory {
     )
 
     val accountItem: List<AccountList> = listOf(
-        AccountList("Edit Profile", R.drawable.editprofile),
+        AccountList("Edit Store Profile", R.drawable.editprofile),
         AccountList("Address", R.drawable.map),
         AccountList("Language", R.drawable.language),
     )

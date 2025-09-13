@@ -22,6 +22,7 @@ import com.course.fleupart.ui.screen.dashboard.home.Home
 import com.course.fleupart.ui.screen.dashboard.order.Order
 import com.course.fleupart.ui.screen.dashboard.product.Product
 import com.course.fleupart.ui.screen.dashboard.profile.Profile
+import com.course.fleupart.ui.screen.dashboard.profile.ProfileViewModel
 
 fun <T> spatialExpressiveSpring() = spring<T>(
     dampingRatio = 0.8f,
@@ -82,6 +83,8 @@ fun NavGraphBuilder.composableWithCompositionLocal(
 fun NavGraphBuilder.addHomeGraph(
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
+    onProfileDetail: (String, NavBackStackEntry) -> Unit,
+    profileViewModel: ProfileViewModel,
     modifier: Modifier = Modifier
 ) {
     composable(HomeSections.Home.route) { from ->
@@ -108,11 +111,13 @@ fun NavGraphBuilder.addHomeGraph(
             modifier = modifier
         )
     }
-    composable(HomeSections.Profile.route) {
+    composable(HomeSections.Profile.route) { from ->
         Profile(
             modifier = modifier,
-            onProfileDetailClick = {},
-//            userData = null
+            onProfileDetailClick = {  to ->
+                onProfileDetail(to, from)
+            },
+            profileViewModel = profileViewModel,
             id = 1
         )
     }

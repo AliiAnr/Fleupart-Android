@@ -34,6 +34,8 @@ object DetailDestinations {
     const val BALANCE_AMOUNT_ROUTE = "balanceAmount"
     const val ADD_BANK_ACCOUNT_ROUTE = "addBankAccount"
     const val SALES_REPORT_ROUTE = "salesReport"
+
+    const val UPDATE_ADDRESS_ROUTE = "updateAddress"
 }
 
 object QueryKeys {
@@ -89,6 +91,14 @@ class FleupartNavController(
     fun navigateToProductDetail(to: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             navController.navigate(DetailDestinations.ADD_PRODUCT_ROUTE)
+        }
+    }
+
+    fun navigateToProfileDetail(to: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            if (to == "Address") {
+                navController.navigate(DetailDestinations.UPDATE_ADDRESS_ROUTE)
+            }
         }
     }
 

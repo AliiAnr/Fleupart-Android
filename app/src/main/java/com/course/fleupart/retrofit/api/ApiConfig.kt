@@ -61,4 +61,8 @@ object ApiConfig {
     fun getLoginService(context: Context): LoginService {
         return provideRetrofit(context).create(LoginService::class.java)
     }
+
+    fun getProfileService(context: Context) : com.course.fleupart.retrofit.services.ProfileService {
+        return provideRetrofit(context).create(com.course.fleupart.retrofit.services.ProfileService::class.java)
+    }
 }

@@ -31,10 +31,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.course.fleupart.data.model.remote.StoreAddress
 import com.course.fleupart.data.resource.Resource
 import com.course.fleupart.di.factory.LoginViewModelFactory
 import com.course.fleupart.di.factory.OnBoardingViewModelFactory
 import com.course.fleupart.di.factory.OnDataBoardingViewModelFactory
+import com.course.fleupart.di.factory.ProductViewModelFactory
+import com.course.fleupart.di.factory.ProfileViewModelFactory
 import com.course.fleupart.di.factory.RegisterViewModelFactory
 import com.course.fleupart.ui.components.FleupartBottomBar
 import com.course.fleupart.ui.components.HomeSections
@@ -50,6 +53,7 @@ import com.course.fleupart.ui.screen.authentication.register.RegisterScreen
 import com.course.fleupart.ui.screen.authentication.register.RegisterScreenViewModel
 import com.course.fleupart.ui.screen.authentication.username.UsernameScreen
 import com.course.fleupart.ui.screen.authentication.welcome.WelcomeScreen
+import com.course.fleupart.ui.screen.dashboard.detail.Profile.StoreAddressDetail
 import com.course.fleupart.ui.screen.dashboard.detail.finance.AddBankAccount
 import com.course.fleupart.ui.screen.dashboard.detail.finance.BalanceValue
 import com.course.fleupart.ui.screen.dashboard.detail.finance.SalesReport
@@ -57,6 +61,7 @@ import com.course.fleupart.ui.screen.dashboard.detail.finance.WithdrawBalance
 import com.course.fleupart.ui.screen.dashboard.detail.home.DetailTest
 import com.course.fleupart.ui.screen.dashboard.detail.product.AddProduct
 import com.course.fleupart.ui.screen.dashboard.detail.product.DetailProduct
+import com.course.fleupart.ui.screen.dashboard.profile.ProfileViewModel
 import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartScaffold
 import com.course.fleupart.ui.screen.navigation.MainDestinations
@@ -106,6 +111,12 @@ fun FleupartApp() {
         )
     )
 
+    val profileViewModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory.getInstance(
+            Resource.appContext
+        )
+    )
+
     val destination by navigationViewModel.startDestination.collectAsStateWithLifecycle(
         initialValue = MainDestinations.ONBOARDING_ROUTE
     )
@@ -125,7 +136,7 @@ fun FleupartApp() {
             ) {
                 NavHost(
                     navController = fleupartNavController.navController,
-                    startDestination = MainDestinations.DASHBOARD_ROUTE,
+                    startDestination = destination,
                     contentAlignment = Alignment.Center
                 ) {
                     composableWithCompositionLocal(
@@ -263,7 +274,9 @@ fun FleupartApp() {
                     ) { backStackEntry ->
                         MainContainer(
                             onSnackSelected = fleupartNavController::navigateToSnackDetail,
-                            onProductDetail = fleupartNavController::navigateToProductDetail
+                            onProductDetail = fleupartNavController::navigateToProductDetail,
+                            onProfileDetail = fleupartNavController::navigateToProfileDetail,
+                            profileViewModel = profileViewModel
                         )
                     }
 
@@ -293,6 +306,15 @@ fun FleupartApp() {
                             navigateToRoute = fleupartNavController::navigateToNonBottomBarRoute,
                             onDataBoardingViewModel = onDataBoardingViewModel,
                             loginViewModel = loginViewModel
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.UPDATE_ADDRESS_ROUTE
+                    ) { backStackEntry ->
+                        StoreAddressDetail(
+                            onBackClick = fleupartNavController::upPress,
+                            profileViewModel = profileViewModel
                         )
                     }
 
@@ -335,6 +357,8 @@ fun MainContainer(
     modifier: Modifier = Modifier,
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
+    onProfileDetail: (String, NavBackStackEntry) -> Unit,
+    profileViewModel: ProfileViewModel
 ) {
     val fleuraScaffoldState = rememberFleupartScaffoldState()
     val nestedNavController = rememberFleupartNavController()
@@ -383,6 +407,8 @@ fun MainContainer(
             addHomeGraph(
                 onSnackSelected = onSnackSelected,
                 onProductDetail = onProductDetail,
+                onProfileDetail = onProfileDetail,
+                profileViewModel = profileViewModel,
                 modifier = Modifier
                     .padding(padding)
                     .consumeWindowInsets(padding)
