@@ -12,15 +12,18 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -45,16 +48,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.course.fleupart.R
 import com.course.fleupart.ui.common.cleanupTempFiles
@@ -683,4 +689,224 @@ fun CustomImagePreviewDialog(
             }
         }
     }
+}
+
+@Composable
+fun FlexibleImagePicker(
+    modifier: Modifier = Modifier,
+    imageUrl: String? = null,
+    selectedImageUri: Uri? = null,
+    width: Dp? = null,
+    height: Dp? = null,
+    size: Dp? = null,
+    onImagePicked: (Uri) -> Unit,
+    shape: Shape = RoundedCornerShape(8.dp),
+    showEditButton: Boolean = true,
+    placeholder: Int = R.drawable.placeholder,
+    onImageClick: () -> Unit = {},
+    editButtonPosition: EditButtonPosition = EditButtonPosition.BottomEnd,
+    editButtonOffset: androidx.compose.ui.unit.DpOffset = androidx.compose.ui.unit.DpOffset(2.dp, 2.dp)
+) {
+    val context = LocalContext.current
+
+    var permissionGranted by remember { mutableStateOf(false) }
+    var showPickerDialog by remember { mutableStateOf(false) }
+    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    LaunchedEffect(Unit) {
+        permissionGranted = checkPermissions(context)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            cleanupTempFiles(context)
+        }
+    }
+
+    val createTempImageUri = {
+        val tempFile = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            tempFile
+        )
+    }
+
+    val cropLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        try {
+            if (result.resultCode == Activity.RESULT_OK) {
+                val resultUri = UCrop.getOutput(result.data!!)
+                resultUri?.let { onImagePicked(it) }
+            } else {
+                cleanupTempFiles(context)
+            }
+        } catch (e: Exception) {
+            cleanupTempFiles(context)
+        }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        try {
+            if (success) {
+                tempImageUri?.let { uri ->
+                    startCropping(context, uri, cropLauncher)
+                }
+            } else {
+                cleanupTempFiles(context)
+            }
+        } catch (e: Exception) {
+            cleanupTempFiles(context)
+        } finally {
+            showPickerDialog = false
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        try {
+            uri?.let {
+                startCropping(context, it, cropLauncher)
+            }
+        } catch (e: Exception) {
+            cleanupTempFiles(context)
+        } finally {
+            showPickerDialog = false
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val cameraGranted = permissions[Manifest.permission.CAMERA] == true
+        val storageGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions[Manifest.permission.READ_MEDIA_IMAGES] == true
+        } else {
+            permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true
+        }
+
+        permissionGranted = cameraGranted && storageGranted
+        if (permissionGranted) {
+            showPickerDialog = true
+        }
+    }
+
+    // Determine modifier based on parameters
+    val imageModifier = when {
+        size != null -> modifier.size(size)
+        width != null && height != null -> modifier
+            .width(width)
+            .height(height)
+        width != null -> modifier
+            .width(width)
+        height != null -> modifier
+            .height(height)
+        else -> modifier.fillMaxSize()
+    }
+
+    Box(
+        modifier = imageModifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                onImageClick()
+            },
+        contentAlignment = when (editButtonPosition) {
+            EditButtonPosition.TopStart -> Alignment.TopStart
+            EditButtonPosition.TopEnd -> Alignment.TopEnd
+            EditButtonPosition.BottomStart -> Alignment.BottomStart
+            EditButtonPosition.BottomEnd -> Alignment.BottomEnd
+            EditButtonPosition.Center -> Alignment.Center
+        }
+    ) {
+        // Priority: selectedImageUri > imageUrl > placeholder
+        when {
+            selectedImageUri != null -> {
+                Image(
+                    painter = rememberAsyncImagePainter(selectedImageUri),
+                    contentDescription = "Selected Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(shape)
+                )
+            }
+            !imageUrl.isNullOrEmpty() -> {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Store Image",
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = placeholder),
+                    error = painterResource(id = placeholder),
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(shape)
+                )
+            }
+            else -> {
+                Image(
+                    painter = painterResource(id = placeholder),
+                    contentDescription = "Placeholder Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(shape)
+                        .background(Color(0xFFC8A2C8))
+                )
+            }
+        }
+
+        if (showEditButton) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .offset(editButtonOffset.x, editButtonOffset.y)
+                    .clip(CircleShape)
+                    .background(primaryLight)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        if (permissionGranted) {
+                            showPickerDialog = true
+                        } else {
+                            permissionLauncher.launch(getRequiredPermissions())
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.editprofile),
+                    contentDescription = "Edit Image",
+                    tint = Color.White
+                )
+            }
+        }
+    }
+
+    if (showPickerDialog) {
+        ImagePickerDialog(
+            onDismiss = { showPickerDialog = false },
+            onCameraClick = {
+                tempImageUri = createTempImageUri()
+                cameraLauncher.launch(tempImageUri!!)
+            },
+            onGalleryClick = {
+                galleryLauncher.launch("image/*")
+            }
+        )
+    }
+}
+
+enum class EditButtonPosition {
+    TopStart,
+    TopEnd,
+    BottomStart,
+    BottomEnd,
+    Center
 }
