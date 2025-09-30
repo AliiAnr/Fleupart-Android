@@ -241,7 +241,8 @@ private fun Header(
                     placeholder = painterResource(id = R.drawable.placeholder),
                     error = painterResource(id = R.drawable.placeholder),
                     modifier = Modifier
-                        .fillMaxSize()
+                        .size(70.dp)
+                        .clip(CircleShape)
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))

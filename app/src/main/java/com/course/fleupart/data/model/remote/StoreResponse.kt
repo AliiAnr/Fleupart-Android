@@ -1,6 +1,7 @@
 package com.course.fleupart.data.model.remote
 
 import com.google.gson.annotations.SerializedName
+import java.io.File
 
 data class ApiUpdateResponse(
 
@@ -12,6 +13,12 @@ data class ApiUpdateResponse(
 
 	@field:SerializedName("timestamp")
 	val timestamp: String
+)
+
+data class StoreLogoRequest(
+
+	@field:SerializedName("file")
+	val picture: File
 )
 
 data class StoreDetailResponse(
@@ -207,3 +214,45 @@ data class UpdateStoreAddressRequest(
 	@field:SerializedName("longitude")
 	val longitude: Any? = null
 )
+
+//////////////////////////
+/////////////////////////
+
+data class StoreInformationResponse(
+	val data: StoreInformationData? = null,
+	val message: String? = null,
+	val statusCode: Int? = null,
+	val timestamp: String? = null
+)
+
+data class StoreInformationAddress(
+	val province: String? = null,
+	val phone: String? = null,
+	val road: String? = null,
+	val city: String? = null,
+	val latitude: Any? = null,
+	val district: String? = null,
+	val name: String? = null,
+	val postcode: String? = null,
+	val id: String? = null,
+	val detail: String? = null,
+	val storeId: String? = null,
+	val longitude: Any? = null
+)
+
+data class StoreInformationData(
+	val operationalDay: Any? = null,
+	val address: StoreInformationAddress? = null,
+	val description: Any? = null,
+	val picture: Any? = null,
+	val adminVerifiedAt: Any? = null,
+	val sellerId: String? = null,
+	val balance: String? = null,
+	val updatedAt: String? = null,
+	val phone: Any? = null,
+	val name: String? = null,
+	val logo: Any? = null,
+	val operationalHour: Any? = null,
+	val id: String? = null
+)
+

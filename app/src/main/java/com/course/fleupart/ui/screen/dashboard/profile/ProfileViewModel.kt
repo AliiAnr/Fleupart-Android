@@ -1,5 +1,7 @@
 package com.course.fleupart.ui.screen.dashboard.profile
 
+import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,14 +11,19 @@ import androidx.lifecycle.viewModelScope
 import com.course.fleupart.data.model.remote.ApiUpdateResponse
 import com.course.fleupart.data.model.remote.StoreAddressData
 import com.course.fleupart.data.model.remote.StoreAddressResponse
+import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreDetailResponse
+import com.course.fleupart.data.model.remote.StoreLogoRequest
 import com.course.fleupart.data.model.remote.UpdateStoreAddressRequest
 import com.course.fleupart.data.repository.ProfileRepository
+import com.course.fleupart.data.resource.Resource
+import com.course.fleupart.ui.common.ImageCompressor
 import com.course.fleupart.ui.common.ResultResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 
 class ProfileViewModel(
     private val profileRepository: ProfileRepository,
@@ -26,6 +33,10 @@ class ProfileViewModel(
         MutableStateFlow(ResultResponse.None)
     val storeDetailState: StateFlow<ResultResponse<StoreDetailResponse>> =
         _storeDetailState.asStateFlow()
+
+    private val _updateImageState: MutableStateFlow<ResultResponse<ApiUpdateResponse>> = MutableStateFlow(ResultResponse.None)
+
+    val updateImageState: StateFlow<ResultResponse<ApiUpdateResponse>> = _updateImageState.asStateFlow()
 
     private val _storeAddressState: MutableStateFlow<ResultResponse<StoreAddressResponse>> =
         MutableStateFlow(ResultResponse.None)
@@ -37,10 +48,14 @@ class ProfileViewModel(
     val updateStoreAddressState: StateFlow<ResultResponse<ApiUpdateResponse>> =
         _updateStoreAddressState.asStateFlow()
 
+//    private val
+
     private val _dataInitialized = MutableStateFlow(false)
     val dataInitialized: StateFlow<Boolean> = _dataInitialized
 
     var storeAddressValue: MutableState<StoreAddressData?> = mutableStateOf(null)
+
+    var storeInformationValue: MutableState<StoreDetailData?> = mutableStateOf(null)
 
     var nameValue by mutableStateOf("")
         private set
@@ -69,37 +84,140 @@ class ProfileViewModel(
     var additionalDetailValue by mutableStateOf("")
         private set
 
-    fun setName(value: String) {
-        nameValue = value
+    var storeNameValue by mutableStateOf("")
+        private set
+
+    var storeDescriptionValue by mutableStateOf("")
+        private set
+
+    var storePhoneNumberValue by mutableStateOf("")
+        private set
+
+    var storeOperationHourValue by mutableStateOf("")
+        private set
+
+    var storeOperationDayValue by mutableStateOf("")
+        private set
+
+    var storeLogoValue by mutableStateOf<Uri?>(null)
+        private set
+
+    var storeBannerValue by mutableStateOf<Uri?>(null)
+        private set
+
+    fun setStoreName(value: String) {
+        storeNameValue = value
     }
 
-    fun setPhoneNumber(value: String) {
-        phoneNumberValue = value
-        validatePhoneNumber()
+    fun setStoreDescription(value: String) {
+        storeDescriptionValue = value
     }
 
-    fun streetName(value: String) {
-        streetNameValue = value
+    fun setStorePhoneNumber(value: String) {
+        storePhoneNumberValue = value
     }
 
-    fun setDistrict(value: String) {
-        districtValue = value
+    fun setStoreOperationHour(value: String) {
+        storeOperationHourValue = value
     }
 
-    fun setCity(value: String) {
-        cityValue = value
+    fun setStoreOperationDay(value: String) {
+        storeOperationDayValue = value
     }
 
-    fun setProvince(value: String) {
-        provinceValue = value
+    fun getStoreData() {
+
     }
 
-    fun setPostalCode(value: String) {
-        postalCodeValue = value
+    fun setStoreLogo(value: Uri): Uri {
+        val tempFile = File.createTempFile(
+            "temp_storelogo_${System.currentTimeMillis()}",
+            ".jpg",
+            Resource.appContext.cacheDir
+        )
+        val success = ImageCompressor.compressImage(Resource.appContext, value, tempFile)
+        return if (success) {
+            val compressedUri = Uri.fromFile(tempFile)
+            val fileSizeKb = tempFile.length() / 1024
+            val fileSizeMb = fileSizeKb / 1024.0
+            Log.e(
+                "ProfileViewModel",
+                "Image Logo compressed successfully: $compressedUri, size: ${fileSizeKb}KB (${
+                    String.format(
+                        "%.2f",
+                        fileSizeMb
+                    )
+                }MB)"
+            )
+            compressedUri
+        } else {
+            Log.e("ProfileViewModel", "Image Logo compression failed")
+            Uri.EMPTY
+        }
     }
 
-    fun setAdditionalDetail(value: String) {
-        additionalDetailValue = value
+    fun setStoreBanner(value: Uri): Uri {
+        val tempFile = File.createTempFile(
+            "temp_storebanner_${System.currentTimeMillis()}",
+            ".jpg",
+            Resource.appContext.cacheDir
+        )
+        val success = ImageCompressor.compressImage(Resource.appContext, value, tempFile)
+        return if (success) {
+            val compressedUri = Uri.fromFile(tempFile)
+            val fileSizeKb = tempFile.length() / 1024
+            val fileSizeMb = fileSizeKb / 1024.0
+            Log.e(
+                "ProfileViewModel",
+                "Image Banner compressed successfully: $compressedUri, size: ${fileSizeKb}KB (${
+                    String.format(
+                        "%.2f",
+                        fileSizeMb
+                    )
+                }MB)"
+            )
+            compressedUri
+        } else {
+            Log.e("ProfileViewModel", "Image Banner compression failed")
+            Uri.EMPTY
+        }
+    }
+
+    fun uploadStoreLogo(logoUri: Uri) {
+        viewModelScope.launch {
+            var logoTempFile: File? = null
+
+            try {
+                _updateImageState.value = ResultResponse.Loading
+
+                logoTempFile = File.createTempFile(
+                    "temp_storelogo_${System.currentTimeMillis()}",
+                    ".jpeg",
+                    Resource.appContext.cacheDir
+                )
+
+                val compressionSuccess = ImageCompressor.compressImage(Resource.appContext, logoUri, logoTempFile)
+
+                if(compressionSuccess) {
+                    profileRepository.inputStoreLogo(
+                        storeLogo = StoreLogoRequest(
+                            picture = logoTempFile
+                        )
+                    ).collect { result ->
+                        _updateImageState.value = result
+                        if (result is ResultResponse.Success) {
+                            getStoreDetail()
+                        }
+                    }
+                } else {
+                    _updateImageState.value = ResultResponse.Error("Image compression failed")
+                }
+            } catch (e: Exception) {
+                _updateImageState.value = ResultResponse.Error("Failed to upload logo: ${e.message}")
+            } finally {
+                logoTempFile?.delete()
+            }
+        }
     }
 
     fun getStoreDetail() {
@@ -108,6 +226,9 @@ class ProfileViewModel(
                 _storeDetailState.value = ResultResponse.Loading
                 profileRepository.getStoreDetail().collect { result ->
                     _storeDetailState.value = result
+                    if (result is ResultResponse.Success) {
+                        storeInformationValue.value = result.data.data
+                    }
                 }
             } catch (e: Exception) {
                 _storeDetailState.value = ResultResponse.Error("Exception: ${e.message}")
@@ -147,7 +268,7 @@ class ProfileViewModel(
             try {
                 _updateStoreAddressState.value = ResultResponse.Loading
                 profileRepository.updateStoreAddress(
-                    requestBody = UpdateStoreAddressRequest (
+                    requestBody = UpdateStoreAddressRequest(
                         name = name,
                         phone = phone,
                         province = province,
@@ -183,6 +304,10 @@ class ProfileViewModel(
 
     fun resetUpdateState() {
         _updateStoreAddressState.value = ResultResponse.None
+    }
+
+    fun resetImageUpdateState() {
+        _updateImageState.value = ResultResponse.None
     }
 
     private fun String.isDigitsOnly(): Boolean = this.all(Char::isDigit)

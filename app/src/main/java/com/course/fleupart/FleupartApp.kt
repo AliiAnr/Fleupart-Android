@@ -54,6 +54,7 @@ import com.course.fleupart.ui.screen.authentication.register.RegisterScreenViewM
 import com.course.fleupart.ui.screen.authentication.username.UsernameScreen
 import com.course.fleupart.ui.screen.authentication.welcome.WelcomeScreen
 import com.course.fleupart.ui.screen.dashboard.detail.Profile.StoreAddressDetail
+import com.course.fleupart.ui.screen.dashboard.detail.Profile.StoreProfileDetail
 import com.course.fleupart.ui.screen.dashboard.detail.finance.AddBankAccount
 import com.course.fleupart.ui.screen.dashboard.detail.finance.BalanceValue
 import com.course.fleupart.ui.screen.dashboard.detail.finance.SalesReport
@@ -313,6 +314,15 @@ fun FleupartApp() {
                         route = DetailDestinations.UPDATE_ADDRESS_ROUTE
                     ) { backStackEntry ->
                         StoreAddressDetail(
+                            onBackClick = fleupartNavController::upPress,
+                            profileViewModel = profileViewModel
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.UPDATE_DETAIL_ROUTE
+                    ) { backStackEntry ->
+                        StoreProfileDetail(
                             onBackClick = fleupartNavController::upPress,
                             profileViewModel = profileViewModel
                         )

@@ -226,8 +226,8 @@ fun StoreAddressDetail(
 private fun StoreAddressDetail(
     modifier: Modifier = Modifier,
     showSuccessDialog: Boolean,
-    showCircularProgress: Boolean = false,
-    isButtonAvailable: Boolean = true,
+    showCircularProgress: Boolean,
+    isButtonAvailable: Boolean,
     name: String,
     phone: String,
     province: String,
@@ -404,12 +404,14 @@ private fun FirstContent(
         EditItem(
             label = "Name",
             value = name,
-            onChage = onNameChange
+            onChage = onNameChange,
+            placeHolder = "e.g. Main Address"
         )
         EditItem(
             label = "Phone Number",
             value = phone,
-            onChage = onPhoneChange
+            onChage = onPhoneChange,
+            placeHolder = "e.g. 081234567890"
         )
     }
 }
@@ -447,6 +449,8 @@ private fun SecondContent(
 //            value = value,
 //            onChage = onChage
 //        )
+
+        //add update/edit profile on PROFILE SCREEN !!
 
         EditItem(
             label = "City/District",
