@@ -217,8 +217,8 @@ private fun Header(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
-            if (storeData.picture.isNullOrEmpty()) {
-//            Log.e("WOIII KOSONG", "${storeData?.picture}")
+            if (storeData.logo.isNullOrEmpty()) {
+            Log.e("WOIII KOSONG", "${storeData.picture}")
                 Image(
                     painter = painterResource(id = R.drawable.placeholder),  // Use a placeholder image
                     contentDescription = "Store Image",
@@ -229,13 +229,13 @@ private fun Header(
                         .background(Color(0xFFC8A2C8))
                 )
             } else {
-                Log.e("WOIII ADA", "${storeData?.picture}")
+                Log.e("WOIII ADA", storeData.logo)
                 AsyncImage(
 //                    model = ImageRequest.Builder(LocalContext.current)
 //                        .data(storeData?.picture)
 //                        .crossfade(true)
 //                        .build(),
-                    model = storeData?.picture,
+                    model = storeData.logo,
                     contentDescription = "Store Image",
                     contentScale = ContentScale.Crop,
                     placeholder = painterResource(id = R.drawable.placeholder),

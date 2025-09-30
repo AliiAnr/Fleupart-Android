@@ -473,14 +473,7 @@ private fun StoreProfileDetail(
 
             if (showSuccessDialog) {
                 CustomPopUpDialog(
-                    onDismiss = {
-                        if (updateType == UpdateType.StoreLogo) {
-                            selectetLogoUri = null
-                        } else if (updateType == UpdateType.StoreBanner) {
-                            selectetBannerUri = null
-                        }
-                        onDismiss()
-                    },
+                    onDismiss = onDismiss,
                     isShowIcon = true,
                     isShowTitle = true,
                     isShowDescription = true,
