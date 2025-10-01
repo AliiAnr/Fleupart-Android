@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 val base20 = Color(0xFFF5F5F5)
 val base100 = Color(0xFF757575)
+val base500 = Color(0xFF3B3B3B)
 val noAvail = Color(0xFFFAD1E4)
 val noAvailOutline = Color(0xFF7F7F7F)
 val base80 = Color(0xFF949494)
