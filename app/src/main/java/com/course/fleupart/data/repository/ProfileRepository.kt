@@ -6,6 +6,7 @@ import com.course.fleupart.data.model.remote.StoreAddressResponse
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.StoreLogoRequest
 import com.course.fleupart.data.model.remote.UpdateStoreAddressRequest
+import com.course.fleupart.data.model.remote.UpdateStoreDetailRequest
 import com.course.fleupart.retrofit.api.ApiConfig
 import com.course.fleupart.ui.common.ResultResponse
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +60,24 @@ class ProfileRepository private constructor(
             emit(ResultResponse.Loading)
             try {
                 val response = profileService.updateStoreAddress(requestBody)
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        emit(ResultResponse.Success(it))
+                    } ?: emit(ResultResponse.Error("Empty response body"))
+                } else {
+                    emit(ResultResponse.Error("Error: ${response.code()} ${response.message()}"))
+                }
+            } catch (e: Exception) {
+                emit(ResultResponse.Error("Exception: ${e.message}"))
+            }
+        }.flowOn(Dispatchers.IO)
+
+
+    fun updateStoreDetail(requestBody: UpdateStoreDetailRequest): Flow<ResultResponse<ApiUpdateResponse>> =
+        flow {
+            emit(ResultResponse.Loading)
+            try {
+                val response = profileService.updateStoreDetail(requestBody)
                 if (response.isSuccessful) {
                     response.body()?.let {
                         emit(ResultResponse.Success(it))

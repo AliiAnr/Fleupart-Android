@@ -87,8 +87,31 @@ fun StoreProfileDetail(
         initialValue = ResultResponse.None
     )
 
+    val updateStoreDetailState by profileViewModel.updateStoreDetailState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+
     LaunchedEffect(updateImageState) {
         when (updateImageState) {
+            is ResultResponse.Success -> {
+                showCircularProgress = false
+                showSuccessDialog = true
+            }
+
+            is ResultResponse.Loading -> {
+                showCircularProgress = true
+            }
+
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+            }
+
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(updateStoreDetailState) {
+        when (updateStoreDetailState) {
             is ResultResponse.Success -> {
                 showCircularProgress = false
                 showSuccessDialog = true
@@ -180,7 +203,17 @@ fun StoreProfileDetail(
         onDismiss = {
             showSuccessDialog = false
             profileViewModel.resetImageUpdateState()
+            profileViewModel.resetUpdateStoreDetailState()
             onBackClick()
+        },
+        onSaveClick = {
+            profileViewModel.updateStoreDetail(
+                name = name,
+                description = description,
+                phone = phone,
+                operationalDay = openingDay,
+                operationalHour = openingHour
+            )
         }
     )
 }
@@ -211,6 +244,7 @@ private fun StoreProfileDetail(
     isShowSheet: Boolean,
     onShowSheet: (Boolean) -> Unit,
     onDismiss: () -> Unit,
+    onSaveClick: () -> Unit,
     onContentTypeChange: (ContentType) -> Unit,
     onUpdateTypeChange: (UpdateType) -> Unit,
     ) {
@@ -386,7 +420,7 @@ private fun StoreProfileDetail(
                         text = "Save",
                         onClick = {
                             onUpdateTypeChange(UpdateType.StoreDetail)
-                           // update detail here
+                            onSaveClick()
                         },
                         isAvailable = isButtonAvailable
                     )

@@ -5,6 +5,7 @@ import com.course.fleupart.data.model.remote.PersonalizeResponse
 import com.course.fleupart.data.model.remote.StoreAddressResponse
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.UpdateStoreAddressRequest
+import com.course.fleupart.data.model.remote.UpdateStoreDetailRequest
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -23,6 +24,9 @@ interface ProfileService {
 
     @PUT("api/store/address")
     suspend fun updateStoreAddress(@Body request: UpdateStoreAddressRequest): Response<ApiUpdateResponse>
+
+    @PUT("api/store")
+    suspend fun updateStoreDetail(@Body request: UpdateStoreDetailRequest): Response<ApiUpdateResponse>
 
     @Multipart
     @PUT("api/store/logo")

@@ -215,6 +215,29 @@ data class UpdateStoreAddressRequest(
 	val longitude: Any? = null
 )
 
+////////////////////////////
+///////////////////////////
+
+data class UpdateStoreDetailRequest(
+
+	@field:SerializedName("operational_day")
+	val operationalDay: String? = null,
+
+	@field:SerializedName("phone")
+	val phone: String? = null,
+
+	@field:SerializedName("name")
+	val name: String? = null,
+
+	@field:SerializedName("operational_hour")
+	val operationalHour: String? = null,
+
+	@field:SerializedName("description")
+	val description: String? = null
+)
+
+
+
 //////////////////////////
 /////////////////////////
 

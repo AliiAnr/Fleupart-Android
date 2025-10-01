@@ -15,6 +15,7 @@ import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.StoreLogoRequest
 import com.course.fleupart.data.model.remote.UpdateStoreAddressRequest
+import com.course.fleupart.data.model.remote.UpdateStoreDetailRequest
 import com.course.fleupart.data.repository.ProfileRepository
 import com.course.fleupart.data.resource.Resource
 import com.course.fleupart.ui.common.ImageCompressor
@@ -48,7 +49,9 @@ class ProfileViewModel(
     val updateStoreAddressState: StateFlow<ResultResponse<ApiUpdateResponse>> =
         _updateStoreAddressState.asStateFlow()
 
-//    private val
+    private val _updateStoreDetailState: MutableStateFlow<ResultResponse<ApiUpdateResponse>> =
+        MutableStateFlow(ResultResponse.None)
+    val updateStoreDetailState: StateFlow<ResultResponse<ApiUpdateResponse>> = _updateStoreDetailState.asStateFlow()
 
     private val _dataInitialized = MutableStateFlow(false)
     val dataInitialized: StateFlow<Boolean> = _dataInitialized
@@ -205,9 +208,9 @@ class ProfileViewModel(
                         )
                     ).collect { result ->
                         _updateImageState.value = result
-                        if (result is ResultResponse.Success) {
-                            getStoreDetail()
-                        }
+//                        if (result is ResultResponse.Success) {
+//                            getStoreDetail()
+//                        }
                     }
                 } else {
                     _updateImageState.value = ResultResponse.Error("Image compression failed")
@@ -248,6 +251,34 @@ class ProfileViewModel(
                 }
             } catch (e: Exception) {
                 _storeAddressState.value = ResultResponse.Error("Exception: ${e.message}")
+            }
+        }
+    }
+
+    fun updateStoreDetail(
+        name: String,
+        description: String,
+        phone: String,
+        operationalHour: String,
+        operationalDay: String
+    ) {
+        viewModelScope.launch {
+            try {
+                _updateStoreDetailState.value = ResultResponse.Loading
+                profileRepository.updateStoreDetail(
+                    requestBody = UpdateStoreDetailRequest(
+                        name = name,
+                        description = description,
+                        phone = phone,
+                        operationalHour = operationalHour,
+                        operationalDay = operationalDay
+                    )
+                ).collect { result ->
+                    _updateStoreDetailState.value = result
+                }
+            } catch (e: Exception) {
+                _updateStoreDetailState.value =
+                    ResultResponse.Error("Failed to update store detail: ${e.message}")
             }
         }
     }
@@ -308,6 +339,10 @@ class ProfileViewModel(
 
     fun resetImageUpdateState() {
         _updateImageState.value = ResultResponse.None
+    }
+
+    fun resetUpdateStoreDetailState() {
+        _updateStoreDetailState.value = ResultResponse.None
     }
 
     private fun String.isDigitsOnly(): Boolean = this.all(Char::isDigit)
