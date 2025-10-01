@@ -21,6 +21,12 @@ data class StoreLogoRequest(
 	val picture: File
 )
 
+data class StoreBannerRequest(
+
+	@field:SerializedName("file")
+	val picture: File
+)
+
 data class StoreDetailResponse(
 
 	@field:SerializedName("data")

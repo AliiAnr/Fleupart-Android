@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.course.fleupart.data.model.remote.ApiUpdateResponse
 import com.course.fleupart.data.model.remote.StoreAddressData
 import com.course.fleupart.data.model.remote.StoreAddressResponse
+import com.course.fleupart.data.model.remote.StoreBannerRequest
 import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.StoreLogoRequest
@@ -202,15 +203,12 @@ class ProfileViewModel(
                 val compressionSuccess = ImageCompressor.compressImage(Resource.appContext, logoUri, logoTempFile)
 
                 if(compressionSuccess) {
-                    profileRepository.inputStoreLogo(
+                    profileRepository.uploadStoreLogo(
                         storeLogo = StoreLogoRequest(
                             picture = logoTempFile
                         )
                     ).collect { result ->
                         _updateImageState.value = result
-//                        if (result is ResultResponse.Success) {
-//                            getStoreDetail()
-//                        }
                     }
                 } else {
                     _updateImageState.value = ResultResponse.Error("Image compression failed")
@@ -219,6 +217,40 @@ class ProfileViewModel(
                 _updateImageState.value = ResultResponse.Error("Failed to upload logo: ${e.message}")
             } finally {
                 logoTempFile?.delete()
+            }
+        }
+    }
+
+    fun uploadStoreBanner(bannerUri: Uri) {
+        viewModelScope.launch {
+            var bannerTempFile: File? = null
+
+            try {
+                _updateImageState.value = ResultResponse.Loading
+
+                bannerTempFile = File.createTempFile(
+                    "temp_storebanner_${System.currentTimeMillis()}",
+                    ".jpeg",
+                    Resource.appContext.cacheDir
+                )
+
+                val compressionSuccess = ImageCompressor.compressImage(Resource.appContext, bannerUri, bannerTempFile)
+
+                if(compressionSuccess) {
+                    profileRepository.uploadStoreBanner(
+                        storeBanner = StoreBannerRequest(
+                            picture = bannerTempFile
+                        )
+                    ).collect { result ->
+                        _updateImageState.value = result
+                    }
+                } else {
+                    _updateImageState.value = ResultResponse.Error("Image compression failed")
+                }
+            } catch (e: Exception) {
+                _updateImageState.value = ResultResponse.Error("Failed to upload logo: ${e.message}")
+            } finally {
+                bannerTempFile?.delete()
             }
         }
     }

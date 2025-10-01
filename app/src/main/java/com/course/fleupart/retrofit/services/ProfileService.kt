@@ -1,7 +1,6 @@
 package com.course.fleupart.retrofit.services
 
 import com.course.fleupart.data.model.remote.ApiUpdateResponse
-import com.course.fleupart.data.model.remote.PersonalizeResponse
 import com.course.fleupart.data.model.remote.StoreAddressResponse
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.UpdateStoreAddressRequest
@@ -30,7 +29,13 @@ interface ProfileService {
 
     @Multipart
     @PUT("api/store/logo")
-    suspend fun inputStoreLogo(
+    suspend fun updateStoreLogo(
+        @Part file: MultipartBody.Part
+    ): Response<ApiUpdateResponse>
+
+    @Multipart
+    @PUT("api/store/picture")
+    suspend fun updateStoreBanner(
         @Part file: MultipartBody.Part
     ): Response<ApiUpdateResponse>
 

@@ -3,6 +3,7 @@ package com.course.fleupart.data.repository
 import android.content.Context
 import com.course.fleupart.data.model.remote.ApiUpdateResponse
 import com.course.fleupart.data.model.remote.StoreAddressResponse
+import com.course.fleupart.data.model.remote.StoreBannerRequest
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.StoreLogoRequest
 import com.course.fleupart.data.model.remote.UpdateStoreAddressRequest
@@ -90,7 +91,7 @@ class ProfileRepository private constructor(
             }
         }.flowOn(Dispatchers.IO)
 
-    fun inputStoreLogo(storeLogo: StoreLogoRequest): Flow<ResultResponse<ApiUpdateResponse>> =
+    fun uploadStoreLogo(storeLogo: StoreLogoRequest): Flow<ResultResponse<ApiUpdateResponse>> =
         flow {
             emit(ResultResponse.Loading)
 
@@ -101,7 +102,31 @@ class ProfileRepository private constructor(
                     storeLogo.picture.asRequestBody("image/jpeg".toMediaTypeOrNull())
                 )
 
-                val response = profileService.inputStoreLogo(file = filePart)
+                val response = profileService.updateStoreLogo(file = filePart)
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        emit(ResultResponse.Success(it))
+                    } ?: emit(ResultResponse.Error("Empty response body"))
+                } else {
+                    emit(ResultResponse.Error("Error: ${response.code()} ${response.message()}"))
+                }
+            } catch (e: Exception) {
+                emit(ResultResponse.Error("Exception: ${e.message}"))
+            }
+        }.flowOn(Dispatchers.IO)
+
+    fun uploadStoreBanner(storeBanner: StoreBannerRequest): Flow<ResultResponse<ApiUpdateResponse>> =
+        flow {
+            emit(ResultResponse.Loading)
+
+            try {
+                val filePart = MultipartBody.Part.createFormData(
+                    "file",
+                    storeBanner.picture.name,
+                    storeBanner.picture.asRequestBody("image/jpeg".toMediaTypeOrNull())
+                )
+
+                val response = profileService.updateStoreBanner(file = filePart)
                 if (response.isSuccessful) {
                     response.body()?.let {
                         emit(ResultResponse.Success(it))

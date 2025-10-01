@@ -54,20 +54,6 @@ import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.primaryLight
 
-
-// Store Header Photo
-//== Section 1
-// Store Name
-// Store Description
-// Store Address
-// Store Phone Number
-
-//Section 2
-// Title: Opening Hours
-// Opening Day Monday - Friday
-// Opening Hour 08.00 - 20.00
-
-
 @Composable
 fun StoreProfileDetail(
     modifier
@@ -455,13 +441,6 @@ private fun StoreProfileDetail(
 
                         contentType = contentType,
                         onSave = {
-                            // TODO: Save to server here
-                            // For now, just update the URL with selected image
-//                            selectedImageUri?.let {
-//                                // In real implementation, upload to server and get new URL
-//                                storeImageUrl = it.toString() // This is temporary
-//                            }
-//                            isShowSheet = false
                             onShowSheet(false)
                             if (contentType == ContentType.Logo) {
                                 onUpdateTypeChange(UpdateType.StoreLogo)
@@ -469,14 +448,13 @@ private fun StoreProfileDetail(
                                     profileViewModel.uploadStoreLogo(it)
                                 }
                             } else {
-//                                onUpdateTypeChange(UpdateType.StoreBanner)
-//                                selectetBannerUri?.let {
-//                                    profileViewModel.uploadStoreBanner(it)
-//                                }
+                                onUpdateTypeChange(UpdateType.StoreBanner)
+                                selectetBannerUri?.let {
+                                    profileViewModel.uploadStoreBanner(it)
+                                }
                             }
                         },
                         onCancel = {
-                            // Reset selected image
                             if(contentType == ContentType.Logo) {
                                 selectetLogoUri = null
                             } else {
@@ -532,13 +510,6 @@ private fun StoreProfileDetail(
         }
     }
 }
-
-// Store Header Photo
-//== Section 1
-// Store Name
-// Store Description
-// Store Address
-// Store Phone Number
 
 @Composable
 private fun DetailContent(
@@ -679,7 +650,7 @@ private fun EditItem(
     isError: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     errorMessage: String = "",
-    isLongText: Boolean = false, // Tambahkan parameter ini
+    isLongText: Boolean = false,
     onChage: (String) -> Unit
 ) {
     Column(
@@ -704,7 +675,7 @@ private fun EditItem(
             borderColor = borderColor,
             keyboardType = keyboardType,
             height = height,
-            isLongText = isLongText // Tambahkan parameter ini
+            isLongText = isLongText
         )
     }
 }
@@ -741,11 +712,3 @@ private fun TimeContent(
         )
     }
 }
-
-
-// Store Header Photo
-//== Section 1
-// Store Name
-// Store Description
-// Store Address
-// Store Phone Number
