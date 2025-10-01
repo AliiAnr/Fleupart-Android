@@ -38,6 +38,8 @@ object DetailDestinations {
     const val UPDATE_ADDRESS_ROUTE = "updateAddress"
 
     const val UPDATE_DETAIL_ROUTE = "updateDetail"
+
+    const val STORE_VIEW_ROUTE = "storeView"
 }
 
 object QueryKeys {
@@ -98,10 +100,16 @@ class FleupartNavController(
 
     fun navigateToProfileDetail(to: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
-            if (to == "Address") {
-                navController.navigate(DetailDestinations.UPDATE_ADDRESS_ROUTE)
-            } else if (to == "Edit Store Profile") {
-                navController.navigate(DetailDestinations.UPDATE_DETAIL_ROUTE)
+            when (to) {
+                "Address" -> {
+                    navController.navigate(DetailDestinations.UPDATE_ADDRESS_ROUTE)
+                }
+                "Edit Store Profile" -> {
+                    navController.navigate(DetailDestinations.UPDATE_DETAIL_ROUTE)
+                }
+                "storeView" -> {
+                    navController.navigate(DetailDestinations.STORE_VIEW_ROUTE)
+                }
             }
         }
     }

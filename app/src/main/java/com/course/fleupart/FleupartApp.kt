@@ -31,12 +31,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
-import com.course.fleupart.data.model.remote.StoreAddress
 import com.course.fleupart.data.resource.Resource
 import com.course.fleupart.di.factory.LoginViewModelFactory
 import com.course.fleupart.di.factory.OnBoardingViewModelFactory
 import com.course.fleupart.di.factory.OnDataBoardingViewModelFactory
-import com.course.fleupart.di.factory.ProductViewModelFactory
 import com.course.fleupart.di.factory.ProfileViewModelFactory
 import com.course.fleupart.di.factory.RegisterViewModelFactory
 import com.course.fleupart.ui.components.FleupartBottomBar
@@ -55,6 +53,7 @@ import com.course.fleupart.ui.screen.authentication.username.UsernameScreen
 import com.course.fleupart.ui.screen.authentication.welcome.WelcomeScreen
 import com.course.fleupart.ui.screen.dashboard.detail.Profile.StoreAddressDetail
 import com.course.fleupart.ui.screen.dashboard.detail.Profile.StoreProfileDetail
+import com.course.fleupart.ui.screen.dashboard.detail.Profile.StoreView
 import com.course.fleupart.ui.screen.dashboard.detail.finance.AddBankAccount
 import com.course.fleupart.ui.screen.dashboard.detail.finance.BalanceValue
 import com.course.fleupart.ui.screen.dashboard.detail.finance.SalesReport
@@ -323,6 +322,15 @@ fun FleupartApp() {
                         route = DetailDestinations.UPDATE_DETAIL_ROUTE
                     ) { backStackEntry ->
                         StoreProfileDetail(
+                            onBackClick = fleupartNavController::upPress,
+                            profileViewModel = profileViewModel
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.STORE_VIEW_ROUTE
+                    ) { backStackEntry ->
+                        StoreView(
                             onBackClick = fleupartNavController::upPress,
                             profileViewModel = profileViewModel
                         )

@@ -18,10 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -54,6 +52,7 @@ import com.course.fleupart.ui.components.AccountList
 import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.FakeCategory
+import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base40
 import com.course.fleupart.ui.theme.primaryLight
@@ -163,7 +162,8 @@ private fun Profile(
                     item {
                         Spacer(modifier = Modifier.height(4.dp))
                         Header(
-                            storeData = storeDetailData
+                            storeData = storeDetailData,
+                            onProfileDetailClick = onProfileDetailClick
                         )
                     }
 
@@ -201,7 +201,8 @@ private fun Profile(
 @Composable
 private fun Header(
     modifier: Modifier = Modifier,
-    storeData: StoreDetailData
+    storeData: StoreDetailData,
+    onProfileDetailClick: (String) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -224,7 +225,7 @@ private fun Header(
                     contentDescription = "Store Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(70.dp)
+                        .size(90.dp)
                         .clip(CircleShape)
                         .background(Color(0xFFC8A2C8))
                 )
@@ -241,7 +242,7 @@ private fun Header(
                     placeholder = painterResource(id = R.drawable.placeholder),
                     error = painterResource(id = R.drawable.placeholder),
                     modifier = Modifier
-                        .size(70.dp)
+                        .size(90.dp)
                         .clip(CircleShape)
                 )
             }
@@ -256,7 +257,7 @@ private fun Header(
             CustomButton(
                 text = "Visit Store",
                 onClick = {
-
+                    onProfileDetailClick(DetailDestinations.STORE_VIEW_ROUTE)
                 },
                 shape = RoundedCornerShape(15.dp),
                 defaultWidth = 120.dp,

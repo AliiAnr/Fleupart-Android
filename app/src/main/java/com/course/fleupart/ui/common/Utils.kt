@@ -60,6 +60,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import co.yml.charts.common.extensions.isNotNull
+import com.course.fleupart.data.model.remote.StoreAddress
 import com.course.fleupart.ui.components.getUCropOptions
 import com.course.fleupart.ui.theme.primaryLight
 import com.yalantis.ucrop.UCrop
@@ -164,6 +166,37 @@ fun ChangeStatusBarColor(
         }
     }
 }
+
+fun StoreAddress.toFormattedAddress(): String {
+    val addressParts = mutableListOf<String>()
+
+    if (!road.isNullOrBlank()) {
+        addressParts.add(road)
+    }
+
+    if (!detail.isNullOrBlank()) {
+        addressParts.add(detail)
+    }
+
+    if (!district.isNullOrBlank()) {
+        addressParts.add("Kec. $district")
+    }
+
+    if (!city.isNullOrBlank()) {
+        addressParts.add(city)
+    }
+
+    if (!province.isNullOrBlank()) {
+        addressParts.add(province)
+    }
+
+    if (!postcode.isNullOrBlank()) {
+        addressParts.add(postcode)
+    }
+
+    return addressParts.joinToString(", ")
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
