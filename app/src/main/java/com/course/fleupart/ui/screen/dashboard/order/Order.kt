@@ -199,8 +199,8 @@ private fun OnPickupSection(
     ) {
         EmptyProduct(
             icon = R.drawable.empty_pickup_order,
-            title = "You currently don’t have any product on delivery",
-            description = "Start to promote your product!"
+            title = "You don't have any orders that can be picked up yet",
+            description = "Start to processing your order!"
         )
     }
 }
