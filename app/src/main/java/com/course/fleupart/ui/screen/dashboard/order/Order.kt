@@ -69,7 +69,7 @@ private fun Order(
                 )
 
                 var selectedTab by remember { mutableIntStateOf(0) }
-                val tabs = listOf("New Order", "On Delivery", "Completed")
+                val tabs = listOf("New Order", "Process", "Pickup", "Delivery", "Completed")
 
                 Column(
                     modifier = Modifier.padding(top = 8.dp)
@@ -84,8 +84,12 @@ private fun Order(
                         0 ->
                             NewOrderSection()
                         1 ->
-                            OnDeliverySection()
+                            OnProcessSection()
                         2 ->
+                            OnPickupSection()
+                        3 ->
+                            OnDeliverySection()
+                        4 ->
                             CompletedSection()
                     }
                 }
@@ -198,7 +202,7 @@ private fun OnPickupSection(
             .padding(start = 20.dp, end = 20.dp, top = 20.dp)
     ) {
         EmptyProduct(
-            icon = R.drawable.empty_pickup_order,
+            icon = R.drawable.empty_product,
             title = "You don't have any orders that can be picked up yet",
             description = "Start to processing your order!"
         )
