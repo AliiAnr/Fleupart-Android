@@ -152,6 +152,24 @@ private fun NewOrderSection(
 }
 
 @Composable
+private fun OnProcessSection(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+    ) {
+        EmptyProduct(
+            icon = R.drawable.empty_process_order,
+            title = "You don’t have any processed order yet",
+            description = "Start to processing your order!"
+        )
+    }
+}
+
+@Composable
 private fun OnDeliverySection(
     modifier: Modifier = Modifier
 ) {
@@ -163,6 +181,24 @@ private fun OnDeliverySection(
     ) {
         EmptyProduct(
             icon = R.drawable.empty_on_order,
+            title = "You currently don’t have any product on delivery",
+            description = "Start to promote your product!"
+        )
+    }
+}
+
+@Composable
+private fun OnPickupSection(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+    ) {
+        EmptyProduct(
+            icon = R.drawable.empty_pickup_order,
             title = "You currently don’t have any product on delivery",
             description = "Start to promote your product!"
         )
