@@ -1,5 +1,6 @@
 package com.course.fleupart.ui.screen.dashboard.order
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,7 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.course.fleupart.R
+import com.course.fleupart.data.model.remote.OrderDataItem
+import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.screen.dashboard.product.EmptyProduct
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
@@ -34,19 +39,73 @@ import com.course.fleupart.ui.theme.primaryLight
 
 @Composable
 fun Order(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    orderViewModel: OrderViewModel
 ) {
 
-    Order(
+    val filteredOrdersState by orderViewModel.filteredOrdersState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+    val newOrders by orderViewModel.newOrders.collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+    val processOrders by orderViewModel.processOrders.collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+    val pickupOrders by orderViewModel.pickupOrders.collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+    val deliveryOrders by orderViewModel.deliveryOrders.collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+    val completedOrders by orderViewModel.completedOrders.collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+
+    var showCircularProgress by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+//        orderViewModel.getStoreOrders()
+        orderViewModel.loadInitialData()
+    }
+
+    LaunchedEffect(filteredOrdersState) {
+        when (filteredOrdersState) {
+            is ResultResponse.Success -> {
+                showCircularProgress = false
+                Log.d("ORDER_SCREEN", "Orders loaded successfully")
+            }
+            is ResultResponse.Loading -> {
+                showCircularProgress = true
+            }
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+                Log.e("ORDER_SCREEN", "Error: ${(filteredOrdersState as ResultResponse.Error).error}")
+            }
+            else -> {}
+        }
+    }
+
+    OrderContent(
         modifier = modifier,
-        id = 0
+        newOrders = newOrders,
+        processOrders = processOrders,
+        pickupOrders = pickupOrders,
+        deliveryOrders = deliveryOrders,
+        completedOrders = completedOrders,
+        showLoading = showCircularProgress
     )
 }
 
 @Composable
-private fun Order(
+private fun OrderContent(
     modifier: Modifier = Modifier,
-    id: Int = 0
+    newOrders: List<OrderDataItem>,
+    processOrders: List<OrderDataItem>,
+    pickupOrders: List<OrderDataItem>,
+    deliveryOrders: List<OrderDataItem>,
+    completedOrders: List<OrderDataItem>,
+    showLoading: Boolean
 ) {
 
     FleupartSurface(
@@ -82,15 +141,15 @@ private fun Order(
 
                     when (selectedTab) {
                         0 ->
-                            NewOrderSection()
+                            NewOrderSection(newOrders = newOrders, isLoading = showLoading)
                         1 ->
-                            OnProcessSection()
+                            OnProcessSection(processOrders = processOrders, isLoading = showLoading)
                         2 ->
-                            OnPickupSection()
+                            OnPickupSection(pickupOrders = pickupOrders, isLoading = showLoading)
                         3 ->
-                            OnDeliverySection()
+                            OnDeliverySection(deliveryOrders = deliveryOrders, isLoading = showLoading)
                         4 ->
-                            CompletedSection()
+                            CompletedSection(completedOrders = completedOrders, isLoading = showLoading)
                     }
                 }
             }
@@ -139,7 +198,9 @@ fun OrderStatusTabRow(
 
 @Composable
 private fun NewOrderSection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    newOrders: List<OrderDataItem>,
+    isLoading: Boolean
 ) {
     Box(
         modifier = modifier
@@ -157,7 +218,9 @@ private fun NewOrderSection(
 
 @Composable
 private fun OnProcessSection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    processOrders: List<OrderDataItem>,
+    isLoading: Boolean
 ) {
     Box(
         modifier = modifier
@@ -175,7 +238,9 @@ private fun OnProcessSection(
 
 @Composable
 private fun OnDeliverySection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    deliveryOrders: List<OrderDataItem>,
+    isLoading: Boolean
 ) {
     Box(
         modifier = modifier
@@ -193,7 +258,9 @@ private fun OnDeliverySection(
 
 @Composable
 private fun OnPickupSection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    pickupOrders: List<OrderDataItem>,
+    isLoading: Boolean
 ) {
     Box(
         modifier = modifier
@@ -211,7 +278,9 @@ private fun OnPickupSection(
 
 @Composable
 private fun CompletedSection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    completedOrders: List<OrderDataItem>,
+    isLoading: Boolean
 ) {
     Box(
         modifier = modifier

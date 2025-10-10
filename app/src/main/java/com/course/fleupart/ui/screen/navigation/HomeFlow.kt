@@ -20,6 +20,7 @@ import com.course.fleupart.ui.components.HomeSections
 import com.course.fleupart.ui.screen.dashboard.finance.Finance
 import com.course.fleupart.ui.screen.dashboard.home.Home
 import com.course.fleupart.ui.screen.dashboard.order.Order
+import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
 import com.course.fleupart.ui.screen.dashboard.product.Product
 import com.course.fleupart.ui.screen.dashboard.profile.Profile
 import com.course.fleupart.ui.screen.dashboard.profile.ProfileViewModel
@@ -84,6 +85,7 @@ fun NavGraphBuilder.addHomeGraph(
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
+    orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -108,7 +110,8 @@ fun NavGraphBuilder.addHomeGraph(
     }
     composable(HomeSections.Order.route) {
         Order(
-            modifier = modifier
+            modifier = modifier,
+            orderViewModel = orderViewModel
         )
     }
     composable(HomeSections.Profile.route) { from ->

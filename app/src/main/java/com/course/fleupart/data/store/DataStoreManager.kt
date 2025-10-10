@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.course.fleupart.data.model.remote.Detail
+import com.course.fleupart.data.model.remote.StoreDetailData
 //import com.course.fleura.data.model.remote.AddressItem
 //import com.course.fleura.data.model.remote.Detail
 import com.google.gson.Gson
@@ -13,6 +14,8 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlin.text.get
+import kotlin.text.set
 
 private val Context.dataStore by preferencesDataStore(name = "user_prefs")
 
@@ -79,6 +82,28 @@ class DataStoreManager(private val context: Context) {
         return detail?.isProfileComplete() ?: false
     }
 
+    suspend fun saveStoreDetail(storeDetail: StoreDetailData) {
+        val gson = Gson()
+        val storeDetailJson = gson.toJson(storeDetail)
+        context.dataStore.edit { preferences ->
+            preferences[STORE_DETAIL_KEY] = storeDetailJson
+        }
+    }
+
+    suspend fun getStoreDetail(): StoreDetailData? {
+        val preferences = context.dataStore.data.first()
+        val storeDetailJson = preferences[STORE_DETAIL_KEY] ?: return null
+        return Gson().fromJson(storeDetailJson, StoreDetailData::class.java)
+    }
+
+    val storeDetailFlow: Flow<StoreDetailData?> = context.dataStore.data
+        .map { preferences ->
+            preferences[STORE_DETAIL_KEY]?.let { json ->
+                Gson().fromJson(json, StoreDetailData::class.java)
+            }
+        }
+
+
 //    val addressListFlow: Flow<List<AddressItem>> = context.dataStore.data
 //        .map { prefs ->
 //            prefs[ADDRESSES_KEY]?.let { json ->
@@ -115,6 +140,8 @@ class DataStoreManager(private val context: Context) {
         private val USER_TOKEN_KEY = stringPreferencesKey("user_token")
         private val USER_DATA_KEY = stringPreferencesKey("user_data")
         private val PERSONALIZED_KEY = booleanPreferencesKey("personalized_filled")
+
+        private val STORE_DETAIL_KEY = stringPreferencesKey("store_detail")
         private val ADDRESSES_KEY = stringPreferencesKey("address_list")
     }
 }

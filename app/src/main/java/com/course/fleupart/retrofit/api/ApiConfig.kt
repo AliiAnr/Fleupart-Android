@@ -5,8 +5,10 @@ import com.course.fleupart.BuildConfig
 import com.course.fleupart.retrofit.AuthInterceptor
 import com.course.fleupart.retrofit.services.LoginService
 import com.course.fleupart.retrofit.services.NotificationService
+import com.course.fleupart.retrofit.services.OrderService
 import com.course.fleupart.retrofit.services.OtpService
 import com.course.fleupart.retrofit.services.PersonalizeService
+import com.course.fleupart.retrofit.services.ProfileService
 import com.course.fleupart.retrofit.services.RegisterService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -62,7 +64,11 @@ object ApiConfig {
         return provideRetrofit(context).create(LoginService::class.java)
     }
 
-    fun getProfileService(context: Context) : com.course.fleupart.retrofit.services.ProfileService {
-        return provideRetrofit(context).create(com.course.fleupart.retrofit.services.ProfileService::class.java)
+    fun getOrderService(context: Context) : OrderService {
+        return provideRetrofit(context).create(OrderService::class.java)
+    }
+
+    fun getProfileService(context: Context) : ProfileService {
+        return provideRetrofit(context).create(ProfileService::class.java)
     }
 }

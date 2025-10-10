@@ -1,6 +1,7 @@
 package com.course.fleupart.data.repository
 
 import android.content.Context
+import co.yml.charts.common.extensions.isNotNull
 import com.course.fleupart.data.model.remote.ApiUpdateResponse
 import com.course.fleupart.data.model.remote.StoreAddressResponse
 import com.course.fleupart.data.model.remote.StoreBannerRequest
@@ -8,6 +9,7 @@ import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.StoreLogoRequest
 import com.course.fleupart.data.model.remote.UpdateStoreAddressRequest
 import com.course.fleupart.data.model.remote.UpdateStoreDetailRequest
+import com.course.fleupart.data.store.DataStoreManager
 import com.course.fleupart.retrofit.api.ApiConfig
 import com.course.fleupart.ui.common.ResultResponse
 import kotlinx.coroutines.Dispatchers
@@ -24,12 +26,17 @@ class ProfileRepository private constructor(
 
     private val profileService = ApiConfig.getProfileService(context)
 
+    private val dataStoreManager = DataStoreManager(context)
+
     fun getStoreDetail(): Flow<ResultResponse<StoreDetailResponse>> = flow {
         emit(ResultResponse.Loading)
         try {
             val response = profileService.getStoreDetail()
             if (response.isSuccessful) {
                 response.body()?.let {
+                    it.data?.let { storeDetail ->
+                        dataStoreManager.saveStoreDetail(storeDetail)
+                    }
                     emit(ResultResponse.Success(it))
                 } ?: emit(ResultResponse.Error("Empty response body"))
             } else {

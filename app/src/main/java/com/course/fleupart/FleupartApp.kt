@@ -35,6 +35,7 @@ import com.course.fleupart.data.resource.Resource
 import com.course.fleupart.di.factory.LoginViewModelFactory
 import com.course.fleupart.di.factory.OnBoardingViewModelFactory
 import com.course.fleupart.di.factory.OnDataBoardingViewModelFactory
+import com.course.fleupart.di.factory.OrderViewModelFactory
 import com.course.fleupart.di.factory.ProfileViewModelFactory
 import com.course.fleupart.di.factory.RegisterViewModelFactory
 import com.course.fleupart.ui.components.FleupartBottomBar
@@ -61,6 +62,7 @@ import com.course.fleupart.ui.screen.dashboard.detail.finance.WithdrawBalance
 import com.course.fleupart.ui.screen.dashboard.detail.home.DetailTest
 import com.course.fleupart.ui.screen.dashboard.detail.product.AddProduct
 import com.course.fleupart.ui.screen.dashboard.detail.product.DetailProduct
+import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
 import com.course.fleupart.ui.screen.dashboard.profile.ProfileViewModel
 import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartScaffold
@@ -108,6 +110,12 @@ fun FleupartApp() {
         factory = StartupNavigationViewModelFactory(
             onBoardingViewModel,
             loginViewModel
+        )
+    )
+
+    val orderViewModel: OrderViewModel = viewModel(
+        factory = OrderViewModelFactory.getInstance(
+            Resource.appContext
         )
     )
 
@@ -276,6 +284,7 @@ fun FleupartApp() {
                             onSnackSelected = fleupartNavController::navigateToSnackDetail,
                             onProductDetail = fleupartNavController::navigateToProductDetail,
                             onProfileDetail = fleupartNavController::navigateToProfileDetail,
+                            orderViewModel = orderViewModel,
                             profileViewModel = profileViewModel
                         )
                     }
@@ -376,6 +385,7 @@ fun MainContainer(
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
+    orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel
 ) {
     val fleuraScaffoldState = rememberFleupartScaffoldState()
@@ -426,6 +436,7 @@ fun MainContainer(
                 onSnackSelected = onSnackSelected,
                 onProductDetail = onProductDetail,
                 onProfileDetail = onProfileDetail,
+                orderViewModel,
                 profileViewModel = profileViewModel,
                 modifier = Modifier
                     .padding(padding)

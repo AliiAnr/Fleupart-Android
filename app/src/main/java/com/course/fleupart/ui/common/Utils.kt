@@ -346,3 +346,15 @@ fun cleanupTempFiles(context: Context) {
 }
 
 
+fun formatCurrencyFromString(amount: String): String {
+    return try {
+        val amountDouble = amount.toDoubleOrNull() ?: 0.0
+        val amountLong = amountDouble.toLong()
+
+        val formatter = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        formatter.format(amountLong).replace(",00", "")
+    } catch (e: Exception) {
+        "Rp0"
+    }
+}
+
