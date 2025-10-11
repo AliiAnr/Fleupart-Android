@@ -2,6 +2,10 @@ package com.course.fleupart.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+
+val err = Color(0xFFFF4646)
+val tert = Color(0xFF8BC34A)
+
 val base20 = Color(0xFFF5F5F5)
 val base100 = Color(0xFF757575)
 val base500 = Color(0xFF3B3B3B)

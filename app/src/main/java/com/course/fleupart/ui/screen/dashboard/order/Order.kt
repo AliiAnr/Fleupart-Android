@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
@@ -30,7 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.course.fleupart.R
 import com.course.fleupart.data.model.remote.OrderDataItem
+import com.course.fleupart.ui.common.OrderDummyData
 import com.course.fleupart.ui.common.ResultResponse
+import com.course.fleupart.ui.components.CreatedOrderSummary
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.screen.dashboard.product.EmptyProduct
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
@@ -200,19 +205,40 @@ fun OrderStatusTabRow(
 private fun NewOrderSection(
     modifier: Modifier = Modifier,
     newOrders: List<OrderDataItem>,
-    isLoading: Boolean
+    isLoading: Boolean,
+    useDummyData: Boolean = true
 ) {
+// detailnya belum di sesuaikan
+    val ordersToShow = if (useDummyData) OrderDummyData.newOrdersDummy else newOrders
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+            .background(base20)
     ) {
-        EmptyProduct(
-            icon = R.drawable.empty_new_order,
-            title = "You don’t have any new order yet",
-            description = "Start to promote your product!"
-        )
+        if (isLoading) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                CircularProgressIndicator(color = primaryLight)
+            }
+        } else if (ordersToShow.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(ordersToShow) { orderItem ->
+                    CreatedOrderSummary(orderItem, {})
+                }
+            }
+        } else {
+            EmptyProduct(
+                icon = R.drawable.empty_new_order,
+                title = "You don’t have any new order yet",
+                description = "Start to promote your product!"
+            )
+        }
     }
 }
 
@@ -225,14 +251,24 @@ private fun OnProcessSection(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
     ) {
+        if (isLoading) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                CircularProgressIndicator(color = primaryLight)
+            }
+        } else if (processOrders.isNotEmpty()) {
+            // Tampilkan daftar newOrders di sini
+        } else {
         EmptyProduct(
             icon = R.drawable.empty_process_order,
             title = "You don’t have any processed order yet",
             description = "Start to processing your order!"
         )
+        }
     }
 }
 
@@ -245,14 +281,24 @@ private fun OnDeliverySection(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
     ) {
-        EmptyProduct(
-            icon = R.drawable.empty_on_order,
-            title = "You currently don’t have any product on delivery",
-            description = "Start to promote your product!"
-        )
+        if (isLoading) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                CircularProgressIndicator(color = primaryLight)
+            }
+        } else if (deliveryOrders.isNotEmpty()) {
+            // Tampilkan daftar newOrders di sini
+        } else {
+            EmptyProduct(
+                icon = R.drawable.empty_on_order,
+                title = "You currently don’t have any product on delivery",
+                description = "Start to promote your product!"
+            )
+        }
     }
 }
 
@@ -265,14 +311,24 @@ private fun OnPickupSection(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
     ) {
-        EmptyProduct(
-            icon = R.drawable.empty_product,
-            title = "You don't have any orders that can be picked up yet",
-            description = "Start to processing your order!"
-        )
+        if (isLoading) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                CircularProgressIndicator(color = primaryLight)
+            }
+        } else if (pickupOrders.isNotEmpty()) {
+            // Tampilkan daftar newOrders di sini
+        } else {
+            EmptyProduct(
+                icon = R.drawable.empty_product,
+                title = "You don't have any orders that can be picked up yet",
+                description = "Start to processing your order!"
+            )
+        }
     }
 }
 
@@ -285,13 +341,23 @@ private fun CompletedSection(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
     ) {
-        EmptyProduct(
-            icon = R.drawable.empty_completed_order,
-            title = "You don’t have any completed order yet",
-            description = "Start to promote your product!"
-        )
+        if (isLoading) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                CircularProgressIndicator(color = primaryLight)
+            }
+        } else if (completedOrders.isNotEmpty()) {
+            // Tampilkan daftar newOrders di sini
+        } else {
+            EmptyProduct(
+                icon = R.drawable.empty_completed_order,
+                title = "You don’t have any completed order yet",
+                description = "Start to promote your product!"
+            )
+        }
     }
 }

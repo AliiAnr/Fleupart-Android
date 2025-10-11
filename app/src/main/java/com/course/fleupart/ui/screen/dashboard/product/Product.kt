@@ -328,8 +328,7 @@ fun EmptyProduct(
 ) {
     Box(
         modifier = modifier
-            .fillMaxSize()
-            .background(Color.White),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(

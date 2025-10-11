@@ -65,6 +65,9 @@ import com.course.fleupart.data.model.remote.StoreAddress
 import com.course.fleupart.ui.components.getUCropOptions
 import com.course.fleupart.ui.theme.primaryLight
 import com.yalantis.ucrop.UCrop
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import java.io.File
 import java.text.NumberFormat
 import java.util.Calendar
@@ -345,6 +348,16 @@ fun cleanupTempFiles(context: Context) {
     cropLauncher.launch(uCrop.getIntent(context))
 }
 
+fun extractOrderId(input: String): String {
+    val digits = input.filter { it.isDigit() }
+    return digits.toList().sorted().take(4).joinToString("")
+}
+
+fun parseDateTime(dateTimeString: String): Pair<kotlinx.datetime.LocalDate, kotlinx.datetime.LocalTime> {
+    val instant = Instant.parse(dateTimeString)
+    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+    return localDateTime.date to localDateTime.time
+}
 
 fun formatCurrencyFromString(amount: String): String {
     return try {
