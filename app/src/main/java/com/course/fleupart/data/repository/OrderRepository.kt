@@ -2,9 +2,11 @@ package com.course.fleupart.data.repository
 
 import android.content.Context
 import android.util.Log
+import com.course.fleupart.data.model.remote.ApiUpdateResponse
 import com.course.fleupart.data.model.remote.FilteredOrdersData
 import com.course.fleupart.data.model.remote.OrderDataItem
 import com.course.fleupart.data.model.remote.OrderListResponse
+import com.course.fleupart.data.model.remote.OrderStatusRequest
 import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.store.DataStoreManager
@@ -95,6 +97,22 @@ class OrderRepository private constructor(
                     it.data?.let { storeDetail ->
                         dataStoreManager.saveStoreDetail(storeDetail)
                     }
+                    emit(ResultResponse.Success(it))
+                } ?: emit(ResultResponse.Error("Empty response body"))
+            } else {
+                emit(ResultResponse.Error("Error: ${response.code()} ${response.message()}"))
+            }
+        } catch (e: Exception) {
+            emit(ResultResponse.Error("Exception: ${e.message}"))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    fun updateOrderStatus(orderId: String, orderStatusRequest: OrderStatusRequest) : Flow<ResultResponse<ApiUpdateResponse>> = flow {
+        emit(ResultResponse.Loading)
+        try {
+            val response = orderService.updateOrderStatus(orderId = orderId, orderStatusRequest = orderStatusRequest)
+            if (response.isSuccessful) {
+                response.body()?.let {
                     emit(ResultResponse.Success(it))
                 } ?: emit(ResultResponse.Error("Empty response body"))
             } else {

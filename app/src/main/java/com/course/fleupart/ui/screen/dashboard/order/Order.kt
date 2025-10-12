@@ -301,11 +301,18 @@ private fun NewOrderSection(
                 }
             }
         } else {
-            EmptyProduct(
-                icon = R.drawable.empty_new_order,
-                title = "You don’t have any new order yet",
-                description = "Start to promote your product!"
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp)
+            ) {
+                EmptyProduct(
+                    icon = R.drawable.empty_new_order,
+                    title = "You don’t have any new order yet",
+                    description = "Start to promote your product!"
+                )
+            }
         }
     }
 }
@@ -339,11 +346,18 @@ private fun OnProcessSection(
                 }
             }
         } else {
-        EmptyProduct(
-            icon = R.drawable.empty_process_order,
-            title = "You don’t have any processed order yet",
-            description = "Start to processing your order!"
-        )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp)
+            ) {
+                EmptyProduct(
+                    icon = R.drawable.empty_process_order,
+                    title = "You don’t have any processed order yet",
+                    description = "Start to processing your order!"
+                )
+            }
         }
     }
 }
@@ -377,11 +391,18 @@ private fun OnDeliverySection(
                 }
             }
         } else {
-            EmptyProduct(
-                icon = R.drawable.empty_on_order,
-                title = "You currently don’t have any product on delivery",
-                description = "Start to promote your product!"
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp)
+            ) {
+                EmptyProduct(
+                    icon = R.drawable.empty_on_order,
+                    title = "You currently don’t have any product on delivery",
+                    description = "Start to promote your product!"
+                )
+            }
         }
     }
 }
@@ -415,11 +436,18 @@ private fun OnPickupSection(
                 }
             }
         } else {
-            EmptyProduct(
-                icon = R.drawable.empty_product,
-                title = "You don't have any orders that can be picked up yet",
-                description = "Start to processing your order!"
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp)
+            ) {
+                EmptyProduct(
+                    icon = R.drawable.empty_product,
+                    title = "You don't have any orders that can be picked up yet",
+                    description = "Start to processing your order!"
+                )
+            }
         }
     }
 }
@@ -453,11 +481,18 @@ private fun CompletedSection(
                 }
             }
         } else {
-            EmptyProduct(
-                icon = R.drawable.empty_completed_order,
-                title = "You don’t have any completed order yet",
-                description = "Start to promote your product!"
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp)
+            ) {
+                EmptyProduct(
+                    icon = R.drawable.empty_completed_order,
+                    title = "You don’t have any completed order yet",
+                    description = "Start to promote your product!"
+                )
+            }
         }
     }
 }

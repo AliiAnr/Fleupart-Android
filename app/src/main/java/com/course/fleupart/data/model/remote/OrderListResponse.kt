@@ -11,6 +11,13 @@ data class FilteredOrdersData(
 	val completedOrders: List<OrderDataItem> = emptyList()
 )
 
+data class OrderStatusRequest(
+
+	@field:SerializedName("status")
+	val status: String
+)
+
+
 data class OrderListResponse(
 
 	@field:SerializedName("data")

@@ -58,9 +58,11 @@ import coil3.compose.AsyncImage
 import com.course.fleupart.R
 import com.course.fleupart.data.model.remote.OrderDataItem
 import com.course.fleupart.ui.common.OrderDummyData
+import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.common.extractOrderId
 import com.course.fleupart.ui.common.formatCurrency
 import com.course.fleupart.ui.common.parseDateTime
+import com.course.fleupart.ui.components.CustomPopUpDialog
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.OrderSummaryItem
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
@@ -87,16 +89,41 @@ fun DetailOrderItem(
         Log.i("ORDER SELECTED", "DetailOrderItem: $selectedOrderItem")
     }
 
+    val orderStatusUpdateState by orderViewModel.orderStatusUpdateState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+
     val dummyOrder = OrderDummyData.newOrdersDummy[1]
 
     var showCircularProgress by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(orderStatusUpdateState) {
+        when (orderStatusUpdateState) {
+            is ResultResponse.Success -> {
+                showCircularProgress = false
+                showSuccessDialog = true
+            }
+            is ResultResponse.Loading -> {
+                showCircularProgress = true
+            }
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+            }
+            else -> {}
+        }
+    }
 
     DetailOrderItem(
-        selectedOrderItem = selectedOrderItem, // Use updated item
+        selectedOrderItem = selectedOrderItem,
         showCircularProgress = showCircularProgress,
+        orderViewModel = orderViewModel,
+        showSuccessDialog = showSuccessDialog,
         onBackClick = {
             onBackClick()
         },
+        onDismiss = {
+            showSuccessDialog = false
+            orderViewModel.resetOrderStatusUpdateState()
+        }
     )
 }
 
@@ -105,8 +132,10 @@ private fun DetailOrderItem(
     modifier: Modifier = Modifier,
     selectedOrderItem: OrderDataItem,
     showCircularProgress: Boolean,
-//    orderData: List<CartItem>? = null,
+    orderViewModel: OrderViewModel,
     onBackClick: () -> Unit,
+    showSuccessDialog: Boolean,
+    onDismiss: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     // State untuk menyimpan status yang dipilih di UI
@@ -144,30 +173,14 @@ private fun DetailOrderItem(
                     onBackClick = onBackClick
                 )
 
-                if (showCircularProgress) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {
-                                // Do nothing - this prevents clicks from passing through
-                            }
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        CircularProgressIndicator(color = primaryLight)
-                    }
-                } else {
 
-                    Box(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-
-                            //Harusnya ada address tetapi belum bisa di GET di API
+                        //Harusnya ada address tetapi belum bisa di GET di API
 //                            item {
 //                                Spacer(modifier = Modifier.height(8.dp))
 //                                DetailOrderAddressSection(
@@ -182,85 +195,133 @@ private fun DetailOrderItem(
 //                                )
 //                            }
 
-                            item {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(Color.White)
-                                        .padding(horizontal = 20.dp, vertical = 12.dp),
-                                ) {
-                                    Text(
-                                        text = "Order Summary",
-                                        color = Color.Black,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White)
+                                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                            ) {
+                                Text(
+                                    text = "Order Summary",
+                                    color = Color.Black,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
 
-                                    selectedOrderItem.orderItems?.forEachIndexed { index, item ->
-                                        val isLastItem =
-                                            index == selectedOrderItem.orderItems.size - 1
-                                        OrderSummaryItem(
-                                            quantity = item?.quantity ?: 0,
-                                            name = item?.product?.name ?: "",
-                                            description = item?.product?.description ?: "",
-                                            price = item?.product?.price ?: ""
+                                selectedOrderItem.orderItems?.forEachIndexed { index, item ->
+                                    val isLastItem =
+                                        index == selectedOrderItem.orderItems.size - 1
+                                    OrderSummaryItem(
+                                        quantity = item?.quantity ?: 0,
+                                        name = item?.product?.name ?: "",
+                                        description = item?.product?.description ?: "",
+                                        price = item?.product?.price ?: ""
+                                    )
+                                    if (!isLastItem) {
+                                        HorizontalDivider(
+                                            color = base40,
                                         )
-                                        if (!isLastItem) {
-                                            HorizontalDivider(
-                                                color = base40,
-                                            )
-                                        }
                                     }
                                 }
                             }
-
-                            item {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                DateAndTimeDisplay(
-                                    selectedOrderItem = selectedOrderItem
-                                )
-                            }
-
-                            item {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                NoteSection(
-                                    note = selectedOrderItem.note ?: "-"
-                                )
-                            }
-
-                            item {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                PaymentSummary(
-                                    selectedOrderItem = selectedOrderItem
-                                )
-                            }
-
-                            item {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                DetailOrderTotalPriceSection(
-                                    selectedOrderItem = selectedOrderItem
-                                )
-                            }
-
-                            item {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                SetStatusSection(
-                                    currentStatus = selectedStatus,
-                                    selectedOrderItem = selectedOrderItem,
-                                    onStatusChange = { newStatus ->
-                                        selectedStatus = newStatus
-                                        // TODO: Panggil fungsi ViewModel untuk memanggil API di sini
-                                        // Contoh:
-                                        // orderViewModel.updateOrderStatus(selectedOrderItem.id, newStatus)
-                                        Log.d("StatusUpdate", "Status baru dipilih: $newStatus untuk Order ID: ${selectedOrderItem.id}")
-                                    }
-                                )
-                            }
-
                         }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            DateAndTimeDisplay(
+                                selectedOrderItem = selectedOrderItem
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            NoteSection(
+                                note = selectedOrderItem.note ?: "-"
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            PaymentSummary(
+                                selectedOrderItem = selectedOrderItem
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            DetailOrderTotalPriceSection(
+                                selectedOrderItem = selectedOrderItem
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            SetStatusSection(
+                                currentStatus = selectedStatus,
+                                selectedOrderItem = selectedOrderItem,
+                                onStatusChange = { newStatus ->
+                                    selectedStatus = newStatus
+                                    selectedOrderItem.id?.let {
+                                        Log.d(
+                                            "StatusUpdate",
+                                            "Status baru dipilih: $newStatus untuk Order ID: ${selectedOrderItem.id}"
+                                        )
+                                        orderViewModel.updateOrderStatus(
+                                            orderId = it,
+                                            newStatus = newStatus
+                                        )
+                                    }
+
+                                }
+                            )
+                        }
+
                     }
                 }
+            }
+
+            if (showCircularProgress) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.3f))
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            // Do nothing - this prevents clicks from passing through
+                        }
+                ) {
+                    CircularProgressIndicator(color = primaryLight)
+                }
+            }
+
+            if (showSuccessDialog) {
+                CustomPopUpDialog(
+                    onDismiss = onDismiss,
+                    isShowIcon = true,
+                    isShowTitle = true,
+                    isShowDescription = true,
+                    isShowButton = false,
+                    icon = {
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ceklist),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                            )
+                        }
+                    },
+                    title = "Update Order Status Success",
+                    description = "Click the X button to close this dialog.",
+                )
             }
 
         }
@@ -674,9 +735,10 @@ fun StatusDropdown(
 
     var isExpanded by remember { mutableStateOf(false) }
 
-    val displayStatus = statusDisplayMap[currentStatus.lowercase()] ?: currentStatus.replaceFirstChar {
-        if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
-    }
+    val displayStatus =
+        statusDisplayMap[currentStatus.lowercase()] ?: currentStatus.replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+        }
 
     Box(modifier = modifier) {
         Row(

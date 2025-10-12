@@ -5,9 +5,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.course.fleupart.data.model.remote.ApiUpdateResponse
 import com.course.fleupart.data.model.remote.FilteredOrdersData
 import com.course.fleupart.data.model.remote.OrderDataItem
 import com.course.fleupart.data.model.remote.OrderListResponse
+import com.course.fleupart.data.model.remote.OrderStatusRequest
 import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.repository.OrderRepository
 import com.course.fleupart.ui.common.ResultResponse
@@ -29,6 +31,11 @@ class OrderViewModel(
     private val _storeOrderState: MutableStateFlow<ResultResponse<OrderListResponse>> =
         MutableStateFlow(ResultResponse.None)
     val storeOrderState: StateFlow<ResultResponse<OrderListResponse>> = _storeOrderState
+
+    private val _orderStatusUpdateState: MutableStateFlow<ResultResponse<ApiUpdateResponse>> =
+        MutableStateFlow(ResultResponse.None)
+    val orderStatusUpdateState: StateFlow<ResultResponse<ApiUpdateResponse>> = _orderStatusUpdateState
+
 
     private val _selectedOrderItem = MutableStateFlow<OrderDataItem?>(null)
     val selectedOrderItem: StateFlow<OrderDataItem?> = _selectedOrderItem.asStateFlow()
@@ -114,6 +121,24 @@ class OrderViewModel(
         }
     }
 
+    fun updateOrderStatus(orderId: String, newStatus: String) {
+        viewModelScope.launch {
+            try {
+                _orderStatusUpdateState.value = ResultResponse.Loading
+                orderRepository.updateOrderStatus(orderId = orderId, orderStatusRequest = OrderStatusRequest(status = newStatus))
+                    .collect { result ->
+                        _orderStatusUpdateState.value = result
+                        if (result is ResultResponse.Success) {
+                            // Refresh orders after status update
+                            getFilteredStoreOrders()
+                        }
+                    }
+            } catch (e: Exception) {
+                _orderStatusUpdateState.value = ResultResponse.Error("Failed to update order status: ${e.message}")
+            }
+        }
+    }
+
     private fun updateOrderStates(filteredData: FilteredOrdersData) {
         _newOrders.value = filteredData.newOrders
         _processOrders.value = filteredData.processOrders
@@ -194,5 +219,9 @@ class OrderViewModel(
                 }
             }
         }
+    }
+
+    fun resetOrderStatusUpdateState() {
+        _orderStatusUpdateState.value = ResultResponse.None
     }
 }
