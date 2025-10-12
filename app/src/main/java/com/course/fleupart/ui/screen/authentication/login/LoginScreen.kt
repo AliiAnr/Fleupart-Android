@@ -402,7 +402,3 @@ private fun LoginScreen(
     }
 }
 
-
-//private fun handleLoginError(context: Context, errorMessage: String) {
-//    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-//}

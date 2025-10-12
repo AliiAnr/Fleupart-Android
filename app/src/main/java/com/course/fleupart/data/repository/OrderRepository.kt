@@ -72,13 +72,6 @@ class OrderRepository private constructor(
             } == true
         } ?: emptyList()
 
-        Log.d("OrderRepository", "Filtered orders for store $targetStoreId: $storeOrders")
-        Log.d("OrderRepository", "Filtered orders for status created $targetStoreId: ${storeOrders.filter { it.status == "created" }}")
-        Log.d("OrderRepository", "Filtered orders for status process $targetStoreId: ${storeOrders.filter { it.status == "process" }}")
-        Log.d("OrderRepository", "Filtered orders for status pickup $targetStoreId: ${storeOrders.filter { it.status == "pickup" }}")
-        Log.d("OrderRepository", "Filtered orders for status delivery $targetStoreId: ${storeOrders.filter { it.status == "delivery" }}")
-        Log.d("OrderRepository", "Filtered orders for status completed $targetStoreId: ${storeOrders.filter { it.status == "completed" }}")
-
         return FilteredOrdersData(
             newOrders = storeOrders.filter { it.status == "created" },
             processOrders = storeOrders.filter { it.status == "process" },

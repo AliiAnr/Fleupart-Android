@@ -129,7 +129,6 @@ class OrderViewModel(
                     .collect { result ->
                         _orderStatusUpdateState.value = result
                         if (result is ResultResponse.Success) {
-                            // Refresh orders after status update
                             getFilteredStoreOrders()
                         }
                     }
@@ -147,7 +146,6 @@ class OrderViewModel(
         _completedOrders.value = filteredData.completedOrders
     }
 
-    // Helper functions to get orders by type
     fun getOrdersByStatus(status: String): List<OrderDataItem> {
         return when (status.lowercase()) {
             "new", "created" -> _newOrders.value
@@ -179,13 +177,11 @@ class OrderViewModel(
 
     private fun loadStoreDetail() {
         viewModelScope.launch {
-            // Pertama, cek cache local
             val cachedData = orderRepository.getStoredStoreDetail()
             Log.i("OrderViewModel", "Cached Data: $cachedData")
             if (cachedData != null) {
                 storeDetail.value = cachedData
             } else {
-                // Jika tidak ada cache, ambil dari remote
                 fetchStoreDetailFromRemote()
             }
         }
@@ -198,7 +194,6 @@ class OrderViewModel(
                     is ResultResponse.Success -> {
                         result.data.let { storeDetailData ->
                             storeDetail.value = storeDetailData.data
-                            // Simpan ke local storage
                             storeDetailData.data?.let {
                                 orderRepository.saveStoreDetail(it)
                             }
