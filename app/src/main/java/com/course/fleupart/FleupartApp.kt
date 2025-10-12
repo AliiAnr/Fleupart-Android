@@ -285,6 +285,7 @@ fun FleupartApp() {
                             onSnackSelected = fleupartNavController::navigateToSnackDetail,
                             onProductDetail = fleupartNavController::navigateToProductDetail,
                             onProfileDetail = fleupartNavController::navigateToProfileDetail,
+                            onOrderDetail = fleupartNavController::navigateToOrderDetail,
                             orderViewModel = orderViewModel,
                             profileViewModel = profileViewModel
                         )
@@ -340,10 +341,16 @@ fun FleupartApp() {
                     composableWithCompositionLocal(
                         route = DetailDestinations.ORDER_DETAIL_ROUTE
                     ) { backStackEntry ->
-                        DetailOrderItem(
-                            onBackClick = fleupartNavController::upPress,
-                            orderViewModel = orderViewModel,
-                        )
+
+                        val selectedOrderItem by orderViewModel.selectedOrderItem.collectAsStateWithLifecycle()
+
+                        selectedOrderItem?.let {
+                            DetailOrderItem(
+                                onBackClick = fleupartNavController::upPress,
+                                orderViewModel = orderViewModel,
+                                selectedOrderItem = it
+                            )
+                        }
                     }
 
                     composableWithCompositionLocal(
@@ -394,6 +401,7 @@ fun MainContainer(
     modifier: Modifier = Modifier,
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
+    onOrderDetail: (NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
     orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel
@@ -446,6 +454,7 @@ fun MainContainer(
                 onSnackSelected = onSnackSelected,
                 onProductDetail = onProductDetail,
                 onProfileDetail = onProfileDetail,
+                onOrderDetail = onOrderDetail,
                 orderViewModel,
                 profileViewModel = profileViewModel,
                 modifier = Modifier

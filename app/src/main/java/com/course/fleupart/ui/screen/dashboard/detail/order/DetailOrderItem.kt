@@ -78,17 +78,21 @@ import java.util.Locale
 @Composable
 fun DetailOrderItem(
     modifier: Modifier = Modifier,
-//    selectedOrderItem: OrderDataItem,
+    selectedOrderItem: OrderDataItem,
     orderViewModel: OrderViewModel,
     onBackClick: () -> Unit,
 ) {
+
+    LaunchedEffect(Unit) {
+        Log.i("ORDER SELECTED", "DetailOrderItem: $selectedOrderItem")
+    }
 
     val dummyOrder = OrderDummyData.newOrdersDummy[1]
 
     var showCircularProgress by remember { mutableStateOf(false) }
 
     DetailOrderItem(
-        selectedOrderItem = dummyOrder, // Use updated item
+        selectedOrderItem = selectedOrderItem, // Use updated item
         showCircularProgress = showCircularProgress,
         onBackClick = {
             onBackClick()

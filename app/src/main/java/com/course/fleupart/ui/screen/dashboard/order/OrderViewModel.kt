@@ -13,6 +13,7 @@ import com.course.fleupart.data.repository.OrderRepository
 import com.course.fleupart.ui.common.ResultResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class OrderViewModel(
@@ -29,6 +30,8 @@ class OrderViewModel(
         MutableStateFlow(ResultResponse.None)
     val storeOrderState: StateFlow<ResultResponse<OrderListResponse>> = _storeOrderState
 
+    private val _selectedOrderItem = MutableStateFlow<OrderDataItem?>(null)
+    val selectedOrderItem: StateFlow<OrderDataItem?> = _selectedOrderItem.asStateFlow()
 
     private val _filteredOrdersState: MutableStateFlow<ResultResponse<FilteredOrdersData>> =
         MutableStateFlow(ResultResponse.None)
@@ -54,6 +57,10 @@ class OrderViewModel(
 
     init {
         loadStoreDetail()
+    }
+
+    fun setSelectedOrderItem(orderItem: OrderDataItem) {
+        _selectedOrderItem.value = orderItem
     }
 
     fun loadInitialData() {

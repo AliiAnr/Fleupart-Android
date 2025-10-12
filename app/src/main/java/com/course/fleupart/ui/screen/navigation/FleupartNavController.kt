@@ -100,6 +100,12 @@ class FleupartNavController(
         }
     }
 
+    fun navigateToOrderDetail(from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(DetailDestinations.ORDER_DETAIL_ROUTE)
+        }
+    }
+
     fun navigateToProfileDetail(to: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             when (to) {

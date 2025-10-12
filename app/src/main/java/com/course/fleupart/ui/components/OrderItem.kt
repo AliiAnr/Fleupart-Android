@@ -49,7 +49,7 @@ import com.course.fleupart.ui.theme.tert
 @Composable
 fun CreatedOrderSummary(
     orderItem: OrderDataItem,
-    onCreatedOrderDetail: () -> Unit
+    onSelectedOrderItem: (OrderDataItem) -> Unit
 ) {
     val isCompleted: Boolean = orderItem.payment?.status == "paid"
 
@@ -67,7 +67,7 @@ fun CreatedOrderSummary(
             )
             .clickable(
                 onClick = {
-                    onCreatedOrderDetail()
+                    onSelectedOrderItem(orderItem)
                 },
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }

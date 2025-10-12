@@ -85,6 +85,7 @@ fun NavGraphBuilder.addHomeGraph(
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
+    onOrderDetail: (NavBackStackEntry) -> Unit,
     orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel,
     modifier: Modifier = Modifier
@@ -108,10 +109,13 @@ fun NavGraphBuilder.addHomeGraph(
             modifier = modifier
         )
     }
-    composable(HomeSections.Order.route) {
+    composable(HomeSections.Order.route) { from ->
         Order(
             modifier = modifier,
-            orderViewModel = orderViewModel
+            orderViewModel = orderViewModel,
+            onOrderDetail = {
+                onOrderDetail(from)
+            }
         )
     }
     composable(HomeSections.Profile.route) { from ->

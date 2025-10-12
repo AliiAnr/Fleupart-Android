@@ -42,6 +42,7 @@ import com.course.fleupart.ui.common.OrderDummyData
 import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.components.CreatedOrderSummary
 import com.course.fleupart.ui.components.CustomTopAppBar
+import com.course.fleupart.ui.components.OrderItem
 import com.course.fleupart.ui.screen.dashboard.product.EmptyProduct
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
@@ -51,7 +52,8 @@ import com.course.fleupart.ui.theme.primaryLight
 @Composable
 fun Order(
     modifier: Modifier = Modifier,
-    orderViewModel: OrderViewModel
+    orderViewModel: OrderViewModel,
+    onOrderDetail: () -> Unit
 ) {
 
     val filteredOrdersState by orderViewModel.filteredOrdersState.collectAsStateWithLifecycle(
@@ -111,6 +113,10 @@ fun Order(
         showLoading = showCircularProgress,
         isRefreshing = isRefreshing,
         pullToRefreshState = pullToRefreshState,
+        onSelectedOrderItem = {
+            onOrderDetail()
+            orderViewModel.setSelectedOrderItem(it)
+                              },
         onRefresh = { orderViewModel.refreshOrders() }
     )
 }
@@ -125,6 +131,7 @@ private fun OrderContent(
     deliveryOrders: List<OrderDataItem>,
     isRefreshing: Boolean,
     onRefresh: () -> Unit = {},
+    onSelectedOrderItem: (OrderDataItem) -> Unit,
     pullToRefreshState: PullToRefreshState,
     completedOrders: List<OrderDataItem>,
     showLoading: Boolean
@@ -182,30 +189,38 @@ private fun OrderContent(
 
                         when (selectedTab) {
                             0 ->
-                                NewOrderSection(newOrders = newOrders, isLoading = showLoading)
+                                NewOrderSection(
+                                    newOrders = newOrders,
+                                    isLoading = showLoading,
+                                    onSelectedOrderItem = onSelectedOrderItem
+                                )
 
                             1 ->
                                 OnProcessSection(
                                     processOrders = processOrders,
-                                    isLoading = showLoading
+                                    isLoading = showLoading,
+                                    onSelectedOrderItem = onSelectedOrderItem
                                 )
 
                             2 ->
                                 OnPickupSection(
                                     pickupOrders = pickupOrders,
-                                    isLoading = showLoading
+                                    isLoading = showLoading,
+                                    onSelectedOrderItem = onSelectedOrderItem
                                 )
 
                             3 ->
                                 OnDeliverySection(
                                     deliveryOrders = deliveryOrders,
-                                    isLoading = showLoading
+                                    isLoading = showLoading,
+                                    onSelectedOrderItem = onSelectedOrderItem
                                 )
 
                             4 ->
                                 CompletedSection(
                                     completedOrders = completedOrders,
-                                    isLoading = showLoading
+                                    isLoading = showLoading,
+                                    onSelectedOrderItem = onSelectedOrderItem
                                 )
                         }
                     }
@@ -259,6 +274,7 @@ private fun NewOrderSection(
     modifier: Modifier = Modifier,
     newOrders: List<OrderDataItem>,
     isLoading: Boolean,
+    onSelectedOrderItem: (OrderDataItem) -> Unit,
     useDummyData: Boolean = false
 ) {
     val ordersToShow = if (useDummyData) OrderDummyData.newOrdersDummy else newOrders
@@ -281,7 +297,7 @@ private fun NewOrderSection(
                     .fillMaxSize()
             ) {
                 items(ordersToShow) { orderItem ->
-                    CreatedOrderSummary(orderItem, {})
+                    CreatedOrderSummary(orderItem, onSelectedOrderItem)
                 }
             }
         } else {
@@ -298,7 +314,8 @@ private fun NewOrderSection(
 private fun OnProcessSection(
     modifier: Modifier = Modifier,
     processOrders: List<OrderDataItem>,
-    isLoading: Boolean
+    isLoading: Boolean,
+    onSelectedOrderItem: (OrderDataItem) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -318,7 +335,7 @@ private fun OnProcessSection(
                     .fillMaxSize()
             ) {
                 items(processOrders) { orderItem ->
-                    CreatedOrderSummary(orderItem, {})
+                    CreatedOrderSummary(orderItem, onSelectedOrderItem = onSelectedOrderItem)
                 }
             }
         } else {
@@ -335,7 +352,8 @@ private fun OnProcessSection(
 private fun OnDeliverySection(
     modifier: Modifier = Modifier,
     deliveryOrders: List<OrderDataItem>,
-    isLoading: Boolean
+    isLoading: Boolean,
+    onSelectedOrderItem: (OrderDataItem) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -355,7 +373,7 @@ private fun OnDeliverySection(
                     .fillMaxSize()
             ) {
                 items(deliveryOrders) { orderItem ->
-                    CreatedOrderSummary(orderItem, {})
+                    CreatedOrderSummary(orderItem, onSelectedOrderItem = onSelectedOrderItem)
                 }
             }
         } else {
@@ -372,7 +390,8 @@ private fun OnDeliverySection(
 private fun OnPickupSection(
     modifier: Modifier = Modifier,
     pickupOrders: List<OrderDataItem>,
-    isLoading: Boolean
+    isLoading: Boolean,
+    onSelectedOrderItem: (OrderDataItem) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -392,7 +411,7 @@ private fun OnPickupSection(
                     .fillMaxSize()
             ) {
                 items(pickupOrders) { orderItem ->
-                    CreatedOrderSummary(orderItem, {})
+                    CreatedOrderSummary(orderItem, onSelectedOrderItem = onSelectedOrderItem)
                 }
             }
         } else {
@@ -409,7 +428,8 @@ private fun OnPickupSection(
 private fun CompletedSection(
     modifier: Modifier = Modifier,
     completedOrders: List<OrderDataItem>,
-    isLoading: Boolean
+    isLoading: Boolean,
+    onSelectedOrderItem: (OrderDataItem) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -429,7 +449,7 @@ private fun CompletedSection(
                     .fillMaxSize()
             ) {
                 items(completedOrders) { orderItem ->
-                    CreatedOrderSummary(orderItem, {})
+                    CreatedOrderSummary(orderItem, onSelectedOrderItem = onSelectedOrderItem)
                 }
             }
         } else {
