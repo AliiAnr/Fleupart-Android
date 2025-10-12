@@ -60,6 +60,7 @@ import com.course.fleupart.ui.screen.dashboard.detail.finance.BalanceValue
 import com.course.fleupart.ui.screen.dashboard.detail.finance.SalesReport
 import com.course.fleupart.ui.screen.dashboard.detail.finance.WithdrawBalance
 import com.course.fleupart.ui.screen.dashboard.detail.home.DetailTest
+import com.course.fleupart.ui.screen.dashboard.detail.order.DetailOrderItem
 import com.course.fleupart.ui.screen.dashboard.detail.product.AddProduct
 import com.course.fleupart.ui.screen.dashboard.detail.product.DetailProduct
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
@@ -144,7 +145,7 @@ fun FleupartApp() {
             ) {
                 NavHost(
                     navController = fleupartNavController.navController,
-                    startDestination = destination,
+                    startDestination = DetailDestinations.ORDER_DETAIL_ROUTE,
                     contentAlignment = Alignment.Center
                 ) {
                     composableWithCompositionLocal(
@@ -333,6 +334,15 @@ fun FleupartApp() {
                         StoreProfileDetail(
                             onBackClick = fleupartNavController::upPress,
                             profileViewModel = profileViewModel
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.ORDER_DETAIL_ROUTE
+                    ) { backStackEntry ->
+                        DetailOrderItem(
+                            onBackClick = fleupartNavController::upPress,
+                            orderViewModel = orderViewModel,
                         )
                     }
 

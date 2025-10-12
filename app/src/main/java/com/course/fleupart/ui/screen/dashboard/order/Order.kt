@@ -208,7 +208,6 @@ private fun NewOrderSection(
     isLoading: Boolean,
     useDummyData: Boolean = true
 ) {
-// detailnya belum di sesuaikan
     val ordersToShow = if (useDummyData) OrderDummyData.newOrdersDummy else newOrders
     Box(
         modifier = modifier

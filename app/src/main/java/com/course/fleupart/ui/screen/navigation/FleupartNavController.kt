@@ -40,6 +40,8 @@ object DetailDestinations {
     const val UPDATE_DETAIL_ROUTE = "updateDetail"
 
     const val STORE_VIEW_ROUTE = "storeView"
+
+    const val ORDER_DETAIL_ROUTE = "orderDetail"
 }
 
 object QueryKeys {

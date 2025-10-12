@@ -22,7 +22,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
@@ -66,21 +72,20 @@ import com.course.fleupart.ui.theme.base500
 import com.course.fleupart.ui.theme.err
 import com.course.fleupart.ui.theme.primaryLight
 import com.course.fleupart.ui.theme.tert
+import java.util.Locale
 
 
 @Composable
 fun DetailOrderItem(
     modifier: Modifier = Modifier,
-    selectedOrderItem: OrderDataItem,
+//    selectedOrderItem: OrderDataItem,
     orderViewModel: OrderViewModel,
     onBackClick: () -> Unit,
-    onPaymentClick: () -> Unit,
-    id: Long,
 ) {
 
-    val dummyOrder = OrderDummyData.newOrdersDummy[0]
+    val dummyOrder = OrderDummyData.newOrdersDummy[1]
 
-    var showCircularProgress by remember { mutableStateOf(true) }
+    var showCircularProgress by remember { mutableStateOf(false) }
 
     DetailOrderItem(
         selectedOrderItem = dummyOrder, // Use updated item
@@ -88,7 +93,6 @@ fun DetailOrderItem(
         onBackClick = {
             onBackClick()
         },
-        onPaymentClick = onPaymentClick
     )
 }
 
@@ -99,18 +103,15 @@ private fun DetailOrderItem(
     showCircularProgress: Boolean,
 //    orderData: List<CartItem>? = null,
     onBackClick: () -> Unit,
-    onPaymentClick: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    var rating by remember { mutableIntStateOf(0) }
-    var reviewComment by remember { mutableStateOf("") }
-    val isButtonEnabled = rating > 0 && reviewComment.isNotEmpty()
+    // State untuk menyimpan status yang dipilih di UI
+    var selectedStatus by remember { mutableStateOf(selectedOrderItem.status ?: "Pending") }
 
-    val isPaid = selectedOrderItem.payment?.status == "paid"
-
-    val isDelivery = selectedOrderItem.takenMethod == "delivery"
-
-    val currentStatus = selectedOrderItem.status
+    // Gunakan LaunchedEffect untuk memastikan state UI selalu sinkron dengan data awal
+    LaunchedEffect(selectedOrderItem.status) {
+        selectedStatus = selectedOrderItem.status ?: "created"
+    }
 
     FleupartSurface(
         modifier = modifier.fillMaxSize(),
@@ -238,43 +239,30 @@ private fun DetailOrderItem(
                                 )
                             }
 
-//                        item {
-//                            Spacer(modifier = Modifier.height(8.dp))
-//                            StarSection(
-//                                rating = rating,
-//                                onRatingChanged = { rating = it },
-//                            )
-//                        }
+                            item {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                SetStatusSection(
+                                    currentStatus = selectedStatus,
+                                    selectedOrderItem = selectedOrderItem,
+                                    onStatusChange = { newStatus ->
+                                        selectedStatus = newStatus
+                                        // TODO: Panggil fungsi ViewModel untuk memanggil API di sini
+                                        // Contoh:
+                                        // orderViewModel.updateOrderStatus(selectedOrderItem.id, newStatus)
+                                        Log.d("StatusUpdate", "Status baru dipilih: $newStatus untuk Order ID: ${selectedOrderItem.id}")
+                                    }
+                                )
+                            }
 
-//                        item {
-//                            Spacer(modifier = Modifier.height(8.dp))
-//                            AddReviewSection(
-//                                reviewComment = reviewComment,
-//                                onRatingChanged = { reviewComment = it }
-//                            )
-//                        }
                         }
                     }
                 }
-
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .background(Color.White)
-//                        .height(90.dp),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    CustomButton(
-//                        text = "Add Review",
-//                        onClick = { },
-//                        isAvailable = isButtonEnabled
-//                    )
-//                }
             }
 
         }
     }
 }
+
 //
 //@Composable
 //private fun DetailOrderAddressSection(
@@ -364,7 +352,7 @@ private fun NoteSection(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = if (note.isEmpty()) "-" else note,
+            text = note.ifEmpty { "-" },
             color = Color.Black,
             fontSize = 12.sp,
             lineHeight = 20.sp,
@@ -617,5 +605,144 @@ private fun DetailOrderTotalPriceSection(
             )
         }
         Spacer(modifier = Modifier.height(26.dp))
+    }
+}
+
+@Composable
+private fun SetStatusSection(
+    currentStatus: String,
+    selectedOrderItem: OrderDataItem,
+    onStatusChange: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Set Status",
+            color = Color.Black,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+        StatusDropdown(
+            currentStatus = currentStatus,
+            onStatusSelected = onStatusChange,
+            takenMethod = selectedOrderItem.takenMethod
+        )
+    }
+}
+
+
+@Composable
+fun StatusDropdown(
+    currentStatus: String,
+    onStatusSelected: (String) -> Unit,
+    takenMethod: String?,
+    modifier: Modifier = Modifier
+) {
+    val statusDisplayMap = mapOf(
+        "created" to "Created",
+        "process" to "Process",
+        "pickup" to "Pickup",
+        "delivery" to "Delivery",
+        "completed" to "Completed"
+    )
+
+    val statusApiMap = mapOf(
+        "Created" to "created",
+        "Process" to "process",
+        "Pickup" to "pickup",
+        "Delivery" to "delivery",
+        "Completed" to "completed"
+    )
+
+    val baseOptions = listOf("Created", "Process", "Pickup", "Delivery", "Completed")
+
+    val statusOptions = when (takenMethod?.lowercase()) {
+        "delivery" -> baseOptions.filter { it != "Pickup" }
+        "pickup" -> baseOptions.filter { it != "Delivery" }
+        else -> baseOptions
+    }
+
+    var isExpanded by remember { mutableStateOf(false) }
+
+    val displayStatus = statusDisplayMap[currentStatus.lowercase()] ?: currentStatus.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+    }
+
+    Box(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .width(150.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(
+                    color = primaryLight,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    isExpanded = true
+                }
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = displayStatus,
+                color = Color.White,
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                contentDescription = "Dropdown Arrow",
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        DropdownMenu(
+            expanded = isExpanded,
+            onDismissRequest = { isExpanded = false },
+            modifier = Modifier
+                .width(150.dp)
+                .background(
+                    color = Color.White,
+                    shape = RoundedCornerShape(8.dp)
+                )
+        ) {
+            statusOptions.forEach { status ->
+                val isCurrentStatus = status.equals(displayStatus, ignoreCase = true)
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = status,
+                            color = if (isCurrentStatus) primaryLight else Color.Black,
+                            fontWeight = if (isCurrentStatus) FontWeight.Bold else FontWeight.Normal,
+                            fontSize = 14.sp
+                        )
+                    },
+                    onClick = {
+                        isExpanded = false
+                        if (!status.equals(displayStatus, ignoreCase = true)) {
+                            val apiStatus = statusApiMap[status] ?: status.lowercase()
+                            onStatusSelected(apiStatus)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            if (isCurrentStatus) base20 else Color.Transparent
+                        )
+                )
+            }
+        }
     }
 }
