@@ -12,12 +12,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +47,7 @@ import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.primaryLight
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Order(
     modifier: Modifier = Modifier,
@@ -51,6 +57,8 @@ fun Order(
     val filteredOrdersState by orderViewModel.filteredOrdersState.collectAsStateWithLifecycle(
         initialValue = ResultResponse.None
     )
+    val isRefreshing by orderViewModel.isRefreshing.collectAsStateWithLifecycle()
+
     val newOrders by orderViewModel.newOrders.collectAsStateWithLifecycle(
         initialValue = emptyList()
     )
@@ -67,7 +75,9 @@ fun Order(
         initialValue = emptyList()
     )
 
-    var showCircularProgress by remember { mutableStateOf(true) }
+    val pullToRefreshState = rememberPullToRefreshState()
+
+    var showCircularProgress by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
 //        orderViewModel.getStoreOrders()
@@ -98,10 +108,14 @@ fun Order(
         pickupOrders = pickupOrders,
         deliveryOrders = deliveryOrders,
         completedOrders = completedOrders,
-        showLoading = showCircularProgress
+        showLoading = showCircularProgress,
+        isRefreshing = isRefreshing,
+        pullToRefreshState = pullToRefreshState,
+        onRefresh = { orderViewModel.refreshOrders() }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OrderContent(
     modifier: Modifier = Modifier,
@@ -109,6 +123,9 @@ private fun OrderContent(
     processOrders: List<OrderDataItem>,
     pickupOrders: List<OrderDataItem>,
     deliveryOrders: List<OrderDataItem>,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit = {},
+    pullToRefreshState: PullToRefreshState,
     completedOrders: List<OrderDataItem>,
     showLoading: Boolean
 ) {
@@ -144,17 +161,53 @@ private fun OrderContent(
                         onTabSelected = { selectedTab = it }
                     )
 
-                    when (selectedTab) {
-                        0 ->
-                            NewOrderSection(newOrders = newOrders, isLoading = showLoading)
-                        1 ->
-                            OnProcessSection(processOrders = processOrders, isLoading = showLoading)
-                        2 ->
-                            OnPickupSection(pickupOrders = pickupOrders, isLoading = showLoading)
-                        3 ->
-                            OnDeliverySection(deliveryOrders = deliveryOrders, isLoading = showLoading)
-                        4 ->
-                            CompletedSection(completedOrders = completedOrders, isLoading = showLoading)
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = onRefresh,
+                        state = pullToRefreshState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(base20),
+                        indicator = {
+                            PullToRefreshDefaults.Indicator(
+                                modifier = Modifier.align(Alignment.TopCenter),
+                                isRefreshing = isRefreshing,
+                                state = pullToRefreshState,
+                                threshold = 100.dp,
+                                color = primaryLight,
+                                containerColor = Color.White
+                            )
+                        }
+                    ) {
+
+                        when (selectedTab) {
+                            0 ->
+                                NewOrderSection(newOrders = newOrders, isLoading = showLoading)
+
+                            1 ->
+                                OnProcessSection(
+                                    processOrders = processOrders,
+                                    isLoading = showLoading
+                                )
+
+                            2 ->
+                                OnPickupSection(
+                                    pickupOrders = pickupOrders,
+                                    isLoading = showLoading
+                                )
+
+                            3 ->
+                                OnDeliverySection(
+                                    deliveryOrders = deliveryOrders,
+                                    isLoading = showLoading
+                                )
+
+                            4 ->
+                                CompletedSection(
+                                    completedOrders = completedOrders,
+                                    isLoading = showLoading
+                                )
+                        }
                     }
                 }
             }
@@ -206,7 +259,7 @@ private fun NewOrderSection(
     modifier: Modifier = Modifier,
     newOrders: List<OrderDataItem>,
     isLoading: Boolean,
-    useDummyData: Boolean = true
+    useDummyData: Boolean = false
 ) {
     val ordersToShow = if (useDummyData) OrderDummyData.newOrdersDummy else newOrders
     Box(
@@ -222,7 +275,7 @@ private fun NewOrderSection(
             ) {
                 CircularProgressIndicator(color = primaryLight)
             }
-        } else if (ordersToShow.isNotEmpty()) {
+        } else if (newOrders.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -260,7 +313,14 @@ private fun OnProcessSection(
                 CircularProgressIndicator(color = primaryLight)
             }
         } else if (processOrders.isNotEmpty()) {
-            // Tampilkan daftar newOrders di sini
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(processOrders) { orderItem ->
+                    CreatedOrderSummary(orderItem, {})
+                }
+            }
         } else {
         EmptyProduct(
             icon = R.drawable.empty_process_order,
@@ -290,7 +350,14 @@ private fun OnDeliverySection(
                 CircularProgressIndicator(color = primaryLight)
             }
         } else if (deliveryOrders.isNotEmpty()) {
-            // Tampilkan daftar newOrders di sini
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(deliveryOrders) { orderItem ->
+                    CreatedOrderSummary(orderItem, {})
+                }
+            }
         } else {
             EmptyProduct(
                 icon = R.drawable.empty_on_order,
@@ -320,7 +387,14 @@ private fun OnPickupSection(
                 CircularProgressIndicator(color = primaryLight)
             }
         } else if (pickupOrders.isNotEmpty()) {
-            // Tampilkan daftar newOrders di sini
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(pickupOrders) { orderItem ->
+                    CreatedOrderSummary(orderItem, {})
+                }
+            }
         } else {
             EmptyProduct(
                 icon = R.drawable.empty_product,
@@ -350,7 +424,14 @@ private fun CompletedSection(
                 CircularProgressIndicator(color = primaryLight)
             }
         } else if (completedOrders.isNotEmpty()) {
-            // Tampilkan daftar newOrders di sini
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(completedOrders) { orderItem ->
+                    CreatedOrderSummary(orderItem, {})
+                }
+            }
         } else {
             EmptyProduct(
                 icon = R.drawable.empty_completed_order,

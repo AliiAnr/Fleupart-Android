@@ -145,7 +145,7 @@ fun FleupartApp() {
             ) {
                 NavHost(
                     navController = fleupartNavController.navController,
-                    startDestination = DetailDestinations.ORDER_DETAIL_ROUTE,
+                    startDestination = MainDestinations.DASHBOARD_ROUTE,
                     contentAlignment = Alignment.Center
                 ) {
                     composableWithCompositionLocal(

@@ -21,6 +21,10 @@ class OrderViewModel(
 
     private val _dataInitialized = MutableStateFlow(false)
     val dataInitialized: StateFlow<Boolean> = _dataInitialized
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
     private val _storeOrderState: MutableStateFlow<ResultResponse<OrderListResponse>> =
         MutableStateFlow(ResultResponse.None)
     val storeOrderState: StateFlow<ResultResponse<OrderListResponse>> = _storeOrderState
@@ -57,6 +61,27 @@ class OrderViewModel(
 //            getStoreOrders()
             getFilteredStoreOrders()
             _dataInitialized.value = true
+        }
+    }
+
+    fun refreshOrders() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            try {
+                storeDetail.value?.id?.let { storeId ->
+                    orderRepository.getFilteredStoreOrders(storeId)
+                        .collect { result ->
+                            _filteredOrdersState.value = result
+                            if (result is ResultResponse.Success) {
+                                updateOrderStates(result.data)
+                            }
+                        }
+                }
+            } catch (e: Exception) {
+                _filteredOrdersState.value = ResultResponse.Error("Failed to refresh orders: ${e.message}")
+            } finally {
+                _isRefreshing.value = false
+            }
         }
     }
 
