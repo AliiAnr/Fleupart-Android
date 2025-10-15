@@ -47,6 +47,7 @@ import com.course.fleupart.ui.components.BankItem
 import com.course.fleupart.ui.components.CustomTextField
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.FakeCategory
+import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
 import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
@@ -56,6 +57,7 @@ import java.util.Locale
 @Composable
 fun WithdrawBalance(
     modifier: Modifier = Modifier,
+    orderViewModel: OrderViewModel,
     onBackClick: () -> Unit,
     onWithdrawDetail: (String) -> Unit
 ) {
@@ -63,7 +65,10 @@ fun WithdrawBalance(
     WithdrawBalance(
         id = 0,
         onBackClick = onBackClick,
-        onWithdrawDetail = onWithdrawDetail
+        onWithdrawDetail = onWithdrawDetail,
+        onSelectedBankAccount = {
+            orderViewModel.setSelectedBankAccount(it)
+        },
     )
 }
 
@@ -72,6 +77,7 @@ private fun WithdrawBalance(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     onWithdrawDetail: (String) -> Unit,
+    onSelectedBankAccount: (BankItem) -> Unit,
     id: Int
 ) {
 
@@ -99,6 +105,7 @@ private fun WithdrawBalance(
 
                 ListBankAccount(
                     bankList = FakeCategory.BankList,
+                    onSelectedBankAccount = onSelectedBankAccount,
                     onWithdrawDetail = onWithdrawDetail
                 )
 
@@ -111,6 +118,7 @@ private fun WithdrawBalance(
 private fun ListBankAccount(
     modifier: Modifier = Modifier,
     bankList: List<BankItem>,
+    onSelectedBankAccount: (BankItem) -> Unit,
     onWithdrawDetail: (String) -> Unit
 ) {
     LazyColumn (
@@ -135,6 +143,7 @@ private fun ListBankAccount(
         ){
             BankAccountItem(
                 item = it,
+                onSelectedBankAccount = onSelectedBankAccount,
                 onWithdrawDetail = onWithdrawDetail
             )
         }
@@ -187,7 +196,8 @@ private fun ListBankAccount(
 fun BankAccountItem(
     modifier: Modifier = Modifier,
     item: BankItem,
-    onWithdrawDetail: (String) -> Unit
+    onWithdrawDetail: (String) -> Unit,
+    onSelectedBankAccount: (BankItem) -> Unit
 ) {
 
     //tambahkan id dari address dan tambahkan clickable
@@ -198,6 +208,7 @@ fun BankAccountItem(
             .padding(horizontal = 20.dp)
             .clickable(
                 onClick = {
+                    onSelectedBankAccount(item)
                     onWithdrawDetail(DetailDestinations.BALANCE_AMOUNT_ROUTE)
                 },
                 indication = null,

@@ -247,6 +247,7 @@ fun FleupartApp() {
                     ) { backStackEntry ->
                         WithdrawBalance(
                             onBackClick = fleupartNavController::upPress,
+                            orderViewModel = orderViewModel,
                             onWithdrawDetail = { to ->
                                 fleupartNavController.navigateToWithdrawDetail(to = to, from = backStackEntry)
                             }
@@ -320,8 +321,12 @@ fun FleupartApp() {
                             )
                         }
                     ) { backStackEntry ->
+
+                        val selectedBankAccount by orderViewModel.selectedBankAccount.collectAsStateWithLifecycle()
+
                         BalanceValue(
-                            onBackClick = fleupartNavController::upPress
+                            onBackClick = fleupartNavController::upPress,
+                            selectedBankAccount = selectedBankAccount,
                         )
                     }
 

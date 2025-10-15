@@ -37,10 +37,12 @@ import com.course.fleupart.ui.theme.base20
 fun BalanceValue(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
+    selectedBankAccount: BankItem
 ) {
 
     BalanceValue(
         onBackClick = onBackClick,
+        selectedBankAccount = selectedBankAccount,
         id = 0
     )
 }
@@ -48,6 +50,7 @@ fun BalanceValue(
 private fun BalanceValue(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
+    selectedBankAccount: BankItem,
     id: Int
 ) {
     var amount by remember { mutableStateOf("") }
@@ -84,7 +87,7 @@ private fun BalanceValue(
                 )
 
                 BalanceValueItem(
-                    item = FakeCategory.BankList[0]
+                    item = selectedBankAccount
                 )
 
                 InputValue(
@@ -129,7 +132,8 @@ private fun BalanceValueItem(
     )
     BankAccountItem(
         item = item,
-        onWithdrawDetail = {}
+        onWithdrawDetail = {},
+        onSelectedBankAccount = {}
     )
 }
 

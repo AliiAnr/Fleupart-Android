@@ -13,6 +13,7 @@ import com.course.fleupart.data.model.remote.OrderStatusRequest
 import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.repository.OrderRepository
 import com.course.fleupart.ui.common.ResultResponse
+import com.course.fleupart.ui.components.BankItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,6 +35,16 @@ class OrderViewModel(
     private val _storeOrderState: MutableStateFlow<ResultResponse<OrderListResponse>> =
         MutableStateFlow(ResultResponse.None)
     val storeOrderState: StateFlow<ResultResponse<OrderListResponse>> = _storeOrderState
+
+    private val _selectedBankAccount: MutableStateFlow<BankItem> = MutableStateFlow(        BankItem(
+        id = 0,
+        name = "",
+        bankName = "",
+        accountNumber = "",
+        accountName = "",
+    ))
+
+    var selectedBankAccount: StateFlow<BankItem> = _selectedBankAccount.asStateFlow()
 
     private val _orderStatusUpdateState: MutableStateFlow<ResultResponse<ApiUpdateResponse>> =
         MutableStateFlow(ResultResponse.None)
@@ -79,6 +90,10 @@ class OrderViewModel(
 
     fun setSelectedOrderItem(orderItem: OrderDataItem) {
         _selectedOrderItem.value = orderItem
+    }
+
+    fun setSelectedBankAccount(bankAccount: BankItem) {
+        _selectedBankAccount.value = bankAccount
     }
 
     fun setSelectedCompletedOrderItem(orderItem: OrderDataItem) {
