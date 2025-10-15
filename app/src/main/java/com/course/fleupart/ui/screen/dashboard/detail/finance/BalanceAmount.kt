@@ -1,6 +1,8 @@
 package com.course.fleupart.ui.screen.dashboard.detail.finance
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,6 +50,7 @@ private fun BalanceValue(
     var amount by remember { mutableStateOf("0") }
     var isButtonEnabled by remember { mutableStateOf(false) }
 
+    val focusManager = LocalFocusManager.current
     FleupartSurface(
         modifier = modifier.fillMaxSize(),
     ) {
@@ -60,7 +64,14 @@ private fun BalanceValue(
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
-                    .background(base20),
+                    .background(base20)
+                    .clickable(
+                        onClick = {
+                            focusManager.clearFocus()
+                        },
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 CustomTopAppBar(

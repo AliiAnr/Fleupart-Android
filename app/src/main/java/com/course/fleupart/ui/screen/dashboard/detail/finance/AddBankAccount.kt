@@ -1,6 +1,8 @@
 package com.course.fleupart.ui.screen.dashboard.detail.finance
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.course.fleupart.ui.components.CustomButton
@@ -55,6 +59,8 @@ private fun AddBankAccount(
         isButtonEnabled = bankNameValue.isNotEmpty() && numberValue.isNotEmpty()
     }
 
+    val focusManager = LocalFocusManager.current
+
     FleupartSurface(
         modifier = modifier.fillMaxSize(),
     ) {
@@ -68,11 +74,18 @@ private fun AddBankAccount(
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
-                    .background(base20),
+                    .background(base20)
+                    .clickable(
+                        onClick = {
+                            focusManager.clearFocus()
+                        },
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 CustomTopAppBar(
-                    title = "Product Status",
+                    title = "Add Bank Account",
                     showNavigationIcon = true
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -121,7 +134,8 @@ private fun InputSection(
     ) {
         Text(
             text = "Bank Name",
-            fontSize = 16.sp,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
             color = Color.Black,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -138,7 +152,8 @@ private fun InputSection(
 
         Text(
             text = "Enter Number",
-            fontSize = 16.sp,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
             color = Color.Black,
             modifier = Modifier.padding(bottom = 8.dp)
         )

@@ -152,7 +152,7 @@ private fun ListBankAccount(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Add another address",
+                        text = "Add another bank account",
                         color = Color.Black,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.W600,

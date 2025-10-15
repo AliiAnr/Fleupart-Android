@@ -77,9 +77,9 @@ object FakeCategory {
     )
 
     val BankList = listOf(
-        BankItem(1, "Bunga Adik", "Bank BCA", "1234567890", "Bunga Adik"),
-        BankItem(2, "Flower WwW", "Bank BNI", "1234567890", "Flower WwW"),
-        BankItem(3, "Flwey", "Bank Mandiri", "1234567890", "Flwey"),
+        BankItem(1, "Ali An Nuur", "Bank BCA", "1234567890", "Bunga Adik"),
+        BankItem(2, "Ali An Nuur", "Bank BNI", "1234567890", "Flower WwW"),
+        BankItem(3, "Ali An Nuur", "Bank Mandiri", "1234567890", "Flwey"),
     )
 
     val recentSalesList = listOf(
