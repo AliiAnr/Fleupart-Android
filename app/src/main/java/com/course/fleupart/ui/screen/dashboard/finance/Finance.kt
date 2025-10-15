@@ -32,6 +32,8 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -126,11 +128,15 @@ fun Finance(
         pullToRefreshState = pullToRefreshState,
         storeBalance = storeBalance,
         storeOrdersCount = storeOrdersCount,
+        isRefreshing = isRefreshing,
         onWithdrawClick = {},
         onRecentSalesClick = {},
         onCompletedOrderDetail = {
             onCompletedOrderDetail()
             orderViewModel.setSelectedCompletedOrderItem(it)
+        },
+        onRefresh = {
+            orderViewModel.refreshOrders()
         }
     )
 }
@@ -144,9 +150,11 @@ private fun Finance(
     pullToRefreshState: PullToRefreshState,
     storeBalance: Int,
     storeOrdersCount: Int,
+    isRefreshing: Boolean,
     onWithdrawClick: () -> Unit,
     onRecentSalesClick: () -> Unit,
-    onCompletedOrderDetail: (OrderDataItem) -> Unit
+    onCompletedOrderDetail: (OrderDataItem) -> Unit,
+    onRefresh: () -> Unit,
 ) {
     val tabItems: List<String> = listOf(
         "Sales Data", "Withdraw Data"
@@ -186,73 +194,98 @@ private fun Finance(
                 CustomTopAppBar(
                     title = "Finance",
                 )
-                if (showCircularProgress) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        CircularProgressIndicator(color = primaryLight)
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = onRefresh,
+                    state = pullToRefreshState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(base20),
+                    indicator = {
+                        PullToRefreshDefaults.Indicator(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            isRefreshing = isRefreshing,
+                            state = pullToRefreshState,
+                            threshold = 100.dp,
+                            color = primaryLight,
+                            containerColor = Color.White
+                        )
                     }
-                } else {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    BalanceSection(
-                        balance = storeBalance.toLong(),
-                        onWithdrawClick = {
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TabRow(
-                        selectedTabIndex = selectedTabIndex,
-                        containerColor = Color.White
-                    ) {
-                        tabItems.forEachIndexed { index, item ->
-                            Tab(
-                                text = {
-                                    Text(
-                                        text = item,
-                                        color = Color.Black,
-                                        style = LocalTextStyle.current.copy(
-                                            color = Color.Black,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 14.sp,
-                                            textAlign = TextAlign.Start
-                                        )
-                                    )
-                                },
-                                selected = selectedTabIndex == index,
-                                onClick = {
-                                    selectedTabIndex = index
-                                },
-                                selectedContentColor = Color.White
-                            )
-                        }
-                    }
-
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    ) { page ->
+                ) {
+                    if (showCircularProgress) {
                         Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) {
+                            CircularProgressIndicator(color = primaryLight)
+                        }
+                    } else {
+                        Column(
                             modifier = Modifier
                                 .fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            when (page) {
-                                0 -> {
-                                    SalesDataSection(
-                                        recentSalesList = completedPaidOrders,
-                                        allOrdersCount = storeOrdersCount,
-                                        onCompletedOrderDetail = onCompletedOrderDetail
+                            Spacer(modifier = Modifier.height(8.dp))
+                            BalanceSection(
+                                balance = storeBalance.toLong(),
+                                onWithdrawClick = {
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TabRow(
+                                selectedTabIndex = selectedTabIndex,
+                                containerColor = Color.White
+                            ) {
+                                tabItems.forEachIndexed { index, item ->
+                                    Tab(
+                                        text = {
+                                            Text(
+                                                text = item,
+                                                color = Color.Black,
+                                                style = LocalTextStyle.current.copy(
+                                                    color = Color.Black,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 14.sp,
+                                                    textAlign = TextAlign.Start
+                                                )
+                                            )
+                                        },
+                                        selected = selectedTabIndex == index,
+                                        onClick = {
+                                            selectedTabIndex = index
+                                        },
+                                        selectedContentColor = Color.White
                                     )
                                 }
+                            }
 
-                                1 -> {
-                                    WithdrawDataSection(
-                                        recentWithdrawData = FakeCategory.withdrawData
-                                    )
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                .weight(1f)
+                            ) { page ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    when (page) {
+                                        0 -> {
+                                            SalesDataSection(
+                                                recentSalesList = completedPaidOrders,
+                                                allOrdersCount = storeOrdersCount,
+                                                onCompletedOrderDetail = onCompletedOrderDetail
+                                            )
+                                        }
+
+                                        1 -> {
+                                            WithdrawDataSection(
+                                                recentWithdrawData = FakeCategory.withdrawData
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
