@@ -61,6 +61,7 @@ import com.course.fleupart.ui.components.FakeCategory
 import com.course.fleupart.ui.components.RecentSales
 import com.course.fleupart.ui.components.WithdrawData
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
+import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.screen.navigation.MainDestinations
 import com.course.fleupart.ui.theme.base20
@@ -73,7 +74,8 @@ import network.chaintech.kmp_date_time_picker.ui.date_range_picker.formatToStrin
 fun Finance(
     modifier: Modifier = Modifier,
     onCompletedOrderDetail: () -> Unit,
-    orderViewModel: OrderViewModel
+    onWithdrawDetail: (String) -> Unit,
+    orderViewModel: OrderViewModel,
 ) {
 
     val filteredOrdersState by orderViewModel.filteredOrdersState.collectAsStateWithLifecycle(
@@ -129,7 +131,7 @@ fun Finance(
         storeBalance = storeBalance,
         storeOrdersCount = storeOrdersCount,
         isRefreshing = isRefreshing,
-        onWithdrawClick = {},
+        onWithdrawDetail = onWithdrawDetail,
         onRecentSalesClick = {},
         onCompletedOrderDetail = {
             onCompletedOrderDetail()
@@ -151,7 +153,7 @@ private fun Finance(
     storeBalance: Int,
     storeOrdersCount: Int,
     isRefreshing: Boolean,
-    onWithdrawClick: () -> Unit,
+    onWithdrawDetail: (String) -> Unit,
     onRecentSalesClick: () -> Unit,
     onCompletedOrderDetail: (OrderDataItem) -> Unit,
     onRefresh: () -> Unit,
@@ -229,8 +231,7 @@ private fun Finance(
                             Spacer(modifier = Modifier.height(8.dp))
                             BalanceSection(
                                 balance = storeBalance.toLong(),
-                                onWithdrawClick = {
-                                }
+                                onWithdrawDetail = onWithdrawDetail
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             TabRow(
@@ -386,7 +387,7 @@ private fun SalesDataSection(
 @Composable
 fun BalanceSection(
     balance: Long,
-    onWithdrawClick: () -> Unit
+    onWithdrawDetail: (String) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -426,7 +427,9 @@ fun BalanceSection(
         ) {
 
             Button(
-                onClick = onWithdrawClick,
+                onClick = {
+                    onWithdrawDetail(DetailDestinations.WITHDRAW_BALANCE_ROUTE)
+                          },
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = primaryLight),
                 modifier = Modifier.height(40.dp)

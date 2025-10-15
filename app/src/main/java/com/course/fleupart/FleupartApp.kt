@@ -146,7 +146,7 @@ fun FleupartApp() {
             ) {
                 NavHost(
                     navController = fleupartNavController.navController,
-                    startDestination = DetailDestinations.BALANCE_AMOUNT_ROUTE,
+                    startDestination = MainDestinations.DASHBOARD_ROUTE,
                     contentAlignment = Alignment.Center
                 ) {
                     composableWithCompositionLocal(
@@ -288,6 +288,7 @@ fun FleupartApp() {
                             onProfileDetail = fleupartNavController::navigateToProfileDetail,
                             onOrderDetail = fleupartNavController::navigateToOrderDetail,
                             onCompletedOrderDetail = fleupartNavController::navigateToCompletedOrderDetail,
+                            onWithdrawDetail = fleupartNavController::navigateToWithdrawDetail,
                             orderViewModel = orderViewModel,
                             profileViewModel = profileViewModel
                         )
@@ -421,6 +422,7 @@ fun MainContainer(
     onOrderDetail: (NavBackStackEntry) -> Unit,
     onCompletedOrderDetail: (NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
+    onWithdrawDetail: (String, NavBackStackEntry) -> Unit,
     orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel
 ) {
@@ -474,6 +476,7 @@ fun MainContainer(
                 onProfileDetail = onProfileDetail,
                 onOrderDetail = onOrderDetail,
                 onCompletedOrderDetail = onCompletedOrderDetail,
+                onWithdrawDetail = onWithdrawDetail,
                 orderViewModel = orderViewModel,
                 profileViewModel = profileViewModel,
                 modifier = Modifier

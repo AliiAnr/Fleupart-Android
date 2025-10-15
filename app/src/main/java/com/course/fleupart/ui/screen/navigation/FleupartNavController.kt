@@ -130,6 +130,23 @@ class FleupartNavController(
         }
     }
 
+    fun navigateToWithdrawDetail(to: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            when (to) {
+                DetailDestinations.WITHDRAW_BALANCE_ROUTE -> {
+                    navController.navigate(DetailDestinations.WITHDRAW_BALANCE_ROUTE)
+                }
+                DetailDestinations.ADD_BANK_ACCOUNT_ROUTE -> {
+                    navController.navigate(DetailDestinations.ADD_BANK_ACCOUNT_ROUTE)
+                }
+                DetailDestinations.BALANCE_AMOUNT_ROUTE -> {
+                    navController.navigate(DetailDestinations.BALANCE_AMOUNT_ROUTE)
+                }
+
+            }
+        }
+    }
+
 }
 
 private fun NavBackStackEntry.lifecycleIsResumed() =
