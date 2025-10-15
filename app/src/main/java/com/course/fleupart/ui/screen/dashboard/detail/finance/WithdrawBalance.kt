@@ -1,6 +1,8 @@
 package com.course.fleupart.ui.screen.dashboard.detail.finance
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,7 +47,7 @@ import com.course.fleupart.ui.components.BankItem
 import com.course.fleupart.ui.components.CustomTextField
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.FakeCategory
-import com.course.fleupart.ui.components.WithdrawTextField
+import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
 import java.text.NumberFormat
@@ -53,17 +55,23 @@ import java.util.Locale
 
 @Composable
 fun WithdrawBalance(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
+    onWithdrawDetail: (String) -> Unit
 ) {
 
     WithdrawBalance(
-        id = 0
+        id = 0,
+        onBackClick = onBackClick,
+        onWithdrawDetail = onWithdrawDetail
     )
 }
 
 @Composable
 private fun WithdrawBalance(
     modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
+    onWithdrawDetail: (String) -> Unit,
     id: Int
 ) {
 
@@ -85,11 +93,13 @@ private fun WithdrawBalance(
             ) {
                 CustomTopAppBar(
                     title = "Withdraw Balance",
-                    showNavigationIcon = true
+                    showNavigationIcon = true,
+                    onBackClick = onBackClick
                 )
 
                 ListBankAccount(
-                    bankList = FakeCategory.BankList
+                    bankList = FakeCategory.BankList,
+                    onWithdrawDetail = onWithdrawDetail
                 )
 
             }
@@ -100,7 +110,8 @@ private fun WithdrawBalance(
 @Composable
 private fun ListBankAccount(
     modifier: Modifier = Modifier,
-    bankList: List<BankItem>
+    bankList: List<BankItem>,
+    onWithdrawDetail: (String) -> Unit
 ) {
     LazyColumn (
         modifier = Modifier.fillMaxWidth()
@@ -123,7 +134,8 @@ private fun ListBankAccount(
             items = bankList,
         ){
             BankAccountItem(
-                item = it
+                item = it,
+                onWithdrawDetail = onWithdrawDetail
             )
         }
 
@@ -135,7 +147,14 @@ private fun ListBankAccount(
                     .height(50.dp)
                     .fillMaxWidth()
                     .background(Color.White)
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 20.dp)
+                    .clickable(
+                        onClick = {
+                            onWithdrawDetail(DetailDestinations.ADD_BANK_ACCOUNT_ROUTE)
+                        },
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ),
                 verticalArrangement = Arrangement.Center
             ) {
                 Row(
@@ -167,7 +186,8 @@ private fun ListBankAccount(
 @Composable
 fun BankAccountItem(
     modifier: Modifier = Modifier,
-    item: BankItem
+    item: BankItem,
+    onWithdrawDetail: (String) -> Unit
 ) {
 
     //tambahkan id dari address dan tambahkan clickable
@@ -176,6 +196,13 @@ fun BankAccountItem(
             .fillMaxWidth()
             .background(Color.White)
             .padding(horizontal = 20.dp)
+            .clickable(
+                onClick = {
+                    onWithdrawDetail(DetailDestinations.BALANCE_AMOUNT_ROUTE)
+                },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            )
     ) {
         HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
         Row(

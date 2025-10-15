@@ -79,6 +79,7 @@ import com.course.fleupart.ui.screen.navigation.spatialExpressiveSpring
 import com.course.fleupart.ui.screen.onboarding.OnBoardingScreen
 import com.course.fleupart.ui.screen.onboarding.OnBoardingViewModel
 import com.course.fleupart.ui.theme.FleupartTheme
+import com.course.fleupart.ui.theme.onBackgroundDark
 import kotlinx.coroutines.flow.first
 
 @Composable
@@ -245,23 +246,82 @@ fun FleupartApp() {
                         route = DetailDestinations.WITHDRAW_BALANCE_ROUTE
                     ) { backStackEntry ->
                         WithdrawBalance(
-
+                            onBackClick = fleupartNavController::upPress,
+                            onWithdrawDetail = { to ->
+                                fleupartNavController.navigateToWithdrawDetail(to = to, from = backStackEntry)
+                            }
                         )
                     }
 
                     composableWithCompositionLocal(
-                        route = DetailDestinations.ADD_BANK_ACCOUNT_ROUTE
+                        route = DetailDestinations.ADD_BANK_ACCOUNT_ROUTE,
+                        enterTransition = {
+                            // Muncul dari kanan
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        exitTransition = {
+                            // Keluar ke kanan
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popEnterTransition = {
+                            // Jika balik (back), bisa juga dari kiri ke posisi normal
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popExitTransition = {
+                            // Jika back, keluar ke kanan
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        }
                     ) { backStackEntry ->
                         AddBankAccount(
-
+                            onBackClick = fleupartNavController::upPress
                         )
                     }
 
                     composableWithCompositionLocal(
-                        route = DetailDestinations.BALANCE_AMOUNT_ROUTE
+                        route = DetailDestinations.BALANCE_AMOUNT_ROUTE,
+                        enterTransition = {
+                            // Muncul dari kanan
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        exitTransition = {
+                            // Keluar ke kanan
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popEnterTransition = {
+                            // Jika balik (back), bisa juga dari kiri ke posisi normal
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popExitTransition = {
+                            // Jika back, keluar ke kanan
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        }
                     ) { backStackEntry ->
                         BalanceValue(
-
+                            onBackClick = fleupartNavController::upPress
                         )
                     }
 

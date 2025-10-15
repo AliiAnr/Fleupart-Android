@@ -36,11 +36,13 @@ import com.course.fleupart.ui.theme.base20
 
 @Composable
 fun AddBankAccount(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
 ) {
 
     AddBankAccount(
         modifier = modifier,
+        onBackClick = onBackClick,
         id = 0
     )
 }
@@ -48,7 +50,8 @@ fun AddBankAccount(
 @Composable
 private fun AddBankAccount(
     modifier: Modifier = Modifier,
-    id: Int = 0
+    onBackClick: () -> Unit,
+    id: Int
 ) {
 
     var bankNameValue by remember { mutableStateOf("") }
@@ -86,7 +89,8 @@ private fun AddBankAccount(
             ) {
                 CustomTopAppBar(
                     title = "Add Bank Account",
-                    showNavigationIcon = true
+                    showNavigationIcon = true,
+                    onBackClick = onBackClick
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 InputSection(

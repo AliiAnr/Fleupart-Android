@@ -35,19 +35,22 @@ import com.course.fleupart.ui.theme.base20
 
 @Composable
 fun BalanceValue(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
 ) {
 
     BalanceValue(
+        onBackClick = onBackClick,
         id = 0
     )
 }
 @Composable
 private fun BalanceValue(
     modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
     id: Int
 ) {
-    var amount by remember { mutableStateOf("0") }
+    var amount by remember { mutableStateOf("") }
     var isButtonEnabled by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
@@ -76,7 +79,8 @@ private fun BalanceValue(
             ) {
                 CustomTopAppBar(
                     title = "Balance Value",
-                    showNavigationIcon = true
+                    showNavigationIcon = true,
+                    onBackClick = onBackClick
                 )
 
                 BalanceValueItem(
@@ -124,7 +128,8 @@ private fun BalanceValueItem(
             .padding(horizontal = 20.dp, vertical = 8.dp)
     )
     BankAccountItem(
-        item = item
+        item = item,
+        onWithdrawDetail = {}
     )
 }
 
