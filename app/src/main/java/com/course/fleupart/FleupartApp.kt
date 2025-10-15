@@ -57,6 +57,7 @@ import com.course.fleupart.ui.screen.dashboard.detail.Profile.StoreProfileDetail
 import com.course.fleupart.ui.screen.dashboard.detail.Profile.StoreView
 import com.course.fleupart.ui.screen.dashboard.detail.finance.AddBankAccount
 import com.course.fleupart.ui.screen.dashboard.detail.finance.BalanceValue
+import com.course.fleupart.ui.screen.dashboard.detail.finance.DetailCompletedOrderItem
 import com.course.fleupart.ui.screen.dashboard.detail.finance.SalesReport
 import com.course.fleupart.ui.screen.dashboard.detail.finance.WithdrawBalance
 import com.course.fleupart.ui.screen.dashboard.detail.home.DetailTest
@@ -286,6 +287,7 @@ fun FleupartApp() {
                             onProductDetail = fleupartNavController::navigateToProductDetail,
                             onProfileDetail = fleupartNavController::navigateToProfileDetail,
                             onOrderDetail = fleupartNavController::navigateToOrderDetail,
+                            onCompletedOrderDetail = fleupartNavController::navigateToCompletedOrderDetail,
                             orderViewModel = orderViewModel,
                             profileViewModel = profileViewModel
                         )
@@ -353,6 +355,21 @@ fun FleupartApp() {
                         }
                     }
 
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.COMPLETED_ORDER_DETAIL_ROUTE
+                    ) { backStackEntry ->
+
+                        val selectedOrderItem by orderViewModel.selectedCompletedOrderItem.collectAsStateWithLifecycle()
+
+                        selectedOrderItem?.let {
+                            DetailCompletedOrderItem(
+                                onBackClick = fleupartNavController::upPress,
+                                selectedOrderItem = it
+                            )
+                        }
+                    }
+
                     composableWithCompositionLocal(
                         route = DetailDestinations.STORE_VIEW_ROUTE
                     ) { backStackEntry ->
@@ -402,6 +419,7 @@ fun MainContainer(
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
     onOrderDetail: (NavBackStackEntry) -> Unit,
+    onCompletedOrderDetail: (NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
     orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel
@@ -455,7 +473,8 @@ fun MainContainer(
                 onProductDetail = onProductDetail,
                 onProfileDetail = onProfileDetail,
                 onOrderDetail = onOrderDetail,
-                orderViewModel,
+                onCompletedOrderDetail = onCompletedOrderDetail,
+                orderViewModel = orderViewModel,
                 profileViewModel = profileViewModel,
                 modifier = Modifier
                     .padding(padding)

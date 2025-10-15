@@ -42,6 +42,8 @@ object DetailDestinations {
     const val STORE_VIEW_ROUTE = "storeView"
 
     const val ORDER_DETAIL_ROUTE = "orderDetail"
+
+    const val COMPLETED_ORDER_DETAIL_ROUTE = "completedOrderDetail"
 }
 
 object QueryKeys {
@@ -103,6 +105,12 @@ class FleupartNavController(
     fun navigateToOrderDetail(from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             navController.navigate(DetailDestinations.ORDER_DETAIL_ROUTE)
+        }
+    }
+
+    fun navigateToCompletedOrderDetail(from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(DetailDestinations.COMPLETED_ORDER_DETAIL_ROUTE)
         }
     }
 

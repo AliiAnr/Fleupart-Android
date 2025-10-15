@@ -43,6 +43,9 @@ class OrderViewModel(
     private val _selectedOrderItem = MutableStateFlow<OrderDataItem?>(null)
     val selectedOrderItem: StateFlow<OrderDataItem?> = _selectedOrderItem.asStateFlow()
 
+    private val _selectedCompletedOrderItem = MutableStateFlow<OrderDataItem?>(null)
+    val selectedCompletedOrderItem: StateFlow<OrderDataItem?> = _selectedCompletedOrderItem.asStateFlow()
+
     private val _filteredOrdersState: MutableStateFlow<ResultResponse<FilteredOrdersData>> =
         MutableStateFlow(ResultResponse.None)
     val filteredOrdersState: StateFlow<ResultResponse<FilteredOrdersData>> = _filteredOrdersState
@@ -76,6 +79,10 @@ class OrderViewModel(
 
     fun setSelectedOrderItem(orderItem: OrderDataItem) {
         _selectedOrderItem.value = orderItem
+    }
+
+    fun setSelectedCompletedOrderItem(orderItem: OrderDataItem) {
+        _selectedCompletedOrderItem.value = orderItem
     }
 
     fun loadInitialData() {

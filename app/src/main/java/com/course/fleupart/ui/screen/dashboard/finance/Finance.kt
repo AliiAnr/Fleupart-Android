@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,6 +60,7 @@ import com.course.fleupart.ui.components.RecentSales
 import com.course.fleupart.ui.components.WithdrawData
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
+import com.course.fleupart.ui.screen.navigation.MainDestinations
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base40
 import com.course.fleupart.ui.theme.primaryLight
@@ -67,6 +70,7 @@ import network.chaintech.kmp_date_time_picker.ui.date_range_picker.formatToStrin
 @Composable
 fun Finance(
     modifier: Modifier = Modifier,
+    onCompletedOrderDetail: () -> Unit,
     orderViewModel: OrderViewModel
 ) {
 
@@ -123,7 +127,11 @@ fun Finance(
         storeBalance = storeBalance,
         storeOrdersCount = storeOrdersCount,
         onWithdrawClick = {},
-        onRecentSalesClick = {}
+        onRecentSalesClick = {},
+        onCompletedOrderDetail = {
+            onCompletedOrderDetail()
+            orderViewModel.setSelectedCompletedOrderItem(it)
+        }
     )
 }
 
@@ -138,6 +146,7 @@ private fun Finance(
     storeOrdersCount: Int,
     onWithdrawClick: () -> Unit,
     onRecentSalesClick: () -> Unit,
+    onCompletedOrderDetail: (OrderDataItem) -> Unit
 ) {
     val tabItems: List<String> = listOf(
         "Sales Data", "Withdraw Data"
@@ -236,6 +245,7 @@ private fun Finance(
                                     SalesDataSection(
                                         recentSalesList = completedPaidOrders,
                                         allOrdersCount = storeOrdersCount,
+                                        onCompletedOrderDetail = onCompletedOrderDetail
                                     )
                                 }
 
@@ -292,6 +302,7 @@ private fun WithdrawDataSection(
 private fun SalesDataSection(
     modifier: Modifier = Modifier,
     recentSalesList: List<OrderDataItem>,
+    onCompletedOrderDetail: (OrderDataItem) -> Unit,
     allOrdersCount: Int
 ) {
     Column(
@@ -327,7 +338,8 @@ private fun SalesDataSection(
 
             items(items = recentSalesList) { item ->
                 RecentSalesItem(
-                    item = item
+                    item = item,
+                    onCompletedOrderDetail = onCompletedOrderDetail
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -401,20 +413,28 @@ fun BalanceSection(
 @Composable
 private fun RecentSalesItem(
     modifier: Modifier = Modifier,
-    item: OrderDataItem
+    item: OrderDataItem,
+    onCompletedOrderDetail: (OrderDataItem) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .border(border = BorderStroke(1.dp, base40), shape = RoundedCornerShape(14.dp))
             .padding(horizontal = 20.dp, vertical = 10.dp)
-            .height(76.dp),
+            .height(76.dp)
+            .clickable(
+                onClick = {
+                    onCompletedOrderDetail(item)
+                },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(modifier = Modifier.padding(start = 8.dp)) {
             Text(
-                text = item.orderItems?.get(0)?.product?.name ?: "Product Name",
+                text = item.orderItems?.get(0)?.let { "${it.quantity ?: 999}x ${it.product?.name ?: "Product Name"}" } ?: "Product Name",
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 fontSize = 16.sp
