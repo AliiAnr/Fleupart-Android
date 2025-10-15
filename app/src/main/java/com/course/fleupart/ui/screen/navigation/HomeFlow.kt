@@ -106,7 +106,8 @@ fun NavGraphBuilder.addHomeGraph(
     }
     composable(HomeSections.Finance.route) { from ->
         Finance(
-            modifier = modifier
+            modifier = modifier,
+            orderViewModel = orderViewModel
         )
     }
     composable(HomeSections.Order.route) { from ->

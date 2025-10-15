@@ -3,13 +3,17 @@ package com.course.fleupart.data.model.remote
 import com.google.gson.annotations.SerializedName
 
 
+// Tambahkan field baru di FilteredOrdersData
 data class FilteredOrdersData(
-	val newOrders: List<OrderDataItem> = emptyList(),
-	val processOrders: List<OrderDataItem> = emptyList(),
-	val pickupOrders: List<OrderDataItem> = emptyList(),
-	val deliveryOrders: List<OrderDataItem> = emptyList(),
-	val completedOrders: List<OrderDataItem> = emptyList()
+	val newOrders: List<OrderDataItem>,
+	val processOrders: List<OrderDataItem>,
+	val pickupOrders: List<OrderDataItem>,
+	val deliveryOrders: List<OrderDataItem>,
+	val completedOrders: List<OrderDataItem>,
+	val completedPaidOrders: List<OrderDataItem>, // Tambahan untuk completed & paid
+	val completedUnpaidOrders: List<OrderDataItem> // Tambahan untuk completed tapi belum paid
 )
+
 
 data class OrderStatusRequest(
 

@@ -28,6 +28,9 @@ class OrderViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
+    private val _storeBalance = MutableStateFlow(0)
+    val storeBalance: MutableStateFlow<Int> = _storeBalance
+
     private val _storeOrderState: MutableStateFlow<ResultResponse<OrderListResponse>> =
         MutableStateFlow(ResultResponse.None)
     val storeOrderState: StateFlow<ResultResponse<OrderListResponse>> = _storeOrderState
@@ -59,6 +62,11 @@ class OrderViewModel(
     private val _completedOrders = MutableStateFlow<List<OrderDataItem>>(emptyList())
     val completedOrders: StateFlow<List<OrderDataItem>> = _completedOrders
 
+    private val _completedPaidOrders = MutableStateFlow<List<OrderDataItem>>(emptyList())
+    val completedPaidOrders: StateFlow<List<OrderDataItem>> = _completedPaidOrders
+
+    private val _allOrdersCount = MutableStateFlow(0)
+    val allOrdersCount: StateFlow<Int> = _allOrdersCount
 
     val storeDetail: MutableState<StoreDetailData?> = mutableStateOf(null)
 
@@ -144,6 +152,19 @@ class OrderViewModel(
         _pickupOrders.value = filteredData.pickupOrders
         _deliveryOrders.value = filteredData.deliveryOrders
         _completedOrders.value = filteredData.completedOrders
+        _completedPaidOrders.value = filteredData.completedPaidOrders
+        calculateStoreBalance(filteredData.completedPaidOrders)
+        _allOrdersCount.value = filteredData.newOrders.size +
+                filteredData.processOrders.size +
+                filteredData.pickupOrders.size +
+                filteredData.deliveryOrders.size +
+                filteredData.completedOrders.size
+    }
+
+    private fun calculateStoreBalance(completedPaidOrders: List<OrderDataItem>) {
+        _storeBalance.value = completedPaidOrders.sumOf { order ->
+            order.total ?: 0
+        }
     }
 
     fun getOrdersByStatus(status: String): List<OrderDataItem> {

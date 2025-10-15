@@ -180,6 +180,8 @@ object OrderDummyData {
         processOrders = processOrdersDummy,
         pickupOrders = pickupOrdersDummy,
         deliveryOrders = deliveryOrdersDummy,
-        completedOrders = completedOrdersDummy
+        completedOrders = completedOrdersDummy,
+        completedPaidOrders = completedOrdersDummy,
+        completedUnpaidOrders = completedOrdersDummy,
     )
 }

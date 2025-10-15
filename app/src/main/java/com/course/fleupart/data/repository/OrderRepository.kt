@@ -72,14 +72,23 @@ class OrderRepository private constructor(
             } == true
         } ?: emptyList()
 
+        val completedOrders = storeOrders.filter { it.status == "completed" }
+
         return FilteredOrdersData(
             newOrders = storeOrders.filter { it.status == "created" },
             processOrders = storeOrders.filter { it.status == "process" },
             pickupOrders = storeOrders.filter { it.status == "pickup" },
             deliveryOrders = storeOrders.filter { it.status == "delivery" },
-            completedOrders = storeOrders.filter { it.status == "completed" }
+            completedOrders = completedOrders,
+            completedPaidOrders = completedOrders.filter { isOrderPaid(it) },
+            completedUnpaidOrders = completedOrders.filter { !isOrderPaid(it) }
         )
     }
+
+    private fun isOrderPaid(order: OrderDataItem): Boolean {
+        return order.payment?.status?.equals("paid", ignoreCase = true) == true
+    }
+
 
     fun getStoreDetail(): Flow<ResultResponse<StoreDetailResponse>> = flow {
         emit(ResultResponse.Loading)
