@@ -54,6 +54,7 @@ import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.FakeCategory
 import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
+import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base40
 import com.course.fleupart.ui.theme.primaryLight
 
@@ -85,8 +86,9 @@ fun Profile(
                 storeAddressState is ResultResponse.Loading
 
         // Cek apakah keduanya sudah selesai (success atau error)
-        val bothCompleted = (storeDetailState is ResultResponse.Success || storeDetailState is ResultResponse.Error) &&
-                (storeAddressState is ResultResponse.Success || storeAddressState is ResultResponse.Error)
+        val bothCompleted =
+            (storeDetailState is ResultResponse.Success || storeDetailState is ResultResponse.Error) &&
+                    (storeAddressState is ResultResponse.Success || storeAddressState is ResultResponse.Error)
 
         showCircularProgress = anyLoading || !bothCompleted
 
@@ -95,11 +97,19 @@ fun Profile(
             storeDetailState is ResultResponse.Success && storeAddressState is ResultResponse.Success -> {
                 Log.e("PROFILE", "Both APIs loaded successfully")
             }
+
             storeDetailState is ResultResponse.Error -> {
-                Log.e("PROFILE", "Store detail error: ${(storeDetailState as ResultResponse.Error).error}")
+                Log.e(
+                    "PROFILE",
+                    "Store detail error: ${(storeDetailState as ResultResponse.Error).error}"
+                )
             }
+
             storeAddressState is ResultResponse.Error -> {
-                Log.e("PROFILE", "Store address error: ${(storeAddressState as ResultResponse.Error).error}")
+                Log.e(
+                    "PROFILE",
+                    "Store address error: ${(storeAddressState as ResultResponse.Error).error}"
+                )
             }
         }
     }
@@ -136,65 +146,66 @@ private fun Profile(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(base20),
+            contentAlignment = Alignment.Center
         ) {
-            if (showCircularProgress) {
-                // Show empty state when there's no data and not loading
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.White),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {}
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .statusBarsPadding(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    item {
-                        CustomTopAppBar(
-                            title = "Profile",
-                        )
-                    }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                ,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
 
-                    item {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Header(
-                            storeData = storeDetailData,
-                            onProfileDetailClick = onProfileDetailClick
-                        )
-                    }
+                CustomTopAppBar(
+                    title = "Profile",
+                )
 
-                    item {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        AccountList(
-                            data = FakeCategory.accountItem,
-                            onProfileDetailClick = onProfileDetailClick
-                        )
+                if (showCircularProgress) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(base20)
+                    ) {
+                        CircularProgressIndicator(color = primaryLight)
                     }
+                } else {
 
-                    item {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        GeneralList(
-                            data = FakeCategory.generalItem,
-                            onProfileDetailClick = onProfileDetailClick
-                        )
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+
+                        item {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Header(
+                                storeData = storeDetailData,
+                                onProfileDetailClick = onProfileDetailClick
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            AccountList(
+                                data = FakeCategory.accountItem,
+                                onProfileDetailClick = onProfileDetailClick
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            GeneralList(
+                                data = FakeCategory.generalItem,
+                                onProfileDetailClick = onProfileDetailClick
+                            )
+                        }
                     }
-                }
-            }
-            if (showCircularProgress) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    CircularProgressIndicator(color = primaryLight)
                 }
             }
         }
-
     }
 }
 
@@ -219,7 +230,7 @@ private fun Header(
         ) {
 
             if (storeData.logo.isNullOrEmpty()) {
-            Log.e("WOIII KOSONG", "${storeData.picture}")
+                Log.e("WOIII KOSONG", "${storeData.picture}")
                 Image(
                     painter = painterResource(id = R.drawable.placeholder),  // Use a placeholder image
                     contentDescription = "Store Image",
