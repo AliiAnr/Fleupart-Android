@@ -80,21 +80,25 @@ fun Profile(
         initialValue = ResultResponse.None
     )
 
-    LaunchedEffect(storeDetailState, storeAddressState) {
+    val storeProductState by profileViewModel.storeProductsState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+
+    LaunchedEffect(storeDetailState, storeAddressState, storeProductState) {
         // Cek apakah masih ada yang loading
         val anyLoading = storeDetailState is ResultResponse.Loading ||
-                storeAddressState is ResultResponse.Loading
+                storeAddressState is ResultResponse.Loading || storeProductState is ResultResponse.Loading
 
         // Cek apakah keduanya sudah selesai (success atau error)
-        val bothCompleted =
+        val allCompleted =
             (storeDetailState is ResultResponse.Success || storeDetailState is ResultResponse.Error) &&
-                    (storeAddressState is ResultResponse.Success || storeAddressState is ResultResponse.Error)
+                    (storeAddressState is ResultResponse.Success || storeAddressState is ResultResponse.Error) && (storeProductState is ResultResponse.Success || storeProductState is ResultResponse.Error)
 
-        showCircularProgress = anyLoading || !bothCompleted
+        showCircularProgress = anyLoading || !allCompleted
 
         // Log untuk debugging
         when {
-            storeDetailState is ResultResponse.Success && storeAddressState is ResultResponse.Success -> {
+            storeDetailState is ResultResponse.Success && storeAddressState is ResultResponse.Success && storeProductState is ResultResponse.Success -> {
                 Log.e("PROFILE", "Both APIs loaded successfully")
             }
 
@@ -110,6 +114,17 @@ fun Profile(
                     "PROFILE",
                     "Store address error: ${(storeAddressState as ResultResponse.Error).error}"
                 )
+            }
+
+            storeProductState is ResultResponse.Error -> {
+                Log.e(
+                    "PROFILE",
+                    "Store product error: ${(storeProductState as ResultResponse.Error).error}"
+                )
+            }
+
+            else -> {
+                Log.e("PROFILE", "Loading...")
             }
         }
     }

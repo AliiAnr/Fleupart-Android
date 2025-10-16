@@ -15,6 +15,7 @@ import com.course.fleupart.data.model.remote.StoreBannerRequest
 import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.StoreLogoRequest
+import com.course.fleupart.data.model.remote.StoreProductsResponse
 import com.course.fleupart.data.model.remote.UpdateStoreAddressRequest
 import com.course.fleupart.data.model.remote.UpdateStoreDetailRequest
 import com.course.fleupart.data.repository.ProfileRepository
@@ -31,6 +32,9 @@ class ProfileViewModel(
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
+    val storeDetail: MutableState<StoreDetailData?> = mutableStateOf(null)
+
+    private val _isRefreshing = MutableStateFlow(false)
     private val _storeDetailState: MutableStateFlow<ResultResponse<StoreDetailResponse>> =
         MutableStateFlow(ResultResponse.None)
     val storeDetailState: StateFlow<ResultResponse<StoreDetailResponse>> =
@@ -44,6 +48,10 @@ class ProfileViewModel(
         MutableStateFlow(ResultResponse.None)
     val storeAddressState: StateFlow<ResultResponse<StoreAddressResponse>> =
         _storeAddressState.asStateFlow()
+
+    private val _storeProductsState: MutableStateFlow<ResultResponse<StoreProductsResponse>> =
+        MutableStateFlow(ResultResponse.None)
+    val storeProductsState: StateFlow<ResultResponse<StoreProductsResponse>> = _storeProductsState
 
     private val _updateStoreAddressState: MutableStateFlow<ResultResponse<ApiUpdateResponse>> =
         MutableStateFlow(ResultResponse.None)
@@ -60,6 +68,8 @@ class ProfileViewModel(
     var storeAddressValue: MutableState<StoreAddressData?> = mutableStateOf(null)
 
     var storeInformationValue: MutableState<StoreDetailData?> = mutableStateOf(null)
+
+    var storeProductsValue: MutableState<StoreProductsResponse?> = mutableStateOf(null)
 
     var nameValue by mutableStateOf("")
         private set
@@ -133,6 +143,10 @@ class ProfileViewModel(
 
     }
 
+    init {
+        loadStoreDetail()
+    }
+
     fun setStoreLogo(value: Uri): Uri {
         val tempFile = File.createTempFile(
             "temp_storelogo_${System.currentTimeMillis()}",
@@ -157,6 +171,47 @@ class ProfileViewModel(
         } else {
             Log.e("ProfileViewModel", "Image Logo compression failed")
             Uri.EMPTY
+        }
+    }
+
+    private fun loadStoreDetail() {
+        viewModelScope.launch {
+            val cachedData = profileRepository.getStoredStoreDetail()
+            Log.i("ProfileViewModel", "Cached Data: $cachedData")
+            if (cachedData != null) {
+                storeDetail.value = cachedData
+            } else {
+                fetchStoreDetailFromRemote()
+            }
+        }
+    }
+
+    private fun fetchStoreDetailFromRemote() {
+        viewModelScope.launch {
+            profileRepository.getStoreDetail().collect { result ->
+                when (result) {
+                    is ResultResponse.Success -> {
+                        result.data.let { storeDetailData ->
+                            storeDetail.value = storeDetailData.data
+                            storeDetailData.data?.let {
+                                profileRepository.saveStoreDetail(it)
+                            }
+                        }
+                    }
+
+                    is ResultResponse.Error -> {
+                        // Handle error sesuai kebutuhan
+                    }
+
+                    is ResultResponse.Loading -> {
+                        // Handle loading state jika diperlukan
+                    }
+
+                    ResultResponse.None -> {
+
+                    }
+                }
+            }
         }
     }
 
@@ -287,6 +342,38 @@ class ProfileViewModel(
         }
     }
 
+    fun getStoreProducts() {
+        viewModelScope.launch {
+            try {
+                _storeProductsState.value = ResultResponse.Loading
+
+                // Tunggu storeDetailState jika masih loading
+                storeDetailState.collect { detailResult ->
+                    if (detailResult is ResultResponse.Success) {
+                        val storeId = detailResult.data.data?.id
+                        Log.d("ProfileViewModel", "Fetching products for store ID: $storeId")
+
+                        storeId?.let { id ->
+                            profileRepository.getStoreProducts(id).collect { result ->
+                                _storeProductsState.value = result
+                                if (result is ResultResponse.Success) {
+                                    storeProductsValue.value = result.data
+                                }
+                            }
+                        } ?: run {
+                            _storeProductsState.value = ResultResponse.Error("Store ID is null")
+                        }
+                        return@collect // Exit setelah berhasil
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Error fetching store products: ${e.message}")
+                _storeProductsState.value = ResultResponse.Error("Exception: ${e.message}")
+            }
+        }
+    }
+
+
     fun updateStoreDetail(
         name: String,
         description: String,
@@ -358,11 +445,22 @@ class ProfileViewModel(
 
 
     fun loadInitialData() {
-//        if (!_dataInitialized.value) {
+        if (!_dataInitialized.value) {
+        getStoreProducts()
         getStoreDetail()
         getStoreAddress()
         _dataInitialized.value = true
-//        }
+        }
+    }
+
+    fun refreshData() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            getStoreProducts()
+            getStoreDetail()
+            getStoreAddress()
+            _isRefreshing.value = false
+        }
     }
 
     fun resetUpdateState() {

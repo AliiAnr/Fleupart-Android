@@ -1,12 +1,15 @@
 package com.course.fleupart.data.repository
 
 import android.content.Context
+import android.util.Log
 import co.yml.charts.common.extensions.isNotNull
 import com.course.fleupart.data.model.remote.ApiUpdateResponse
 import com.course.fleupart.data.model.remote.StoreAddressResponse
 import com.course.fleupart.data.model.remote.StoreBannerRequest
+import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.StoreLogoRequest
+import com.course.fleupart.data.model.remote.StoreProductsResponse
 import com.course.fleupart.data.model.remote.UpdateStoreAddressRequest
 import com.course.fleupart.data.model.remote.UpdateStoreDetailRequest
 import com.course.fleupart.data.store.DataStoreManager
@@ -38,6 +41,30 @@ class ProfileRepository private constructor(
                         dataStoreManager.saveStoreDetail(storeDetail)
                     }
                     emit(ResultResponse.Success(it))
+                } ?: emit(ResultResponse.Error("Empty response body"))
+            } else {
+                emit(ResultResponse.Error("Error: ${response.code()} ${response.message()}"))
+            }
+        } catch (e: Exception) {
+            emit(ResultResponse.Error("Exception: ${e.message}"))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun getStoredStoreDetail(): StoreDetailData? = dataStoreManager.getStoreDetail()
+
+    suspend fun saveStoreDetail(storeDetail: StoreDetailData) {
+        dataStoreManager.saveStoreDetail(storeDetail)
+    }
+
+    fun getStoreProducts(storeId: String): Flow<ResultResponse<StoreProductsResponse>> = flow {
+        emit(ResultResponse.Loading)
+        try {
+            val response = profileService.getStoreProducts(storeId = storeId)
+            if (response.isSuccessful) {
+                response.body()?.let { productResponse ->
+                    Log.d("ProfileRepositoryOrder", "Response body: $productResponse")
+
+                    emit(ResultResponse.Success(productResponse))
                 } ?: emit(ResultResponse.Error("Empty response body"))
             } else {
                 emit(ResultResponse.Error("Error: ${response.code()} ${response.message()}"))

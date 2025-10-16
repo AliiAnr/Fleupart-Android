@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,10 +39,15 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.course.fleupart.R
 import com.course.fleupart.data.model.remote.StoreDetailData
+import com.course.fleupart.data.model.remote.StoreProductDataItem
+import com.course.fleupart.data.model.remote.StoreProductsResponse
 import com.course.fleupart.ui.common.toFormattedAddress
+import com.course.fleupart.ui.components.MerchantFlowerItem
+import com.course.fleupart.ui.components.MerchantProduct
 import com.course.fleupart.ui.screen.dashboard.profile.ProfileViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
+import com.course.fleupart.ui.theme.base40
 import com.course.fleupart.ui.theme.base500
 
 @Composable
@@ -66,9 +73,14 @@ fun StoreView(
         }
     }
 
+    val storeProduct = remember {
+        profileViewModel.storeProductsValue.value?.data
+    }
+
     Merchant(
         modifier = modifier,
         storeData = storeData,
+        storeProduct = storeProduct,
         onBackClick = onBackClick,
     )
 
@@ -78,8 +90,17 @@ fun StoreView(
 private fun Merchant(
     modifier: Modifier = Modifier,
     storeData: StoreDetailData?,
+    storeProduct: List<StoreProductDataItem?>?,
     onBackClick: () -> Unit,
 ) {
+
+    val groupedByCat = remember(storeProduct) {
+        storeProduct
+            ?.filterNotNull()
+            ?.groupBy { it.category?.name ?: "Uncategorized" }
+            ?.toSortedMap(compareBy { it })
+            ?: sortedMapOf()
+    }
 
 
     FleupartSurface(
@@ -106,6 +127,64 @@ private fun Merchant(
                         DescMerchant(
                             storeData = storeData,
                             onBackClick = onBackClick
+                        )
+                    }
+
+                    if (storeProduct.isNullOrEmpty()){
+
+                    } else {
+
+                        groupedByCat.forEach { (categoryName, itemsInCat) ->
+                            // Header kategori
+                            item(key = "header-$categoryName") {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = categoryName,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color.White)
+                                        .padding(start = 20.dp, top = 20.dp, end = 20.dp)
+                                )
+                            }
+
+                            items(
+                                items = itemsInCat,
+                                key = { it.id ?: "id-$categoryName-$it" }
+                            ) { product ->
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color.White)
+                                        .padding(horizontal = 20.dp)
+                                ) {
+                                    MerchantFlowerItem(
+                                        item = product,
+                                        onFlowerClick = {
+//                                        homeViewModel.setSelectedProduct(product)
+//                                        onFlowerClick(
+//                                            product.id,
+//                                            DetailDestinations.DETAIL_MERCHANT
+//                                        )
+                                        }
+                                    )
+                                    // Divider kecuali item terakhir
+                                    if (product != itemsInCat.last()) {
+                                        HorizontalDivider(color = base40)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .background(Color.White)
                         )
                     }
 

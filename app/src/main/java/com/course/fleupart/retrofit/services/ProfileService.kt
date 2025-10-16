@@ -1,8 +1,10 @@
 package com.course.fleupart.retrofit.services
 
 import com.course.fleupart.data.model.remote.ApiUpdateResponse
+import com.course.fleupart.data.model.remote.OrderListResponse
 import com.course.fleupart.data.model.remote.StoreAddressResponse
 import com.course.fleupart.data.model.remote.StoreDetailResponse
+import com.course.fleupart.data.model.remote.StoreProductsResponse
 import com.course.fleupart.data.model.remote.UpdateStoreAddressRequest
 import com.course.fleupart.data.model.remote.UpdateStoreDetailRequest
 import okhttp3.MultipartBody
@@ -12,6 +14,7 @@ import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.Path
 
 interface ProfileService {
 
@@ -39,4 +42,6 @@ interface ProfileService {
         @Part file: MultipartBody.Part
     ): Response<ApiUpdateResponse>
 
+    @GET("api/product/store/{storeId}")
+    suspend fun getStoreProducts(@Path("storeId") storeId: String): Response<StoreProductsResponse>
 }
