@@ -44,6 +44,7 @@ import com.course.fleupart.data.model.remote.StoreProductsResponse
 import com.course.fleupart.ui.common.toFormattedAddress
 import com.course.fleupart.ui.components.MerchantFlowerItem
 import com.course.fleupart.ui.components.MerchantProduct
+import com.course.fleupart.ui.screen.dashboard.product.EmptyProduct
 import com.course.fleupart.ui.screen.dashboard.profile.ProfileViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
@@ -131,7 +132,23 @@ private fun Merchant(
                     }
 
                     if (storeProduct.isNullOrEmpty()){
-
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Column (
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.White)
+                                    .padding(horizontal = 20.dp, vertical = 100.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                EmptyProduct(
+                                    icon = R.drawable.empty_store_products,
+                                    title = "No Products Available",
+                                    description = "Add products to your store and they will appear here."
+                                )
+                            }
+                        }
                     } else {
 
                         groupedByCat.forEach { (categoryName, itemsInCat) ->
@@ -177,15 +194,15 @@ private fun Merchant(
                                 }
                             }
                         }
-                    }
 
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                                .background(Color.White)
-                        )
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(100.dp)
+                                    .background(Color.White)
+                            )
+                        }
                     }
 
                 }

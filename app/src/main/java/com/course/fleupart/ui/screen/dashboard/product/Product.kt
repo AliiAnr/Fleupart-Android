@@ -354,7 +354,8 @@ fun EmptyProduct(
                 text = description,
                 color = base100,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
             )
         }
     }
