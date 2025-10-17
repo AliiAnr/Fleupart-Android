@@ -180,11 +180,6 @@ private fun Merchant(
                                     MerchantFlowerItem(
                                         item = product,
                                         onFlowerClick = {
-//                                        homeViewModel.setSelectedProduct(product)
-//                                        onFlowerClick(
-//                                            product.id,
-//                                            DetailDestinations.DETAIL_MERCHANT
-//                                        )
                                         }
                                     )
                                     // Divider kecuali item terakhir
