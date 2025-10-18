@@ -255,15 +255,15 @@ private fun OrderStatusSection(
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
-            Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                painter = painterResource(R.drawable.back_arrow),
-                contentDescription = "Navigate",
-                tint = Color.Black,
-                modifier = Modifier
-                    .size(18.dp)
-                    .clickable { onNavigate() }
-            )
+//            Spacer(modifier = Modifier.weight(1f))
+//            Icon(
+//                painter = painterResource(R.drawable.back_arrow),
+//                contentDescription = "Navigate",
+//                tint = Color.Black,
+//                modifier = Modifier
+//                    .size(18.dp)
+//                    .clickable { onNavigate() }
+//            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
