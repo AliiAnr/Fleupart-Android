@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.course.fleupart.R
+import com.course.fleupart.data.model.remote.StoreProduct
 import com.course.fleupart.data.model.remote.StoreProductDataItem
 import com.course.fleupart.ui.common.formatCurrency
 import com.course.fleupart.ui.common.formatCurrencyFromString
@@ -42,13 +43,9 @@ import com.course.fleupart.ui.theme.secColor
 @Composable
 fun FlowerItem(
     modifier: Modifier = Modifier,
-    onFlowerClick: (Long, String) -> Unit,
-    imageRes: Int,
-    storeName: String,
-    flowerName: String,
-    rating: Double,
-    reviewsCount: Int,
-    price: Long
+    onFlowerClick: (String, String) -> Unit,
+    setSelectedProduct: (StoreProduct) -> Unit,
+    item: StoreProduct
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -57,20 +54,48 @@ fun FlowerItem(
         ),
         modifier = modifier
             .width(140.dp)
+            .clickable(
+                onClick = {
+//                    setSelectedProduct(item)
+//                    onFlowerClick(item.id, MainDestinations.DASHBOARD_ROUTE)
+                },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-            )
+
+            if (item.picture.isEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.placeholder),  // Use a placeholder image
+                    contentDescription = "Store Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                )
+            } else {
+                AsyncImage(
+                    model = item.picture[0].path,
+                    contentDescription = "Store Image",
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = R.drawable.placeholder),
+                    error = painterResource(id = R.drawable.placeholder),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                )
+            }
+
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = "$storeName - $flowerName",
+                text = "${item.name} - ${item.store.name}",
                 fontSize = 14.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.Medium,
             )
             Row(
@@ -80,18 +105,18 @@ fun FlowerItem(
                 Icon(
                     painter = painterResource(id = R.drawable.star),
                     contentDescription = "Rating",
-                    tint = Color(0xFFFFC107),
+                    tint = secColor,
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "$rating | $reviewsCount",
+                    text = "${item.rating} | 100",
                     fontSize = 10.sp,
                     color = base100
                 )
             }
             Text(
-                text = formatCurrency(price),
+                text = formatCurrencyFromString(item.price),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -100,7 +125,6 @@ fun FlowerItem(
         }
     }
 }
-
 
 @Composable
 fun MerchantFlowerItem(

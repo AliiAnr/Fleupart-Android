@@ -1,5 +1,6 @@
 package com.course.fleupart.ui.screen.dashboard.home
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,11 +23,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -45,35 +53,93 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.course.fleupart.R
+import com.course.fleupart.data.model.remote.StoreProduct
+import com.course.fleupart.data.model.remote.StoreProductResponse
+import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.common.formatCurrency
 import com.course.fleupart.ui.components.FakeCategory
 import com.course.fleupart.ui.components.Flower
 import com.course.fleupart.ui.components.FlowerItem
+import com.course.fleupart.ui.components.ProductListLoading
 import com.course.fleupart.ui.components.TipsItem
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base100
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base300
+import com.course.fleupart.ui.theme.primaryLight
+import com.google.android.datatransport.ProductData
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(
+    modifier: Modifier,
     onSnackClick: (Long, String) -> Unit,
-    modifier: Modifier
+    homeViewModel: HomeViewModel
 ) {
     // call API in this section
+
+    val isRefreshing by homeViewModel.isRefreshing.collectAsStateWithLifecycle()
+    val pullToRefreshState = rememberPullToRefreshState()
+
+    val storeProductState by homeViewModel.storeProductState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+    var isStoreProductLoading by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        homeViewModel.loadInitialData()
+    }
+
+    LaunchedEffect(storeProductState) {
+        when (storeProductState) {
+            is ResultResponse.Success -> {
+               isStoreProductLoading = false
+            }
+
+            is ResultResponse.Loading -> {
+                isStoreProductLoading = true
+            }
+
+            is ResultResponse.Error -> {
+                isStoreProductLoading = false
+            }
+
+            else -> {}
+        }
+    }
+
+    val productData: List<StoreProduct> = when (storeProductState) {
+        is ResultResponse.Success -> {
+            (storeProductState as ResultResponse.Success<StoreProductResponse>).data.data
+        }
+        else -> {
+            emptyList()
+        }
+    }
+
     Home(
         modifier = modifier,
+        isStoreProductLoading = isStoreProductLoading,
+        storeProductList = productData,
         onSnackClick = onSnackClick,
-        data = 0
+        isRefreshing = isRefreshing,
+        pullToRefreshState = pullToRefreshState,
+        onRefresh = {
+            homeViewModel.refreshData()
+        }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Home(
     modifier: Modifier = Modifier,
+    isStoreProductLoading: Boolean,
+    isRefreshing: Boolean,
+    pullToRefreshState: PullToRefreshState,
+    storeProductList: List<StoreProduct>,
     onSnackClick: (Long, String) -> Unit,
-    data: Int = 0
+    onRefresh: () -> Unit,
 ) {
     var textState by remember { mutableStateOf("") }
 
@@ -98,48 +164,73 @@ private fun Home(
                     .statusBarsPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                LazyColumn(
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = onRefresh,
+                    state = pullToRefreshState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .statusBarsPadding(),
+                        .background(base20),
+                    indicator = {
+                        PullToRefreshDefaults.Indicator(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            isRefreshing = isRefreshing,
+                            state = pullToRefreshState,
+                            threshold = 100.dp,
+                            color = primaryLight,
+                            containerColor = Color.White
+                        )
+                    }
                 ) {
-                    item {
-                        Header()
-                    }
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .statusBarsPadding(),
+                    ) {
+                        item {
+                            Header()
+                        }
 
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Income()
-                    }
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Income()
+                        }
 
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OrderStatusSection(
-                            count = temp,
-                            onNavigate = {
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OrderStatusSection(
+                                count = temp,
+                                onNavigate = {
 
+                                }
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            if (isStoreProductLoading) {
+                                ProductListLoading()
+                            } else if (storeProductList.isEmpty()) {
+                                EmptyPopularProduct()
+                            } else {
+                                PopularProduct(
+                                    flowerList = storeProductList,
+                                    onNavigate = {
+
+                                    },
+                                    onItemClick = { id, name ->
+
+                                    }
+                                )
                             }
-                        )
-                    }
+                        }
 
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        PopularProduct(
-                            flowerList = FakeCategory.flowers,
-                            onNavigate = {
-
-                            },
-                            onItemClick = { id, name ->
-
-                            }
-                        )
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        TipsSection(
-                            tipsList = FakeCategory.tipsList
-                        )
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TipsSection(
+                                tipsList = FakeCategory.tipsList
+                            )
+                        }
                     }
                 }
             }
@@ -255,7 +346,7 @@ private fun OrderStatusSection(
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
-//            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
 //            Icon(
 //                painter = painterResource(R.drawable.back_arrow),
 //                contentDescription = "Navigate",
@@ -314,7 +405,7 @@ private fun OrderStatusItem(
 @Composable
 private fun PopularProduct(
     modifier: Modifier = Modifier,
-    flowerList: List<Flower>,
+    flowerList: List<StoreProduct>,
     onNavigate: () -> Unit,
     onItemClick: (Long, String) -> Unit
 ) {
@@ -349,21 +440,71 @@ private fun PopularProduct(
         ) {
             items(flowerList, key = { it.id }) { flower ->
                 FlowerItem(
-                    onFlowerClick = { id, name ->
-                        // call API
+                    onFlowerClick = { _, _ ->
                     },
-                    imageRes = flower.image,
-                    storeName = flower.storeName,
-                    flowerName = flower.flowerName,
-                    rating = flower.rating,
-                    reviewsCount = flower.reviewsCount,
-                    price = flower.price
+                    item = flower,
+                    setSelectedProduct = {}
                 )
             }
 
         }
     }
 }
+
+
+@Composable
+private fun EmptyPopularProduct(
+) {
+    Column(
+        modifier = Modifier
+            .background(Color.White)
+            .padding(horizontal = 20.dp, vertical = 20.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Best Ratings!",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Icon(
+                painter = painterResource(R.drawable.back_arrow),
+                contentDescription = "Navigate",
+                tint = Color.Black,
+                modifier = Modifier
+                    .size(16.dp)
+                    .clickable {  }
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column(
+            modifier = Modifier.fillMaxSize().height(160.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "No popular products available",
+                color = Color.Black,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "Try to refresh or check back later.",
+                color = base100,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
 
 @Composable
 fun TipsSection(

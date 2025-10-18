@@ -32,6 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.course.fleupart.data.resource.Resource
+import com.course.fleupart.di.factory.HomeViewModelFactory
 import com.course.fleupart.di.factory.LoginViewModelFactory
 import com.course.fleupart.di.factory.OnBoardingViewModelFactory
 import com.course.fleupart.di.factory.OnDataBoardingViewModelFactory
@@ -64,6 +65,7 @@ import com.course.fleupart.ui.screen.dashboard.detail.home.DetailTest
 import com.course.fleupart.ui.screen.dashboard.detail.order.DetailOrderItem
 import com.course.fleupart.ui.screen.dashboard.detail.product.AddProduct
 import com.course.fleupart.ui.screen.dashboard.detail.product.DetailProduct
+import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
 import com.course.fleupart.ui.screen.dashboard.profile.ProfileViewModel
 import com.course.fleupart.ui.screen.navigation.DetailDestinations
@@ -99,6 +101,12 @@ fun FleupartApp() {
 
     val loginViewModel: LoginScreenViewModel = viewModel(
         factory = LoginViewModelFactory.getInstance(
+            Resource.appContext
+        )
+    )
+
+    val homeViewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory.getInstance(
             Resource.appContext
         )
     )
@@ -355,7 +363,8 @@ fun FleupartApp() {
                             onCompletedOrderDetail = fleupartNavController::navigateToCompletedOrderDetail,
                             onWithdrawDetail = fleupartNavController::navigateToWithdrawDetail,
                             orderViewModel = orderViewModel,
-                            profileViewModel = profileViewModel
+                            profileViewModel = profileViewModel,
+                            homeViewModel = homeViewModel
                         )
                     }
 
@@ -489,7 +498,8 @@ fun MainContainer(
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
     onWithdrawDetail: (String, NavBackStackEntry) -> Unit,
     orderViewModel: OrderViewModel,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    homeViewModel: HomeViewModel
 ) {
     val fleuraScaffoldState = rememberFleupartScaffoldState()
     val nestedNavController = rememberFleupartNavController()
@@ -544,6 +554,7 @@ fun MainContainer(
                 onWithdrawDetail = onWithdrawDetail,
                 orderViewModel = orderViewModel,
                 profileViewModel = profileViewModel,
+                homeViewModel = homeViewModel,
                 modifier = Modifier
                     .padding(padding)
                     .consumeWindowInsets(padding)

@@ -1,6 +1,7 @@
 package com.course.fleupart.di
 
 import android.content.Context
+import com.course.fleupart.data.repository.HomeRepository
 import com.course.fleupart.data.repository.LoginRepository
 import com.course.fleupart.data.repository.NotificationRepository
 import com.course.fleupart.data.repository.OnBoardingRepository
@@ -28,6 +29,11 @@ object Injection {
     fun provideRegisterRepository(context: Context): RegisterRepository {
         return RegisterRepository.getInstance(context)
     }
+
+    fun provideHomeRepository(context: Context): HomeRepository {
+        return HomeRepository.getInstance(context)
+    }
+
 
     fun provideOtpRepository(context: Context): OtpRepository {
         return OtpRepository.getInstance(context)

@@ -19,6 +19,7 @@ import com.course.fleupart.LocalNavAnimatedVisibilityScope
 import com.course.fleupart.ui.components.HomeSections
 import com.course.fleupart.ui.screen.dashboard.finance.Finance
 import com.course.fleupart.ui.screen.dashboard.home.Home
+import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
 import com.course.fleupart.ui.screen.dashboard.order.Order
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
 import com.course.fleupart.ui.screen.dashboard.product.Product
@@ -90,11 +91,13 @@ fun NavGraphBuilder.addHomeGraph(
     onOrderDetail: (NavBackStackEntry) -> Unit,
     orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel,
+    homeViewModel: HomeViewModel,
     modifier: Modifier = Modifier
 ) {
     composable(HomeSections.Home.route) { from ->
         Home(
             onSnackClick = { id, origin -> onSnackSelected(id, origin, from) },
+            homeViewModel = homeViewModel,
             modifier = modifier
         )
     }

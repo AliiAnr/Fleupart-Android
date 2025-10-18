@@ -3,6 +3,7 @@ package com.course.fleupart.retrofit.api
 import android.content.Context
 import com.course.fleupart.BuildConfig
 import com.course.fleupart.retrofit.AuthInterceptor
+import com.course.fleupart.retrofit.services.HomeService
 import com.course.fleupart.retrofit.services.LoginService
 import com.course.fleupart.retrofit.services.NotificationService
 import com.course.fleupart.retrofit.services.OrderService
@@ -66,6 +67,10 @@ object ApiConfig {
 
     fun getOrderService(context: Context) : OrderService {
         return provideRetrofit(context).create(OrderService::class.java)
+    }
+
+    fun getHomeService(context: Context): HomeService {
+        return provideRetrofit(context).create(HomeService::class.java)
     }
 
     fun getProfileService(context: Context) : ProfileService {
