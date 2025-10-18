@@ -21,10 +21,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,6 +63,7 @@ import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base40
 import com.course.fleupart.ui.theme.primaryLight
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Profile(
     modifier: Modifier,
@@ -72,9 +78,13 @@ fun Profile(
         profileViewModel.loadInitialData()
     }
 
+    val isRefreshing by profileViewModel.isRefreshing.collectAsStateWithLifecycle()
+
     val storeDetailState by profileViewModel.storeDetailState.collectAsStateWithLifecycle(
         initialValue = ResultResponse.None
     )
+
+    val pullToRefreshState = rememberPullToRefreshState()
 
     val storeAddressState by profileViewModel.storeAddressState.collectAsStateWithLifecycle(
         initialValue = ResultResponse.None
@@ -141,18 +151,27 @@ fun Profile(
 
     Profile(
         modifier = modifier,
+        isRefreshing = isRefreshing,
+        pullToRefreshState = pullToRefreshState,
         onProfileDetailClick = onProfileDetailClick,
         storeDetailData = storeDetailData ?: StoreDetailData(),
-        showCircularProgress = showCircularProgress
+        showCircularProgress = showCircularProgress,
+        onRefresh = {
+            profileViewModel.refreshData()
+        }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Profile(
     modifier: Modifier = Modifier,
     onProfileDetailClick: (String) -> Unit,
     storeDetailData: StoreDetailData,
-    showCircularProgress: Boolean
+    isRefreshing: Boolean,
+    pullToRefreshState: PullToRefreshState,
+    showCircularProgress: Boolean,
+    onRefresh: () -> Unit,
 ) {
 
     FleupartSurface(
@@ -175,47 +194,66 @@ private fun Profile(
                 CustomTopAppBar(
                     title = "Profile",
                 )
-
-                if (showCircularProgress) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(base20)
-                    ) {
-                        CircularProgressIndicator(color = primaryLight)
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = onRefresh,
+                    state = pullToRefreshState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(base20),
+                    indicator = {
+                        PullToRefreshDefaults.Indicator(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            isRefreshing = isRefreshing,
+                            state = pullToRefreshState,
+                            threshold = 100.dp,
+                            color = primaryLight,
+                            containerColor = Color.White
+                        )
                     }
-                } else {
+                ) {
 
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-
-                        item {
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Header(
-                                storeData = storeDetailData,
-                                onProfileDetailClick = onProfileDetailClick
-                            )
+                    if (showCircularProgress) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(base20)
+                        ) {
+                            CircularProgressIndicator(color = primaryLight)
                         }
+                    } else {
 
-                        item {
-                            Spacer(modifier = Modifier.height(12.dp))
-                            AccountList(
-                                data = FakeCategory.accountItem,
-                                onProfileDetailClick = onProfileDetailClick
-                            )
-                        }
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
 
-                        item {
-                            Spacer(modifier = Modifier.height(12.dp))
-                            GeneralList(
-                                data = FakeCategory.generalItem,
-                                onProfileDetailClick = onProfileDetailClick
-                            )
+                            item {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Header(
+                                    storeData = storeDetailData,
+                                    onProfileDetailClick = onProfileDetailClick
+                                )
+                            }
+
+                            item {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                AccountList(
+                                    data = FakeCategory.accountItem,
+                                    onProfileDetailClick = onProfileDetailClick
+                                )
+                            }
+
+                            item {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                GeneralList(
+                                    data = FakeCategory.generalItem,
+                                    onProfileDetailClick = onProfileDetailClick
+                                )
+                            }
                         }
                     }
                 }

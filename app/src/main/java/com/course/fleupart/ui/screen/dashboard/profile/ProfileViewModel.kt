@@ -22,6 +22,7 @@ import com.course.fleupart.data.repository.ProfileRepository
 import com.course.fleupart.data.resource.Resource
 import com.course.fleupart.ui.common.ImageCompressor
 import com.course.fleupart.ui.common.ResultResponse
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,6 +36,8 @@ class ProfileViewModel(
     val storeDetail: MutableState<StoreDetailData?> = mutableStateOf(null)
 
     private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
     private val _storeDetailState: MutableStateFlow<ResultResponse<StoreDetailResponse>> =
         MutableStateFlow(ResultResponse.None)
     val storeDetailState: StateFlow<ResultResponse<StoreDetailResponse>> =
@@ -452,14 +455,46 @@ class ProfileViewModel(
         _dataInitialized.value = true
         }
     }
-
     fun refreshData() {
         viewModelScope.launch {
             _isRefreshing.value = true
-            getStoreProducts()
-            getStoreDetail()
-            getStoreAddress()
-            _isRefreshing.value = false
+            try {
+                val storeProductsDeferred = async {
+                    profileRepository.getStoreProducts(storeDetail.value?.id ?: "").collect { result ->
+                        _storeProductsState.value = result
+                        if (result is ResultResponse.Success) {
+                            storeProductsValue.value = result.data
+                        }
+                    }
+                }
+
+                val storeDetailDeferred = async {
+                    profileRepository.getStoreDetail().collect { result ->
+                        _storeDetailState.value = result
+                        if (result is ResultResponse.Success) {
+                            storeInformationValue.value = result.data.data
+                        }
+                    }
+                }
+
+                val storeAddressDeferred = async {
+                    profileRepository.getStoreAddress().collect { result ->
+                        _storeAddressState.value = result
+                        if (result is ResultResponse.Success) {
+                            storeAddressValue.value = result.data.data
+                        }
+                    }
+                }
+
+                storeProductsDeferred.await()
+                storeDetailDeferred.await()
+                storeAddressDeferred.await()
+
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Error refreshing data: ${e.message}")
+            } finally {
+                _isRefreshing.value = false
+            }
         }
     }
 
