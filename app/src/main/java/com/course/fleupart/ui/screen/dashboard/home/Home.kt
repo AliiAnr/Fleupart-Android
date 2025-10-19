@@ -106,6 +106,8 @@ fun Home(
         initialValue = emptyList()
     )
 
+    val storeBalance by orderViewModel.storeBalance.collectAsStateWithLifecycle()
+
     LaunchedEffect(Unit) {
         orderViewModel.loadInitialData()
         homeViewModel.loadInitialData()
@@ -168,6 +170,7 @@ fun Home(
         modifier = modifier,
         isStoreProductLoading = isStoreProductLoading,
         storeProductList = productData,
+        storeBalance = storeBalance,
         orderCounts = orderCounts,
         isFilteredOrdersLoading = isFilteredOrdersLoading,
         onSnackClick = onSnackClick,
@@ -185,6 +188,7 @@ fun Home(
 private fun Home(
     modifier: Modifier = Modifier,
     isStoreProductLoading: Boolean,
+    storeBalance: Int,
     isRefreshing: Boolean,
     orderCounts: List<Int>,
     isFilteredOrdersLoading: Boolean,
@@ -239,7 +243,13 @@ private fun Home(
 
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
-                            Income()
+                            if (isFilteredOrdersLoading){
+                                IncomeLoading()
+                            } else {
+                                Income(
+                                    storeBalance = storeBalance
+                                )
+                            }
                         }
 
                         item {
@@ -332,7 +342,8 @@ private fun Header(
 
 @Composable
 private fun Income(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    storeBalance: Int
 ) {
     Row(
         modifier = Modifier
@@ -345,18 +356,54 @@ private fun Income(
             modifier = Modifier.padding(vertical = 18.dp)
         ) {
             Text(
-                text = "Today's Income",
+                text = "Total Income",
                 fontSize = 14.sp,
                 color = Color.Black,
                 fontWeight = FontWeight.Normal
             )
 
             Text(
-                text = formatCurrency(1000000),
+                text = formatCurrency(amount = storeBalance.toLong()),
                 fontSize = 24.sp,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
+        }
+    }
+}
+
+
+@Composable
+private fun IncomeLoading(
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 18.dp)
+        ) {
+            Text(
+                text = "Total Income",
+                fontSize = 14.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Normal
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .height(24.dp)
+                    .width(200.dp)
+                    .loadingFx()
+            ) {
+            }
+
         }
     }
 }
