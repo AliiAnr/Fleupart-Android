@@ -66,6 +66,7 @@ import com.course.fleupart.ui.screen.dashboard.detail.home.TipsDetail
 import com.course.fleupart.ui.screen.dashboard.detail.order.DetailOrderItem
 import com.course.fleupart.ui.screen.dashboard.detail.product.AddProduct
 import com.course.fleupart.ui.screen.dashboard.detail.product.DetailProduct
+import com.course.fleupart.ui.screen.dashboard.detail.product.FlowerDetail
 import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
 import com.course.fleupart.ui.screen.dashboard.profile.ProfileViewModel
@@ -380,6 +381,52 @@ fun FleupartApp() {
                     }
 
                     composableWithCompositionLocal(
+                        route = "${DetailDestinations.FLOWER_DETAIL_ROUTE}/{${MainDestinations.FLOWER_ID_KEY}}",
+                        arguments = listOf(
+                            navArgument(MainDestinations.FLOWER_ID_KEY) {
+                                type = NavType.StringType
+                            }
+                        ),
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popEnterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        }
+                    ) { backStackEntry ->
+                        val arguments = requireNotNull(backStackEntry.arguments)
+                        val flowerId = arguments.getString(MainDestinations.FLOWER_ID_KEY)
+
+                        val selectedProduct by homeViewModel.selectedProduct.collectAsStateWithLifecycle()
+                        selectedProduct?.let {
+                            FlowerDetail(
+                                flowerId = flowerId ?: "",
+                                selectedProduct = it,
+                                homeViewModel = homeViewModel,
+                                onBackClick = fleupartNavController::upPress
+                            )
+                        }
+                    }
+
+                    composableWithCompositionLocal(
                         route = DetailDestinations.SALES_REPORT_ROUTE
                     ) { backStackEntry ->
                         SalesReport(
@@ -399,6 +446,7 @@ fun FleupartApp() {
                         MainContainer(
                             onSnackSelected = fleupartNavController::navigateToSnackDetail,
                             onProductDetail = fleupartNavController::navigateToProductDetail,
+                            onFlowerDetail = fleupartNavController::navigateToFlowerDetail,
                             onProfileDetail = fleupartNavController::navigateToProfileDetail,
                             onOrderDetail = fleupartNavController::navigateToOrderDetail,
                             onTipsDetail = fleupartNavController::navigateToTipsDetail,
@@ -535,6 +583,7 @@ fun MainContainer(
     modifier: Modifier = Modifier,
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
+    onFlowerDetail: (String, NavBackStackEntry) -> Unit,
     onTipsDetail: (Long, NavBackStackEntry) -> Unit,
     onOrderDetail: (NavBackStackEntry) -> Unit,
     onCompletedOrderDetail: (NavBackStackEntry) -> Unit,
@@ -592,6 +641,7 @@ fun MainContainer(
                 onSnackSelected = onSnackSelected,
                 onProductDetail = onProductDetail,
                 onProfileDetail = onProfileDetail,
+                onFlowerDetail = onFlowerDetail,
                 onOrderDetail = onOrderDetail,
                 onTipsDetail = onTipsDetail,
                 onCompletedOrderDetail = onCompletedOrderDetail,

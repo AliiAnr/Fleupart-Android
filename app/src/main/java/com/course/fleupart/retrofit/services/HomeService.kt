@@ -1,5 +1,6 @@
 package com.course.fleupart.retrofit.services
 
+import com.course.fleupart.data.model.remote.ProductReviewResponse
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.StoreProductResponse
 import retrofit2.Response
@@ -14,5 +15,7 @@ interface HomeService {
     @GET("api/store/detail")
     suspend fun getStoreDetail(): Response<StoreDetailResponse>
 
+    @GET("api/product/review/product/{productId}")
+    suspend fun getProductReview(@Path("productId") productId: String): Response<ProductReviewResponse>
 
 }

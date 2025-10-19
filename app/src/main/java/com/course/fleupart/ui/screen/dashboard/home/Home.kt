@@ -81,6 +81,7 @@ fun Home(
     modifier: Modifier,
     onSnackClick: (Long, String) -> Unit,
     onTipsDetail: (Long) -> Unit,
+    onFlowerDetail: (String) -> Unit,
     homeViewModel: HomeViewModel,
     orderViewModel: OrderViewModel
 ) {
@@ -216,7 +217,11 @@ fun Home(
             homeViewModel.refreshData()
             orderViewModel.refreshOrders()
         },
-        onTipsDetail = onTipsDetail
+        onTipsDetail = onTipsDetail,
+        onFlowerDetail = onFlowerDetail,
+        onSelectedProduct = { storeProduct ->
+            homeViewModel.setSelectedProduct(storeProduct)
+        }
     )
 }
 
@@ -235,7 +240,9 @@ private fun Home(
     storeProductList: List<StoreProduct>,
     onSnackClick: (Long, String) -> Unit,
     onRefresh: () -> Unit,
-    onTipsDetail: (Long) -> Unit
+    onTipsDetail: (Long) -> Unit,
+    onFlowerDetail: (String) -> Unit,
+    onSelectedProduct: (StoreProduct) -> Unit
 ) {
 
     val tempOrderCounts = listOf(0, 0, 0, 0)
@@ -321,9 +328,8 @@ private fun Home(
                                     onNavigate = {
 
                                     },
-                                    onItemClick = { id, name ->
-
-                                    }
+                                    onFlowerClick = onFlowerDetail,
+                                    onSelectedProduct = onSelectedProduct
                                 )
                             }
                         }
@@ -684,7 +690,8 @@ private fun PopularProduct(
     modifier: Modifier = Modifier,
     flowerList: List<StoreProduct>,
     onNavigate: () -> Unit,
-    onItemClick: (Long, String) -> Unit
+    onSelectedProduct: (StoreProduct) -> Unit,
+    onFlowerClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -717,10 +724,9 @@ private fun PopularProduct(
         ) {
             items(flowerList, key = { it.id }) { flower ->
                 FlowerItem(
-                    onFlowerClick = { _, _ ->
-                    },
+                    onFlowerClick = onFlowerClick,
                     item = flower,
-                    setSelectedProduct = {}
+                    onSelectedProduct = onSelectedProduct
                 )
             }
 

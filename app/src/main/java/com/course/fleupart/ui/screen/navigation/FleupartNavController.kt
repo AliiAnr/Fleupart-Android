@@ -25,6 +25,8 @@ object MainDestinations {
     const val SNACK_ID_KEY = "snackId"
     const val ORIGIN = "origin"
     const val OTP_ROUTE = "otp"
+
+    const val FLOWER_ID_KEY = "flowerId"
 }
 
 object DetailDestinations {
@@ -47,6 +49,8 @@ object DetailDestinations {
 
     const val TIPS_DETAIL_ROUTE = "tipsDetail"
     const val TIPS_ID_KEY = "tipsId"
+
+    const val FLOWER_DETAIL_ROUTE = "flowerDetail"
 }
 
 object QueryKeys {
@@ -96,6 +100,12 @@ class FleupartNavController(
     fun navigateToSnackDetail(snackId: Long, origin: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             navController.navigate("${MainDestinations.SNACK_DETAIL_ROUTE}/$snackId?origin=$origin")
+        }
+    }
+
+    fun navigateToFlowerDetail(id: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate("${DetailDestinations.FLOWER_DETAIL_ROUTE}/$id")
         }
     }
 

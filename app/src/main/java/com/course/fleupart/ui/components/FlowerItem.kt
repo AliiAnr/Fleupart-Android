@@ -43,8 +43,8 @@ import com.course.fleupart.ui.theme.secColor
 @Composable
 fun FlowerItem(
     modifier: Modifier = Modifier,
-    onFlowerClick: (String, String) -> Unit,
-    setSelectedProduct: (StoreProduct) -> Unit,
+    onFlowerClick: (String) -> Unit,
+    onSelectedProduct: (StoreProduct) -> Unit,
     item: StoreProduct
 ) {
     Card(
@@ -56,8 +56,8 @@ fun FlowerItem(
             .width(140.dp)
             .clickable(
                 onClick = {
-//                    setSelectedProduct(item)
-//                    onFlowerClick(item.id, MainDestinations.DASHBOARD_ROUTE)
+                    onSelectedProduct(item)
+                    onFlowerClick(item.id)
                 },
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }

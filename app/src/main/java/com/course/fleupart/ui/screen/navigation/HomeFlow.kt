@@ -87,6 +87,7 @@ fun NavGraphBuilder.addHomeGraph(
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
+    onFlowerDetail: (String, NavBackStackEntry) -> Unit,
     onTipsDetail: (Long, NavBackStackEntry) -> Unit,
     onWithdrawDetail: (String, NavBackStackEntry) -> Unit,
     onCompletedOrderDetail: (NavBackStackEntry) -> Unit,
@@ -98,6 +99,9 @@ fun NavGraphBuilder.addHomeGraph(
 ) {
     composable(HomeSections.Home.route) { from ->
         Home(
+            onFlowerDetail = { id ->
+                onFlowerDetail(id, from)
+            },
             onSnackClick = { id, origin ->
                 onSnackSelected(id, origin, from)
             },

@@ -1,6 +1,7 @@
 package com.course.fleupart.data.repository
 
 import android.content.Context
+import com.course.fleupart.data.model.remote.ProductReviewResponse
 import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.StoreProductResponse
@@ -54,6 +55,23 @@ class HomeRepository private constructor(
             }
         } catch (e: Exception) {
             emit(ResultResponse.Error("Exception: ${e.message}"))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    fun getProductReview(productId: String): Flow<ResultResponse<ProductReviewResponse>> = flow {
+        emit(ResultResponse.Loading)
+
+        try {
+            val response = homeService.getProductReview(productId = productId)
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    emit(ResultResponse.Success(it))
+                } ?: emit(ResultResponse.Error("Empty response body"))
+            } else {
+                emit(ResultResponse.Error("Error: ${response.errorBody()?.string() ?: "Unknown error"}"))
+            }
+        } catch (e: Exception) {
+            emit(ResultResponse.Error(e.localizedMessage ?: "Error retrieving user details"))
         }
     }.flowOn(Dispatchers.IO)
 

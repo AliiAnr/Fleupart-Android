@@ -6,8 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.course.fleupart.data.model.remote.ProductReviewResponse
 import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreDetailResponse
+import com.course.fleupart.data.model.remote.StoreProduct
 import com.course.fleupart.data.model.remote.StoreProductResponse
 import com.course.fleupart.data.repository.HomeRepository
 import com.course.fleupart.ui.common.ResultResponse
@@ -28,11 +30,17 @@ class HomeViewModel(
 
     val storeDetail: MutableState<StoreDetailData?> = mutableStateOf(null)
 
+    private val _productReviewState =
+        MutableStateFlow<ResultResponse<ProductReviewResponse>>(ResultResponse.None)
+    val productReviewState: StateFlow<ResultResponse<ProductReviewResponse>> = _productReviewState
+
     private val _storeDetailState: MutableStateFlow<ResultResponse<StoreDetailResponse>> =
         MutableStateFlow(ResultResponse.None)
     val storeDetailState: StateFlow<ResultResponse<StoreDetailResponse>> =
         _storeDetailState.asStateFlow()
 
+    private val _selectedProduct = MutableStateFlow<StoreProduct?>(null)
+    val selectedProduct: StateFlow<StoreProduct?> = _selectedProduct.asStateFlow()
 
     private val _dataInitialized = MutableStateFlow(false)
     val dataInitialized: StateFlow<Boolean> = _dataInitialized
@@ -69,6 +77,10 @@ class HomeViewModel(
                 )
             )
         }
+    }
+
+    fun setSelectedProduct(storeProduct: StoreProduct) {
+        _selectedProduct.value = storeProduct
     }
 
     fun refreshData() {
@@ -166,6 +178,20 @@ class HomeViewModel(
                 }
             } catch (e: Exception) {
                 _storeProductState.value = ResultResponse.Error("Failed to get user: ${e.message}")
+            }
+        }
+    }
+
+    fun getProductReview(productId: String) {
+        viewModelScope.launch {
+            try {
+                _productReviewState.value = ResultResponse.Loading
+                homeRepository.getProductReview(productId = productId)
+                    .collect { result ->
+                        _productReviewState.value = result
+                    }
+            } catch (e: Exception) {
+                _productReviewState.value = ResultResponse.Error("Failed to get user: ${e.message}")
             }
         }
     }
