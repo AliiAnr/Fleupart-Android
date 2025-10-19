@@ -98,6 +98,7 @@ fun NavGraphBuilder.addHomeGraph(
         Home(
             onSnackClick = { id, origin -> onSnackSelected(id, origin, from) },
             homeViewModel = homeViewModel,
+            orderViewModel = orderViewModel,
             modifier = modifier
         )
     }

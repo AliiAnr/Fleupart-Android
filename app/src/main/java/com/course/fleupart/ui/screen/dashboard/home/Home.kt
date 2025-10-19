@@ -59,11 +59,13 @@ import com.course.fleupart.data.model.remote.StoreProduct
 import com.course.fleupart.data.model.remote.StoreProductResponse
 import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.common.formatCurrency
+import com.course.fleupart.ui.common.loadingFx
 import com.course.fleupart.ui.components.FakeCategory
 import com.course.fleupart.ui.components.Flower
 import com.course.fleupart.ui.components.FlowerItem
 import com.course.fleupart.ui.components.ProductListLoading
 import com.course.fleupart.ui.components.TipsItem
+import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base100
 import com.course.fleupart.ui.theme.base20
@@ -76,7 +78,8 @@ import com.google.android.datatransport.ProductData
 fun Home(
     modifier: Modifier,
     onSnackClick: (Long, String) -> Unit,
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel,
+    orderViewModel: OrderViewModel
 ) {
     // call API in this section
 
@@ -86,7 +89,25 @@ fun Home(
     val storeProductState by homeViewModel.storeProductState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
     var isStoreProductLoading by remember { mutableStateOf(false) }
 
+    val filteredOrdersState by orderViewModel.filteredOrdersState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+    var isFilteredOrdersLoading by remember { mutableStateOf(false) }
+    val newOrders by orderViewModel.newOrders.collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+    val pickupOrders by orderViewModel.pickupOrders.collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+    val deliveryOrders by orderViewModel.deliveryOrders.collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+    val completedOrders by orderViewModel.completedOrders.collectAsStateWithLifecycle(
+        initialValue = emptyList()
+    )
+
     LaunchedEffect(Unit) {
+        orderViewModel.loadInitialData()
         homeViewModel.loadInitialData()
     }
 
@@ -108,6 +129,25 @@ fun Home(
         }
     }
 
+    LaunchedEffect(filteredOrdersState) {
+        when (filteredOrdersState) {
+            is ResultResponse.Success -> {
+                isFilteredOrdersLoading = false
+            }
+
+            is ResultResponse.Loading -> {
+                isFilteredOrdersLoading = true
+            }
+
+            is ResultResponse.Error -> {
+                isFilteredOrdersLoading = false
+            }
+
+            else -> {}
+        }
+    }
+
+
     val productData: List<StoreProduct> = when (storeProductState) {
         is ResultResponse.Success -> {
             (storeProductState as ResultResponse.Success<StoreProductResponse>).data.data
@@ -117,15 +157,25 @@ fun Home(
         }
     }
 
+    val orderCounts = listOf(
+        newOrders.size,
+        pickupOrders.size,
+        deliveryOrders.size,
+        completedOrders.size
+    )
+
     Home(
         modifier = modifier,
         isStoreProductLoading = isStoreProductLoading,
         storeProductList = productData,
+        orderCounts = orderCounts,
+        isFilteredOrdersLoading = isFilteredOrdersLoading,
         onSnackClick = onSnackClick,
         isRefreshing = isRefreshing,
         pullToRefreshState = pullToRefreshState,
         onRefresh = {
             homeViewModel.refreshData()
+            orderViewModel.refreshOrders()
         }
     )
 }
@@ -136,19 +186,15 @@ private fun Home(
     modifier: Modifier = Modifier,
     isStoreProductLoading: Boolean,
     isRefreshing: Boolean,
+    orderCounts: List<Int>,
+    isFilteredOrdersLoading: Boolean,
     pullToRefreshState: PullToRefreshState,
     storeProductList: List<StoreProduct>,
     onSnackClick: (Long, String) -> Unit,
     onRefresh: () -> Unit,
 ) {
-    var textState by remember { mutableStateOf("") }
 
-    val temp = listOf(
-        1,
-        2,
-        5,
-        10
-    )
+    val tempOrderCounts = listOf(0, 0, 0, 0)
 
     FleupartSurface(
         modifier = modifier.fillMaxSize(),
@@ -198,12 +244,13 @@ private fun Home(
 
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
-                            OrderStatusSection(
-                                count = temp,
-                                onNavigate = {
-
-                                }
-                            )
+                            if (isFilteredOrdersLoading){
+                                OrderStatusSectionLoading(count = tempOrderCounts)
+                            } else {
+                                OrderStatusSection(
+                                    count = orderCounts,
+                                )
+                            }
                         }
 
                         item {
@@ -317,14 +364,13 @@ private fun Income(
 @Composable
 private fun OrderStatusSection(
     count: List<Int>,
-    onNavigate: () -> Unit
 ) {
 
     val orderStatusList = listOf(
         "New Order",
-        "On Delivery",
-        "Completed",
-        "Product Rate"
+        "Pickup",
+        "Delivery",
+        "Completed"
     )
 
     Column(
@@ -375,6 +421,64 @@ private fun OrderStatusSection(
     }
 }
 
+
+@Composable
+private fun OrderStatusSectionLoading(
+    count: List<Int>,
+) {
+
+    val orderStatusList = listOf(
+        "New Order",
+        "Pickup",
+        "Delivery",
+        "Completed"
+    )
+
+    Column(
+        modifier = Modifier
+            .background(Color.White)
+            .padding(horizontal = 20.dp)
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Order Status",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.weight(1f))
+//            Icon(
+//                painter = painterResource(R.drawable.back_arrow),
+//                contentDescription = "Navigate",
+//                tint = Color.Black,
+//                modifier = Modifier
+//                    .size(18.dp)
+//                    .clickable { onNavigate() }
+//            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            items(orderStatusList.size) { index ->
+                OrderStatusItemLoading(
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun OrderStatusItem(
     title: String,
@@ -383,6 +487,7 @@ private fun OrderStatusItem(
     Column(
         modifier = Modifier
             .width(80.dp)
+            .height(80.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(base20)
             .padding(vertical = 12.dp),
@@ -399,6 +504,23 @@ private fun OrderStatusItem(
             fontSize = 10.sp,
             color = base300
         )
+    }
+}
+
+
+@Composable
+private fun OrderStatusItemLoading(
+) {
+    Column(
+        modifier = Modifier
+            .width(80.dp)
+            .height(80.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(base20)
+            .loadingFx()
+            .padding(vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
     }
 }
 
@@ -477,13 +599,15 @@ private fun EmptyPopularProduct(
                 tint = Color.Black,
                 modifier = Modifier
                     .size(16.dp)
-                    .clickable {  }
+                    .clickable { }
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
 
         Column(
-            modifier = Modifier.fillMaxSize().height(160.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .height(160.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
