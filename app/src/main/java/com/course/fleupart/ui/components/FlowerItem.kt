@@ -110,7 +110,7 @@ fun FlowerItem(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "${item.rating} | 100",
+                    text = "${item.rating} | ${item.reviewCount}",
                     fontSize = 10.sp,
                     color = base100
                 )
@@ -216,7 +216,7 @@ fun MerchantFlowerItem(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "${item.rating} | 100",
+                    text = "${item.rating} | ${item.reviewCount}",
                     fontSize = 10.sp,
                     color = base100
                 )

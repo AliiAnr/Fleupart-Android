@@ -55,6 +55,9 @@ data class StoreProduct(
 
     @field:SerializedName("rating")
     val rating: Double,
+
+    @field:SerializedName("review_count")
+    val reviewCount: Int,
 )
 
 data class StoreFromProduct(
