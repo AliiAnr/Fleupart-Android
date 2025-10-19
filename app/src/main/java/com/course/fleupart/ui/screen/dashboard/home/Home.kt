@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.course.fleupart.R
+import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreProduct
 import com.course.fleupart.data.model.remote.StoreProductResponse
 import com.course.fleupart.ui.common.ResultResponse
@@ -86,13 +87,18 @@ fun Home(
     val isRefreshing by homeViewModel.isRefreshing.collectAsStateWithLifecycle()
     val pullToRefreshState = rememberPullToRefreshState()
 
-    val storeProductState by homeViewModel.storeProductState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
-    var isStoreProductLoading by remember { mutableStateOf(false) }
+    val storeProductState by homeViewModel.storeProductState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+    val isStoreProductLoading = storeProductState is ResultResponse.Loading ||
+            storeProductState is ResultResponse.None
 
     val filteredOrdersState by orderViewModel.filteredOrdersState.collectAsStateWithLifecycle(
         initialValue = ResultResponse.None
     )
-    var isFilteredOrdersLoading by remember { mutableStateOf(false) }
+    val isFilteredOrdersLoading = filteredOrdersState is ResultResponse.Loading ||
+            filteredOrdersState is ResultResponse.None
+
     val newOrders by orderViewModel.newOrders.collectAsStateWithLifecycle(
         initialValue = emptyList()
     )
@@ -108,56 +114,82 @@ fun Home(
 
     val storeBalance by orderViewModel.storeBalance.collectAsStateWithLifecycle()
 
+    val storeDetailState by homeViewModel.storeDetailState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+
+    val isStoreDetailLoading = storeDetailState is ResultResponse.Loading ||
+            storeDetailState is ResultResponse.None
+
     LaunchedEffect(Unit) {
         orderViewModel.loadInitialData()
         homeViewModel.loadInitialData()
     }
-
-    LaunchedEffect(storeProductState) {
-        when (storeProductState) {
-            is ResultResponse.Success -> {
-               isStoreProductLoading = false
-            }
-
-            is ResultResponse.Loading -> {
-                isStoreProductLoading = true
-            }
-
-            is ResultResponse.Error -> {
-                isStoreProductLoading = false
-            }
-
-            else -> {}
-        }
-    }
-
-    LaunchedEffect(filteredOrdersState) {
-        when (filteredOrdersState) {
-            is ResultResponse.Success -> {
-                isFilteredOrdersLoading = false
-            }
-
-            is ResultResponse.Loading -> {
-                isFilteredOrdersLoading = true
-            }
-
-            is ResultResponse.Error -> {
-                isFilteredOrdersLoading = false
-            }
-
-            else -> {}
-        }
-    }
+//
+//    LaunchedEffect(storeProductState) {
+//        when (storeProductState) {
+//            is ResultResponse.Success -> {
+//                isStoreProductLoading = false
+//            }
+//
+//            is ResultResponse.Loading -> {
+//                isStoreProductLoading = true
+//            }
+//
+//            is ResultResponse.Error -> {
+//                isStoreProductLoading = false
+//            }
+//
+//            else -> {}
+//        }
+//    }
+//
+//    LaunchedEffect(storeDetailState) {
+//        when (storeDetailState) {
+//            is ResultResponse.Success -> {
+//                isStoreDetailLoading = false
+//            }
+//
+//            is ResultResponse.Loading -> {
+//                isStoreDetailLoading = true
+//            }
+//
+//            is ResultResponse.Error -> {
+//                isStoreDetailLoading = false
+//            }
+//
+//            else -> {}
+//        }
+//    }
+//
+//    LaunchedEffect(filteredOrdersState) {
+//        when (filteredOrdersState) {
+//            is ResultResponse.Success -> {
+//                isFilteredOrdersLoading = false
+//            }
+//
+//            is ResultResponse.Loading -> {
+//                isFilteredOrdersLoading = true
+//            }
+//
+//            is ResultResponse.Error -> {
+//                isFilteredOrdersLoading = false
+//            }
+//
+//            else -> {}
+//        }
+//    }
 
 
     val productData: List<StoreProduct> = when (storeProductState) {
         is ResultResponse.Success -> {
             (storeProductState as ResultResponse.Success<StoreProductResponse>).data.data
         }
+
         else -> {
             emptyList()
         }
     }
+
+    val storeDetailName: String = homeViewModel.storeDetail.value?.name ?: ""
 
     val orderCounts = listOf(
         newOrders.size,
@@ -172,7 +204,9 @@ fun Home(
         storeProductList = productData,
         storeBalance = storeBalance,
         orderCounts = orderCounts,
+        storeDetailName = storeDetailName,
         isFilteredOrdersLoading = isFilteredOrdersLoading,
+        isStoreDetailLoading = isStoreDetailLoading,
         onSnackClick = onSnackClick,
         isRefreshing = isRefreshing,
         pullToRefreshState = pullToRefreshState,
@@ -192,6 +226,8 @@ private fun Home(
     isRefreshing: Boolean,
     orderCounts: List<Int>,
     isFilteredOrdersLoading: Boolean,
+    isStoreDetailLoading: Boolean,
+    storeDetailName: String,
     pullToRefreshState: PullToRefreshState,
     storeProductList: List<StoreProduct>,
     onSnackClick: (Long, String) -> Unit,
@@ -238,12 +274,18 @@ private fun Home(
                             .statusBarsPadding(),
                     ) {
                         item {
-                            Header()
+                            if (isStoreDetailLoading) {
+                                HeaderLoading()
+                            } else {
+                                Header(
+                                    storeName = storeDetailName
+                                )
+                            }
                         }
 
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
-                            if (isFilteredOrdersLoading){
+                            if (isFilteredOrdersLoading) {
                                 IncomeLoading()
                             } else {
                                 Income(
@@ -254,7 +296,7 @@ private fun Home(
 
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
-                            if (isFilteredOrdersLoading){
+                            if (isFilteredOrdersLoading) {
                                 OrderStatusSectionLoading(count = tempOrderCounts)
                             } else {
                                 OrderStatusSection(
@@ -297,7 +339,8 @@ private fun Home(
 
 @Composable
 private fun Header(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    storeName: String
 ) {
     Row(
         modifier = Modifier
@@ -324,21 +367,81 @@ private fun Header(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Lily’s Flower House!",
+                text = storeName,
                 fontSize = 24.sp,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
         }
-        IconButton(onClick = { /* Handle notification click */ }) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.notification),
-                contentDescription = "Notification",
-                tint = Color.Black
-            )
-        }
+
+        Spacer(modifier = Modifier.weight(1f))
+//        IconButton(onClick = { /* Handle notification click */ }) {
+//            Icon(
+//                imageVector = ImageVector.vectorResource(id = R.drawable.notification),
+//                contentDescription = "Notification",
+//                tint = Color.Black
+//            )
+//        }
     }
 }
+
+
+@Composable
+private fun HeaderLoading(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 16.dp)
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
+                    ) {
+                        append("Welcome,")
+                    }
+                },
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .height(24.dp)
+                    .width(250.dp)
+                    .loadingFx()
+            )
+
+//            Text(
+//                text = "Lily’s Flower House!",
+//                fontSize = 24.sp,
+//                color = MaterialTheme.colorScheme.primary,
+//                fontWeight = FontWeight.Bold
+//            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
+//        IconButton(onClick = { /* Handle notification click */ }) {
+//            Icon(
+//                imageVector = ImageVector.vectorResource(id = R.drawable.notification),
+//                contentDescription = "Notification",
+//                tint = Color.Black
+//            )
+//        }
+    }
+}
+
 
 @Composable
 private fun Income(
@@ -696,7 +799,7 @@ fun TipsSection(
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        Column(     ) {
+        Column() {
             tipsList.forEach { item ->
                 TipCard(item)
             }

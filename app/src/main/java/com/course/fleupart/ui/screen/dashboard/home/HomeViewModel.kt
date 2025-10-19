@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.course.fleupart.data.model.remote.StoreDetailData
+import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.data.model.remote.StoreProductResponse
 import com.course.fleupart.data.repository.HomeRepository
 import com.course.fleupart.ui.common.ResultResponse
@@ -14,6 +15,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
@@ -25,6 +27,12 @@ class HomeViewModel(
     val storeProductState: StateFlow<ResultResponse<StoreProductResponse>> = _storeProductState
 
     val storeDetail: MutableState<StoreDetailData?> = mutableStateOf(null)
+
+    private val _storeDetailState: MutableStateFlow<ResultResponse<StoreDetailResponse>> =
+        MutableStateFlow(ResultResponse.None)
+    val storeDetailState: StateFlow<ResultResponse<StoreDetailResponse>> =
+        _storeDetailState.asStateFlow()
+
 
     private val _dataInitialized = MutableStateFlow(false)
     val dataInitialized: StateFlow<Boolean> = _dataInitialized
@@ -76,9 +84,14 @@ class HomeViewModel(
                     }
                 }
 
+                val storeDetailDeferred = async {
+                    fetchStoreDetailFromRemote()
+                }
+
+                storeDetailDeferred.await()
                 storeProductsDeferred.await()
             } catch (e: Exception) {
-                _storeProductState.value = ResultResponse.Error("Failed to refresh data: ${e.message}")
+                Log.e("HomeViewModel", "Error refreshing data: ${e.message}")
             } finally {
                 _isRefreshing.value = false
             }
@@ -87,10 +100,19 @@ class HomeViewModel(
 
     private fun loadStoreDetail() {
         viewModelScope.launch {
+            _storeDetailState.value = ResultResponse.Loading
             val cachedData = homeRepository.getStoredStoreDetail()
             Log.i("HomeViewModel", "Cached Data: $cachedData")
             if (cachedData != null) {
                 storeDetail.value = cachedData
+                _storeDetailState.value = ResultResponse.Success(
+                    StoreDetailResponse(
+                        data = cachedData,
+                        message = "Loaded from cache",
+                        statusCode = 200,
+                        timestamp = ""
+                    )
+                )
             } else {
                 Log.i("HomeViewModel", "Fetching from remote")
                 fetchStoreDetailFromRemote()
@@ -100,9 +122,11 @@ class HomeViewModel(
 
     private fun fetchStoreDetailFromRemote() {
         viewModelScope.launch {
+            _storeDetailState.value = ResultResponse.Loading
             homeRepository.getStoreDetail().collect { result ->
                 when (result) {
                     is ResultResponse.Success -> {
+                        _storeDetailState.value = result
                         result.data.let { storeDetailData ->
                             storeDetail.value = storeDetailData.data
                             storeDetailData.data?.let {
@@ -112,11 +136,11 @@ class HomeViewModel(
                     }
 
                     is ResultResponse.Error -> {
-                        // Handle error sesuai kebutuhan
+                        _storeDetailState.value = result
                     }
 
                     is ResultResponse.Loading -> {
-                        // Handle loading state jika diperlukan
+                        _storeDetailState.value = result
                     }
 
                     ResultResponse.None -> {
