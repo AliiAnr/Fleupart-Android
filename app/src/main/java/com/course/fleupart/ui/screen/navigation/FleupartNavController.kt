@@ -44,6 +44,9 @@ object DetailDestinations {
     const val ORDER_DETAIL_ROUTE = "orderDetail"
 
     const val COMPLETED_ORDER_DETAIL_ROUTE = "completedOrderDetail"
+
+    const val TIPS_DETAIL_ROUTE = "tipsDetail"
+    const val TIPS_ID_KEY = "tipsId"
 }
 
 object QueryKeys {
@@ -144,6 +147,12 @@ class FleupartNavController(
                 }
 
             }
+        }
+    }
+
+    fun navigateToTipsDetail(tipsId: Long, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate("${DetailDestinations.TIPS_DETAIL_ROUTE}/$tipsId")
         }
     }
 

@@ -17,6 +17,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.course.fleupart.LocalNavAnimatedVisibilityScope
 import com.course.fleupart.ui.components.HomeSections
+import com.course.fleupart.ui.components.TipsDetail
 import com.course.fleupart.ui.screen.dashboard.finance.Finance
 import com.course.fleupart.ui.screen.dashboard.home.Home
 import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
@@ -86,6 +87,7 @@ fun NavGraphBuilder.addHomeGraph(
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
+    onTipsDetail: (Long, NavBackStackEntry) -> Unit,
     onWithdrawDetail: (String, NavBackStackEntry) -> Unit,
     onCompletedOrderDetail: (NavBackStackEntry) -> Unit,
     onOrderDetail: (NavBackStackEntry) -> Unit,
@@ -96,7 +98,12 @@ fun NavGraphBuilder.addHomeGraph(
 ) {
     composable(HomeSections.Home.route) { from ->
         Home(
-            onSnackClick = { id, origin -> onSnackSelected(id, origin, from) },
+            onSnackClick = { id, origin ->
+                onSnackSelected(id, origin, from)
+            },
+            onTipsDetail = { to ->
+                onTipsDetail(to, from)
+            },
             homeViewModel = homeViewModel,
             orderViewModel = orderViewModel,
             modifier = modifier
@@ -134,7 +141,7 @@ fun NavGraphBuilder.addHomeGraph(
     composable(HomeSections.Profile.route) { from ->
         Profile(
             modifier = modifier,
-            onProfileDetailClick = {  to ->
+            onProfileDetailClick = { to ->
                 onProfileDetail(to, from)
             },
             profileViewModel = profileViewModel,

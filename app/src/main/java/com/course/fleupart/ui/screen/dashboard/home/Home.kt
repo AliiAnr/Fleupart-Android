@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -79,6 +80,7 @@ import com.google.android.datatransport.ProductData
 fun Home(
     modifier: Modifier,
     onSnackClick: (Long, String) -> Unit,
+    onTipsDetail: (Long) -> Unit,
     homeViewModel: HomeViewModel,
     orderViewModel: OrderViewModel
 ) {
@@ -213,7 +215,8 @@ fun Home(
         onRefresh = {
             homeViewModel.refreshData()
             orderViewModel.refreshOrders()
-        }
+        },
+        onTipsDetail = onTipsDetail
     )
 }
 
@@ -232,6 +235,7 @@ private fun Home(
     storeProductList: List<StoreProduct>,
     onSnackClick: (Long, String) -> Unit,
     onRefresh: () -> Unit,
+    onTipsDetail: (Long) -> Unit
 ) {
 
     val tempOrderCounts = listOf(0, 0, 0, 0)
@@ -327,7 +331,8 @@ private fun Home(
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
                             TipsSection(
-                                tipsList = FakeCategory.tipsList
+                                tipsList = FakeCategory.tipsList,
+                                onTipClick = onTipsDetail
                             )
                         }
                     }
@@ -782,7 +787,8 @@ private fun EmptyPopularProduct(
 
 @Composable
 fun TipsSection(
-    tipsList: List<TipsItem>
+    tipsList: List<TipsItem>,
+    onTipClick: (Long) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -796,12 +802,16 @@ fun TipsSection(
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
-            modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        Column() {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column {
             tipsList.forEach { item ->
-                TipCard(item)
+                TipCard(
+                    tip = item,
+                    onTipClick = onTipClick
+                )
             }
         }
     }
@@ -809,7 +819,8 @@ fun TipsSection(
 
 @Composable
 fun TipCard(
-    tip: TipsItem
+    tip: TipsItem,
+    onTipClick: (Long) -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -818,6 +829,11 @@ fun TipCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
+            .clickable(
+                onClick = { onTipClick(tip.id) },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            )
     ) {
         Row(
             modifier = Modifier

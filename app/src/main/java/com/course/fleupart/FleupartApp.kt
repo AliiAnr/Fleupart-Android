@@ -62,6 +62,7 @@ import com.course.fleupart.ui.screen.dashboard.detail.finance.DetailCompletedOrd
 import com.course.fleupart.ui.screen.dashboard.detail.finance.SalesReport
 import com.course.fleupart.ui.screen.dashboard.detail.finance.WithdrawBalance
 import com.course.fleupart.ui.screen.dashboard.detail.home.DetailTest
+import com.course.fleupart.ui.screen.dashboard.detail.home.TipsDetail
 import com.course.fleupart.ui.screen.dashboard.detail.order.DetailOrderItem
 import com.course.fleupart.ui.screen.dashboard.detail.product.AddProduct
 import com.course.fleupart.ui.screen.dashboard.detail.product.DetailProduct
@@ -339,6 +340,46 @@ fun FleupartApp() {
                     }
 
                     composableWithCompositionLocal(
+                        route = "${DetailDestinations.TIPS_DETAIL_ROUTE}/{${DetailDestinations.TIPS_ID_KEY}}",
+                        arguments = listOf(
+                            navArgument(DetailDestinations.TIPS_ID_KEY) {
+                                type = NavType.LongType
+                            }
+                        ),
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popEnterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        }
+                    ) { backStackEntry ->
+                        val arguments = requireNotNull(backStackEntry.arguments)
+                        val tipsId = arguments.getLong(DetailDestinations.TIPS_ID_KEY)
+                        TipsDetail(
+                            tipsId = tipsId,
+                            onBackClick = fleupartNavController::upPress
+                        )
+                    }
+
+                    composableWithCompositionLocal(
                         route = DetailDestinations.SALES_REPORT_ROUTE
                     ) { backStackEntry ->
                         SalesReport(
@@ -360,6 +401,7 @@ fun FleupartApp() {
                             onProductDetail = fleupartNavController::navigateToProductDetail,
                             onProfileDetail = fleupartNavController::navigateToProfileDetail,
                             onOrderDetail = fleupartNavController::navigateToOrderDetail,
+                            onTipsDetail = fleupartNavController::navigateToTipsDetail,
                             onCompletedOrderDetail = fleupartNavController::navigateToCompletedOrderDetail,
                             onWithdrawDetail = fleupartNavController::navigateToWithdrawDetail,
                             orderViewModel = orderViewModel,
@@ -493,6 +535,7 @@ fun MainContainer(
     modifier: Modifier = Modifier,
     onSnackSelected: (Long, String, NavBackStackEntry) -> Unit,
     onProductDetail: (String, NavBackStackEntry) -> Unit,
+    onTipsDetail: (Long, NavBackStackEntry) -> Unit,
     onOrderDetail: (NavBackStackEntry) -> Unit,
     onCompletedOrderDetail: (NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
@@ -550,6 +593,7 @@ fun MainContainer(
                 onProductDetail = onProductDetail,
                 onProfileDetail = onProfileDetail,
                 onOrderDetail = onOrderDetail,
+                onTipsDetail = onTipsDetail,
                 onCompletedOrderDetail = onCompletedOrderDetail,
                 onWithdrawDetail = onWithdrawDetail,
                 orderViewModel = orderViewModel,
