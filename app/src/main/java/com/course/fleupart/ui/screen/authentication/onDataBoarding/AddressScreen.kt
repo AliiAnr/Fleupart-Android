@@ -143,8 +143,6 @@ private fun AddressScreen(
 
     }
 
-    var citizenCardUri by remember { mutableStateOf<Uri?>(null) }
-
     FleupartSurface(
         modifier = modifier
             .fillMaxSize(),
