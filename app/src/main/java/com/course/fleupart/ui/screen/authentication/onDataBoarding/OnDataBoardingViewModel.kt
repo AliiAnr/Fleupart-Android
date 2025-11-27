@@ -441,5 +441,7 @@ class OnDataBoardingViewModel(
         postalCodeValue = ""
         additionalDetailValue = ""
         _personalizeState.value = ResultResponse.None
+        citizenCardPictureValue = null
+        selfPictureValue = null
     }
 }
