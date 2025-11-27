@@ -116,12 +116,13 @@ fun LoginScreen(
 
                 if (detail.isProfileComplete()) {
                     onDataBoardingViewModel.getUserAddress()
-                } else if (detail.picture.isNullOrEmpty() || detail.identityPicture.isNullOrEmpty()) {
-                    showCircularProgress = false
-                    navigateToRoute(MainDestinations.PHOTO_ROUTE, true)
                 } else {
                     showCircularProgress = false
-                    navigateToRoute(MainDestinations.CITIZEN_ROUTE, true)
+                    if (detail.name.isNullOrBlank() || detail.identityNumber.isNullOrBlank() || detail.account.isNullOrBlank()) {
+                        navigateToRoute(MainDestinations.CITIZEN_ROUTE, true)
+                    } else {
+                        navigateToRoute(MainDestinations.PHOTO_ROUTE, true)
+                    }
                 }
                 onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
