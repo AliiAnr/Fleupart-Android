@@ -124,6 +124,7 @@ fun LoginScreen(
                         navigateToRoute(MainDestinations.PHOTO_ROUTE, true)
                     }
                 }
+                loginViewModel.resetState()
                 onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
 
@@ -153,6 +154,7 @@ fun LoginScreen(
                 } else {
                     navigateToRoute(MainDestinations.ADDRESS_ROUTE, true)
                 }
+                loginViewModel.resetState()
                 onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
 

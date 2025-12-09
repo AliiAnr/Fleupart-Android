@@ -123,6 +123,7 @@ fun Home(
             storeDetailState is ResultResponse.None
 
     LaunchedEffect(Unit) {
+        Log.e("homeScreen", "Home Screen HIABID LaunchedEffect called")
         orderViewModel.loadInitialData()
         homeViewModel.loadInitialData()
     }

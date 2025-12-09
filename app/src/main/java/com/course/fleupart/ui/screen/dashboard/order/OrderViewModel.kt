@@ -103,7 +103,11 @@ class OrderViewModel(
     fun loadInitialData() {
         if (!_dataInitialized.value) {
 //            getStoreOrders()
-            getFilteredStoreOrders()
+            if(storeDetail.value != null) {
+                getFilteredStoreOrders()
+            } else {
+                fetchStoreDetailFromRemote()
+            }
             _dataInitialized.value = true
         }
     }
@@ -241,6 +245,7 @@ class OrderViewModel(
                                 orderRepository.saveStoreDetail(it)
                             }
                         }
+                        getFilteredStoreOrders()
                     }
 
                     is ResultResponse.Error -> {

@@ -59,7 +59,11 @@ class HomeViewModel(
         if (!_dataInitialized.value) {
 //            getStoreOrders()
 //            getFilteredStoreOrders()
-            getAllStoreProduct()
+            if (storeDetail.value  != null) {
+                getAllStoreProduct()
+            } else {
+                fetchStoreDetailFromRemote()
+            }
             _dataInitialized.value = true
         }
     }
@@ -145,6 +149,7 @@ class HomeViewModel(
                                 homeRepository.saveStoreDetail(it)
                             }
                         }
+                        getAllStoreProduct()
                     }
 
                     is ResultResponse.Error -> {

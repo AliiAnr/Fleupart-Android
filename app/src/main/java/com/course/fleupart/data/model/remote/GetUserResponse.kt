@@ -110,9 +110,7 @@ data class AddressData(
 	val longitude: Any
 ) {
 	fun isAddressCompleted(): Boolean {
-		return !name.isNullOrBlank() &&
-				!phone.isNullOrBlank() &&
-				!province.isNullOrBlank() &&
+		return  !province.isNullOrBlank() &&
 				!road.isNullOrBlank() &&
 				!city.isNullOrBlank() &&
 				!district.isNullOrBlank() &&

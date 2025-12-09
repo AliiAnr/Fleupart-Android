@@ -157,7 +157,7 @@ fun FleupartApp() {
             ) {
                 NavHost(
                     navController = fleupartNavController.navController,
-                    startDestination = MainDestinations.ADDRESS_ROUTE,
+                    startDestination = destination,
                     contentAlignment = Alignment.Center
                 ) {
                     composableWithCompositionLocal(
@@ -634,7 +634,7 @@ fun MainContainer(
     ) { padding ->
         NavHost(
             navController = nestedNavController.navController,
-            startDestination = HomeSections.Profile.route,
+            startDestination = HomeSections.Home.route,
             contentAlignment = Alignment.Center
         ) {
             addHomeGraph(
