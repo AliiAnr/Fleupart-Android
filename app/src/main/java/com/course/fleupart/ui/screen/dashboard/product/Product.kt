@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -104,6 +105,8 @@ private fun Product(
         }
     }
 
+    val focusManager = LocalFocusManager.current
+
     FleupartSurface(
         modifier = modifier.fillMaxSize(),
     ) {
@@ -116,6 +119,13 @@ private fun Product(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .clickable(
+                        onClick = {
+                            focusManager.clearFocus()
+                        },
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    )
                     .statusBarsPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {

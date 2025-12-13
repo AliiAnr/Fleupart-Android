@@ -9,6 +9,7 @@ import com.course.fleupart.retrofit.services.NotificationService
 import com.course.fleupart.retrofit.services.OrderService
 import com.course.fleupart.retrofit.services.OtpService
 import com.course.fleupart.retrofit.services.PersonalizeService
+import com.course.fleupart.retrofit.services.ProductService
 import com.course.fleupart.retrofit.services.ProfileService
 import com.course.fleupart.retrofit.services.RegisterService
 import okhttp3.OkHttpClient
@@ -71,6 +72,10 @@ object ApiConfig {
 
     fun getHomeService(context: Context): HomeService {
         return provideRetrofit(context).create(HomeService::class.java)
+    }
+
+    fun getProductService(context: Context): ProductService {
+        return provideRetrofit(context).create(ProductService::class.java)
     }
 
     fun getProfileService(context: Context) : ProfileService {

@@ -37,6 +37,7 @@ import com.course.fleupart.di.factory.LoginViewModelFactory
 import com.course.fleupart.di.factory.OnBoardingViewModelFactory
 import com.course.fleupart.di.factory.OnDataBoardingViewModelFactory
 import com.course.fleupart.di.factory.OrderViewModelFactory
+import com.course.fleupart.di.factory.ProductViewModelFactory
 import com.course.fleupart.di.factory.ProfileViewModelFactory
 import com.course.fleupart.di.factory.RegisterViewModelFactory
 import com.course.fleupart.ui.components.FleupartBottomBar
@@ -69,6 +70,7 @@ import com.course.fleupart.ui.screen.dashboard.detail.product.DetailProduct
 import com.course.fleupart.ui.screen.dashboard.detail.product.FlowerDetail
 import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
+import com.course.fleupart.ui.screen.dashboard.product.ProductViewModel
 import com.course.fleupart.ui.screen.dashboard.profile.ProfileViewModel
 import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartScaffold
@@ -128,6 +130,12 @@ fun FleupartApp() {
 
     val orderViewModel: OrderViewModel = viewModel(
         factory = OrderViewModelFactory.getInstance(
+            Resource.appContext
+        )
+    )
+
+    val productViewModel: ProductViewModel = viewModel(
+        factory = ProductViewModelFactory.getInstance(
             Resource.appContext
         )
     )
@@ -248,7 +256,8 @@ fun FleupartApp() {
                         }
                     ) { backStackEntry ->
                         AddProduct(
-                            onBackClick = fleupartNavController::upPress
+                            onBackClick = fleupartNavController::upPress,
+                            productViewModel = productViewModel
                         )
                     }
 

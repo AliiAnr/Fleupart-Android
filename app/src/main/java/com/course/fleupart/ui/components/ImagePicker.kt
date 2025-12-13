@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -29,8 +30,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -278,11 +281,11 @@ fun ImagePickerDialog(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.empty_image), // You'll need this icon
+                            painter = painterResource(R.drawable.camera), // You'll need this icon
                             contentDescription = "Camera",
                             modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text("Camera")
                     }
                 }
@@ -299,11 +302,11 @@ fun ImagePickerDialog(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.google_ic), // You'll need this icon
+                            painter = painterResource(R.drawable.gallery), // You'll need this icon
                             contentDescription = "Gallery",
                             modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text("Gallery")
                     }
                 }
@@ -363,7 +366,8 @@ fun ImagePickerList(
     label: String = "Citizen Card Picture",
     imageUri: List<Uri> = emptyList(),
     onImagePicked: (Uri) -> Unit,
-    onImageRemoved: (Uri) -> Unit = {} // Tambahan parameter untuk menghapus gambar
+    onImageRemoved: (Uri) -> Unit = {},
+    onImageRetaken: (Int, Uri) -> Unit = { _, newUri -> onImagePicked(newUri) }
 ) {
     val context = LocalContext.current
 
@@ -372,26 +376,28 @@ fun ImagePickerList(
     var showPickerDialog by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedImageIndex by remember { mutableStateOf<Int?>(null) }
+    var pendingRetakeIndex by remember { mutableStateOf<Int?>(null) }
 
-    LaunchedEffect(Unit) {
-        permissionGranted = checkPermissions(context)
-    }
+    LaunchedEffect(Unit) { permissionGranted = checkPermissions(context) }
 
-    // Cleanup temporary files saat composable dispose
     DisposableEffect(Unit) {
-        onDispose {
-            cleanupTempFiles(context)
-        }
+        onDispose { cleanupTempFiles(context) }
     }
 
-    // Create temporary file for camera capture
     val createTempImageUri = {
         val tempFile = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
-        FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.provider",
-            tempFile
-        )
+        FileProvider.getUriForFile(context, "${context.packageName}.provider", tempFile)
+    }
+
+    val handleImageResult: (Uri) -> Unit = { uri ->
+        val targetIndex = pendingRetakeIndex
+        if (targetIndex != null) {
+            onImageRetaken(targetIndex, uri)
+            pendingRetakeIndex = null
+        } else {
+            onImagePicked(uri)
+        }
     }
 
     val cropLauncher =
@@ -399,11 +405,13 @@ fun ImagePickerList(
             try {
                 if (result.resultCode == Activity.RESULT_OK) {
                     val resultUri = UCrop.getOutput(result.data!!)
-                    resultUri?.let { onImagePicked(it) }
+                    resultUri?.let(handleImageResult)
                 } else {
+                    pendingRetakeIndex = null
                     cleanupTempFiles(context)
                 }
             } catch (e: Exception) {
+                pendingRetakeIndex = null
                 cleanupTempFiles(context)
             }
         }
@@ -413,13 +421,13 @@ fun ImagePickerList(
     ) { success ->
         try {
             if (success) {
-                tempImageUri?.let { uri ->
-                    startCropping(context, uri, cropLauncher)
-                }
+                tempImageUri?.let { uri -> startCropping(context, uri, cropLauncher) }
             } else {
+                pendingRetakeIndex = null
                 cleanupTempFiles(context)
             }
         } catch (e: Exception) {
+            pendingRetakeIndex = null
             cleanupTempFiles(context)
         } finally {
             showPickerDialog = false
@@ -428,10 +436,13 @@ fun ImagePickerList(
 
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         try {
-            uri?.let {
-                startCropping(context, it, cropLauncher)
+            if (uri != null) {
+                startCropping(context, uri, cropLauncher)
+            } else {
+                pendingRetakeIndex = null
             }
         } catch (e: Exception) {
+            pendingRetakeIndex = null
             cleanupTempFiles(context)
         } finally {
             showPickerDialog = false
@@ -451,13 +462,12 @@ fun ImagePickerList(
         permissionGranted = cameraGranted && storageGranted
         if (permissionGranted) {
             showPickerDialog = true
+        } else {
+            pendingRetakeIndex = null
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label,
             color = Color.Black,
@@ -480,6 +490,7 @@ fun ImagePickerList(
                         .clip(RoundedCornerShape(10.dp))
                         .border(1.dp, base300, RoundedCornerShape(10.dp))
                         .clickable {
+                            pendingRetakeIndex = null
                             if (permissionGranted) {
                                 showPickerDialog = true
                             } else {
@@ -498,9 +509,7 @@ fun ImagePickerList(
                     }
                 }
             } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                Row(modifier = Modifier.fillMaxWidth()) {
                     LazyRow(
                         modifier = when {
                             imageUri.size >= 3 -> Modifier.weight(1f)
@@ -509,13 +518,14 @@ fun ImagePickerList(
                         },
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        items(imageUri) { image ->
+                        itemsIndexed(imageUri) { index, image ->
                             Box(
                                 modifier = Modifier
                                     .height(100.dp)
                                     .width(100.dp)
                                     .clip(RoundedCornerShape(10.dp))
                                     .clickable {
+                                        selectedImageIndex = index
                                         selectedImageUri = image
                                         showPreviewDialog = true
                                     },
@@ -526,21 +536,17 @@ fun ImagePickerList(
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop
                                 )
-
-                                // Tombol delete di kanan atas
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
                                         .padding(4.dp)
                                         .size(20.dp)
                                         .background(Color.Gray.copy(alpha = 0.5f), CircleShape)
-                                        .clickable {
-                                            onImageRemoved(image)
-                                        },
+                                        .clickable { onImageRemoved(image) },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        painter = painterResource(R.drawable.close_icon), // Ganti dengan icon X yang Anda miliki
+                                        painter = painterResource(R.drawable.close_icon),
                                         contentDescription = "Remove Image",
                                         tint = Color.Black,
                                         modifier = Modifier.size(12.dp)
@@ -563,6 +569,7 @@ fun ImagePickerList(
                             modifier = Modifier
                                 .size(35.dp)
                                 .clickable {
+                                    pendingRetakeIndex = null
                                     if (permissionGranted) {
                                         showPickerDialog = true
                                     } else {
@@ -576,10 +583,12 @@ fun ImagePickerList(
         }
     }
 
-    // Image Picker Dialog
     if (showPickerDialog) {
         ImagePickerDialog(
-            onDismiss = { showPickerDialog = false },
+            onDismiss = {
+                showPickerDialog = false
+                pendingRetakeIndex = null
+            },
             onCameraClick = {
                 tempImageUri = createTempImageUri()
                 cameraLauncher.launch(tempImageUri!!)
@@ -595,17 +604,22 @@ fun ImagePickerList(
             imageUri = selectedImageUri,
             onDismiss = { showPreviewDialog = false },
             onRetake = {
-                if (permissionGranted) {
-                    showPickerDialog = true
+                val targetIndex = selectedImageIndex
+                if (targetIndex == null) {
                     showPreviewDialog = false
                 } else {
-                    permissionLauncher.launch(getRequiredPermissions())
+                    pendingRetakeIndex = targetIndex
+                    showPreviewDialog = false
+                    if (permissionGranted) {
+                        showPickerDialog = true
+                    } else {
+                        permissionLauncher.launch(getRequiredPermissions())
+                    }
                 }
             }
         )
     }
 }
-
 //fun checkPermissions(context: Context): Boolean {
 //    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 //        ContextCompat.checkSelfPermission(

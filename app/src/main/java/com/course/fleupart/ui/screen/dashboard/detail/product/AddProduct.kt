@@ -1,6 +1,7 @@
 package com.course.fleupart.ui.screen.dashboard.detail.product
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +33,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -42,6 +45,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +56,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -59,15 +66,22 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.course.fleupart.R
+import com.course.fleupart.data.model.remote.CategoryDataItem
+import com.course.fleupart.data.model.remote.CreateProductResponse
+import com.course.fleupart.data.model.remote.GetAllCategoryResponse
+import com.course.fleupart.data.model.remote.ProductReviewResponse
 import com.course.fleupart.ui.common.CustomBottomSheet
 import com.course.fleupart.ui.common.NumberPicker
+import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.common.convertMinutesToHours
 import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.components.CustomTextInput
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.ImagePickerCard
 import com.course.fleupart.ui.components.ImagePickerList
+import com.course.fleupart.ui.screen.dashboard.product.ProductViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base300
@@ -77,11 +91,58 @@ import kotlin.rem
 @Composable
 fun AddProduct(
     modifier: Modifier = Modifier,
+    productViewModel: ProductViewModel,
     onBackClick: () -> Unit
 ) {
 
+    var showCircularProgress by remember { mutableStateOf(false) }
+
+    var shouldClearForm by remember { mutableStateOf(true) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            if (shouldClearForm) {
+                productViewModel.clearProductForm()
+                Log.e("productViewModel", "DisposableEffect: ProductViewModel called inside")
+            }
+            Log.e("ProductViewModel", "DisposableEffect: ProductViewModel")
+        }
+    }
+
+    val categoryState by productViewModel.categoryState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+
+    LaunchedEffect(Unit) {
+        productViewModel.getAllCategory()
+    }
+
+    LaunchedEffect(categoryState) {
+        when (categoryState) {
+            is ResultResponse.Success -> {
+                showCircularProgress = false
+            }
+
+            is ResultResponse.Loading -> {
+                showCircularProgress = true
+            }
+
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+                onBackClick()
+            }
+
+            else -> {}
+        }
+    }
+
+    val categoryList = when (categoryState) {
+        is ResultResponse.Success -> (categoryState as ResultResponse.Success<GetAllCategoryResponse>).data.data
+        else -> emptyList()
+    }
+
     AddProduct(
-        id = 0,
+        productViewModel = productViewModel,
+        showCircularProgress = showCircularProgress,
+        categoryList = categoryList,
         onBackClick = onBackClick,
     )
 }
@@ -91,7 +152,9 @@ fun AddProduct(
 @Composable
 private fun AddProduct(
     modifier: Modifier = Modifier,
-    id: Int = 0,
+    productViewModel: ProductViewModel,
+    showCircularProgress: Boolean,
+    categoryList: List<CategoryDataItem>,
     onBackClick: () -> Unit
 ) {
     var temp by remember { mutableStateOf("") }
@@ -141,80 +204,87 @@ private fun AddProduct(
                     color = base20,
                     thickness = 8.dp
                 )
-                Box(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    LazyColumn(
+
+                if (showCircularProgress) {
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.White),
                     ) {
-                        item {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            EditItem(
-                                label = "Product Name",
-                                value = productName,
-                                onChage = {
-                                    productName = it
-                                },
-                                placeHolder = "Lily Flower",
-                                borderColor = Color.Black,
-                            )
-                        }
+                        CircularProgressIndicator(color = primaryLight)
+                    }
+                } else {
 
-                        item {
-                            EditItem(
-                                label = "Short Description",
-                                value = shortDescription,
-                                onChage = {
-                                    shortDescription = it
-                                },
-                                isLongText = true,
-                                placeHolder = "This is a flower made from ...",
-                                height = 100.dp,
-                                borderColor = Color.Black,
-                            )
-                        }
+                    Box(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White),
+                        ) {
+                            item {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                EditItem(
+                                    label = "Product Name",
+                                    value = productViewModel.nameValue,
+                                    onChage = productViewModel::setName,
+                                    placeHolder = "Lily Flower",
+                                    borderColor = Color.Black,
+                                )
+                            }
 
-                        item {
-                            EditItem(
-                                label = "Price",
-                                value = price,
-                                onChage = {
-                                    price = it
-                                },
-                                leadingText = "Rp",
-                                placeHolder = "10000",
-                                borderColor = Color.Black,
-                                keyboardType = KeyboardType.NumberPassword,
-                            )
-                        }
+                            item {
+                                EditItem(
+                                    label = "Short Description",
+                                    value = productViewModel.descriptionValue,
+                                    onChage = productViewModel::setDescription,
+                                    isLongText = true,
+                                    placeHolder = "This is a flower made from ...",
+                                    height = 100.dp,
+                                    borderColor = Color.Black,
+                                )
+                            }
 
-                        item {
-                            Text(
-                                text = "Category",
-                                color = Color.Black,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.W600,
-                                modifier = Modifier.padding(horizontal = 20.dp)
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            CustomDropdownMenu()
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
+                            item {
+                                EditItem(
+                                    label = "Price",
+                                    value = productViewModel.priceValue,
+                                    onChage = productViewModel::setPrice,
+                                    leadingText = "Rp",
+                                    placeHolder = "10000",
+                                    borderColor = Color.Black,
+                                    keyboardType = KeyboardType.NumberPassword,
+                                )
+                            }
 
-                        item {
-                            EditItem(
-                                label = "Arrange Time",
-                                value = arrangeTime,
-                                onChage = {
-                                    arrangeTime = it
-                                },
-                                placeHolder = "30 - 60 minutes",
-                                borderColor = Color.Black,
-                                keyboardType = KeyboardType.NumberPassword,
-                            )
-                        }
+                            item {
+                                Text(
+                                    text = "Category",
+                                    color = Color.Black,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.W600,
+                                    modifier = Modifier.padding(horizontal = 20.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                CustomDropdownMenu(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    categoryList = categoryList,
+                                    productViewModel = productViewModel
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+
+                            item {
+                                EditItem(
+                                    label = "Arrange Time",
+                                    value = productViewModel.arrangeTimeValue,
+                                    onChage = productViewModel::setArrangeTime,
+                                    placeHolder = "30 - 60 minutes",
+                                    borderColor = Color.Black,
+                                    keyboardType = KeyboardType.NumberPassword,
+                                )
+                            }
 
 //                        item {
 //                            Text(
@@ -234,68 +304,71 @@ private fun AddProduct(
 //                            Spacer(modifier = Modifier.height(16.dp))
 //                        }
 
-                        item {
-                            Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                                ImagePickerList(
-                                    label = "Image",
-                                    imageUri = imageList,
-                                    onImagePicked = {
-                                        imageList = imageList + it
-                                    },
-                                    onImageRemoved = { removedUri ->
-                                        imageList = imageList.filter { it != removedUri }
-                                    }
+                            item {
+                                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                    val imageList = productViewModel.productImages
+                                    ImagePickerList(
+                                        label = "Image",
+                                        imageUri = imageList,
+                                        onImagePicked = productViewModel::addProductImage,
+                                        onImageRemoved = { removedUri ->
+                                            val index = imageList.indexOf(removedUri)
+                                            if (index != -1) {
+                                                productViewModel.removeProductImage(index)
+                                            }
+                                        },
+                                        onImageRetaken = { index, uri ->
+                                            productViewModel.replaceProductImage(index, uri)
+                                        }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+
+                            item {
+                                EditItem(
+                                    label = "Stock",
+                                    value = productViewModel.stockValue,
+                                    onChage = productViewModel::setStock,
+                                    placeHolder = "10",
+                                    keyboardType = KeyboardType.NumberPassword,
+                                    borderColor = Color.Black,
                                 )
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
 
-                        item {
-                            EditItem(
-                                label = "Stock",
-                                value = stock,
-                                onChage = {
-                                    stock = it
-                                },
-                                placeHolder = "10",
-                                keyboardType = KeyboardType.NumberPassword,
-                                borderColor = Color.Black,
-                            )
-                        }
+                            item {
+                                HorizontalDivider(
+                                    color = base20,
+                                    thickness = 8.dp
+                                )
 
-                        item {
-                            HorizontalDivider(
-                                color = base20,
-                                thickness = 8.dp
-                            )
+                                PreOrderSwitch(
+                                    isChecked = productViewModel.isPreOrderValue,
+                                    onCheckedChange = productViewModel::setPreOrder
+                                )
 
-                            PreOrderSwitch(
-                                isChecked = isPreOrder,
-                                onCheckedChange = {
-                                    isPreOrder = it
-                                }
-                            )
-
-                            HorizontalDivider(
-                                color = base20,
-                                thickness = 8.dp
-                            )
+                                HorizontalDivider(
+                                    color = base20,
+                                    thickness = 8.dp
+                                )
+                            }
                         }
                     }
-                }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(90.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CustomButton(
-                        text = "Add Product",
-                        onClick = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White)
+                            .height(90.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CustomButton(
+                            text = "Add Product",
+                            onClick = {
 
-                        }
-                    )
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -482,27 +555,56 @@ private fun ArrangeTime(
         )
     }
 }
-
 @Composable
 fun CustomDropdownMenu(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    categoryList: List<CategoryDataItem>,
+    productViewModel: ProductViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedItem by remember { mutableStateOf("Graduation") }
-    val menuItems = listOf(
-        Pair(Icons.Default.Home, "Graduation"),
-        Pair(Icons.Default.Person, "Birthday"),
-        Pair(Icons.Default.ShoppingCart, "Cart"),
-        Pair(Icons.Default.Settings, "Settings"),
-        Pair(Icons.Default.Call, "Calls"),
-        Pair(Icons.Default.Email, "Emails")
-    )
+    var selectedItem by remember { mutableStateOf("") }
+    var dropdownWidth by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current
+
+    LaunchedEffect(categoryList) {
+        when {
+            categoryList.isEmpty() -> {
+                selectedItem = ""
+                expanded = false
+            }
+
+            selectedItem.isBlank() -> {
+                selectedItem = categoryList.first().name
+            }
+
+            categoryList.none { it.name == selectedItem } -> {
+                selectedItem = categoryList.first().name
+            }
+        }
+    }
+
+    val hasCategories = categoryList.isNotEmpty()
+    val displayText = selectedItem.ifBlank { "Select category" }
+
+    val menuModifier = (if (dropdownWidth > 0.dp) {
+        Modifier.width(dropdownWidth)
+    } else {
+        Modifier.wrapContentWidth()
+    })
+        .background(Color.White, shape = RoundedCornerShape(12.dp))
+        .border(
+            width = 1.dp,
+            color = primaryLight,
+            shape = RoundedCornerShape(12.dp)
+        )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .height(50.dp)
-            .fillMaxWidth()
             .padding(horizontal = 20.dp)
+            .onGloballyPositioned { coordinates ->
+                dropdownWidth = with(density) { coordinates.size.width.toDp() }
+            }
             .border(
                 width = 1.dp,
                 color = Color.Black,
@@ -510,7 +612,6 @@ fun CustomDropdownMenu(
             ),
         contentAlignment = Alignment.Center
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxSize()
@@ -523,8 +624,8 @@ fun CustomDropdownMenu(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = selectedItem,
-                color = Color.Black,
+                text = displayText,
+                color = if (hasCategories) Color.Black else base300,
                 fontSize = 16.sp,
                 modifier = Modifier.padding(start = 12.dp)
             )
@@ -537,46 +638,55 @@ fun CustomDropdownMenu(
                     .padding(end = 12.dp)
                     .graphicsLayer(rotationZ = if (expanded) 270f else 90f)
             )
-
         }
 
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            offset = DpOffset(x = 0.dp, y = 700.dp),
-            containerColor = Color.Transparent,
+            containerColor = Color.White,
+            shape = RoundedCornerShape(12.dp),
             tonalElevation = 0.dp,
             shadowElevation = 0.dp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .background(Color.White, shape = RoundedCornerShape(12.dp))
-                .border(
-                    width = 1.dp,
-                    color = base300,
-                    shape = RoundedCornerShape(12.dp)
-                ),
+            modifier = menuModifier,
         ) {
-            menuItems.forEach { (icon, title) ->
+            if (hasCategories) {
+                categoryList.forEachIndexed { index, categoryItem ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = categoryItem.name,
+                                fontSize = 16.sp,
+                                color = Color.Black,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
+                        },
+                        onClick = {
+                            expanded = false
+                            selectedItem = categoryItem.name
+                            productViewModel.setCategoryId(categoryItem.id)
+                        }
+                    )
+                    if (index < categoryList.lastIndex) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 20.dp)
+                        )
+                    }
+                }
+            } else {
                 DropdownMenuItem(
                     text = {
                         Text(
-                            text = title,
+                            text = "No categories available",
                             fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
                             color = Color.Black,
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     },
-                    onClick = {
-                        expanded = false
-                        selectedItem = title
-                    }
+                    onClick = {},
+                    enabled = false
                 )
-                if (title != menuItems.last().second) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 20.dp)
-                    )
-                }
             }
         }
     }
