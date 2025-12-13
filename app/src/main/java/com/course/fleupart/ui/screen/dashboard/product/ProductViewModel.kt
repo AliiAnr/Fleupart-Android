@@ -172,9 +172,6 @@ class ProductViewModel(
                 productRepository.createProductWithCategory(payload, filesSnapshot)
                     .collect { result ->
                         _productState.value = result
-                        if (result is ResultResponse.Success) {
-                            clearProductForm()
-                        }
                     }
             } catch (e: Exception) {
                 _productState.value = ResultResponse.Error("Create product failed: ${e.message}")
@@ -237,7 +234,6 @@ class ProductViewModel(
                 arrangeTime = arrangeTimeValue,
                 point = point,
                 price = price,
-                isPreOrder = isPreOrderValue,
                 categoryId = categoryIdValue
             )
         }

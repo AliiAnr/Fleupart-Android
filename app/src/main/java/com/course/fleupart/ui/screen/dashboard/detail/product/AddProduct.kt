@@ -40,6 +40,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -77,6 +78,7 @@ import com.course.fleupart.ui.common.NumberPicker
 import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.common.convertMinutesToHours
 import com.course.fleupart.ui.components.CustomButton
+import com.course.fleupart.ui.components.CustomPopUpDialog
 import com.course.fleupart.ui.components.CustomTextInput
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.ImagePickerCard
@@ -97,6 +99,8 @@ fun AddProduct(
 
     var showCircularProgress by remember { mutableStateOf(false) }
 
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
     var shouldClearForm by remember { mutableStateOf(true) }
 
     DisposableEffect(Unit) {
@@ -109,16 +113,19 @@ fun AddProduct(
         }
     }
 
+    val productState by productViewModel.productState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+
     val categoryState by productViewModel.categoryState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
 
     LaunchedEffect(Unit) {
         productViewModel.getAllCategory()
     }
 
-    LaunchedEffect(categoryState) {
-        when (categoryState) {
+    LaunchedEffect(productState) {
+        when (productState) {
             is ResultResponse.Success -> {
                 showCircularProgress = false
+                showSuccessDialog = true
             }
 
             is ResultResponse.Loading -> {
@@ -127,7 +134,6 @@ fun AddProduct(
 
             is ResultResponse.Error -> {
                 showCircularProgress = false
-                onBackClick()
             }
 
             else -> {}
@@ -139,9 +145,20 @@ fun AddProduct(
         else -> emptyList()
     }
 
+    val isLoading = categoryState is ResultResponse.Loading ||
+            (categoryState is ResultResponse.None)
+
+
     AddProduct(
         productViewModel = productViewModel,
         showCircularProgress = showCircularProgress,
+        isLoading = isLoading,
+        showSuccessDialog = showSuccessDialog,
+        onSuccessDialogDismiss = {
+            onBackClick()
+            showSuccessDialog = false
+        },
+        onAddProductClick = productViewModel::createProduct,
         categoryList = categoryList,
         onBackClick = onBackClick,
     )
@@ -154,6 +171,10 @@ private fun AddProduct(
     modifier: Modifier = Modifier,
     productViewModel: ProductViewModel,
     showCircularProgress: Boolean,
+    isLoading: Boolean,
+    showSuccessDialog: Boolean,
+    onSuccessDialogDismiss: () -> Unit,
+    onAddProductClick: () -> Unit,
     categoryList: List<CategoryDataItem>,
     onBackClick: () -> Unit
 ) {
@@ -171,6 +192,8 @@ private fun AddProduct(
     var isPreOrder by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
+
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     FleupartSurface(
         modifier = modifier.fillMaxSize(),
@@ -205,7 +228,7 @@ private fun AddProduct(
                     thickness = 8.dp
                 )
 
-                if (showCircularProgress) {
+                if (isLoading) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
@@ -337,6 +360,17 @@ private fun AddProduct(
                             }
 
                             item {
+                                EditItem(
+                                    label = "Point",
+                                    value = productViewModel.pointValue,
+                                    onChage = productViewModel::setPoint,
+                                    placeHolder = "200",
+                                    keyboardType = KeyboardType.NumberPassword,
+                                    borderColor = Color.Black,
+                                )
+                            }
+
+                            item {
                                 HorizontalDivider(
                                     color = base20,
                                     thickness = 8.dp
@@ -363,13 +397,115 @@ private fun AddProduct(
                         contentAlignment = Alignment.Center
                     ) {
                         CustomButton(
+                            isAvailable = productViewModel.nameValue.isNotBlank() &&
+                            productViewModel.stockValue.isNotBlank() &&
+                                    productViewModel.descriptionValue.isNotBlank() &&
+                                    productViewModel.arrangeTimeValue.isNotBlank() &&
+                                    productViewModel.pointValue.isNotBlank() &&
+                                    productViewModel.priceValue.isNotBlank() &&
+                                    productViewModel.categoryIdValue.isNotBlank() &&
+                                    productViewModel.productImages.isNotEmpty()
+                            ,
                             text = "Add Product",
                             onClick = {
-
+                                showConfirmDialog = true
                             }
                         )
                     }
                 }
+            }
+
+            if (showCircularProgress) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.3f))
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            // Do nothing - this prevents clicks from passing through
+                        }
+                ) {
+                    CircularProgressIndicator(color = primaryLight)
+                }
+            }
+
+            if (showSuccessDialog) {
+                CustomPopUpDialog(
+                    onDismiss = {
+                        onSuccessDialogDismiss()
+                    },
+                    isShowIcon = true,
+                    isShowTitle = true,
+                    isShowDescription = true,
+                    isShowButton = false,
+                    icon = {
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ceklist),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                            )
+                        }
+                    },
+                    title = "Add Product Successful",
+                    description = "Your product has been added successfully.",
+                )
+            }
+
+            if (showConfirmDialog) {
+                CustomPopUpDialog(
+                    onDismiss = { showConfirmDialog = false },
+                    isShowIcon = true,
+                    isShowTitle = true,
+                    isShowDescription = false,
+                    isShowButton = true,
+                    icon = {
+
+                        Icon(
+                            painter = painterResource(id = R.drawable.think),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier.height(150.dp)
+                        )
+                    },
+                    title = "Are you sure you want to add the product?",
+                    buttons = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            OutlinedButton(
+                                onClick = { showConfirmDialog = false },
+                                border = BorderStroke(1.dp, primaryLight),
+                                shape = RoundedCornerShape(28.dp),
+                                modifier = Modifier.weight(1f).padding(end = 6.dp)
+                            ) {
+                                Text("Cancel", color = primaryLight)
+                            }
+                            Button(
+                                onClick = {
+                                    focusManager.clearFocus()
+                                   onAddProductClick()
+                                    showConfirmDialog = false
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = primaryLight
+                                ),
+                                shape = RoundedCornerShape(28.dp),
+                                modifier = Modifier.weight(1f).padding(start = 6.dp)
+                            ) {
+                                Text("Confirm", color = Color.White)
+                            }
+                        }
+                    }
+                )
             }
         }
     }
@@ -555,6 +691,7 @@ private fun ArrangeTime(
         )
     }
 }
+
 @Composable
 fun CustomDropdownMenu(
     modifier: Modifier = Modifier,
@@ -566,19 +703,22 @@ fun CustomDropdownMenu(
     var dropdownWidth by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
 
-    LaunchedEffect(categoryList) {
+    LaunchedEffect(categoryList, productViewModel.categoryIdValue) {
+        val currentCategoryId = productViewModel.categoryIdValue
         when {
             categoryList.isEmpty() -> {
                 selectedItem = ""
                 expanded = false
             }
-
-            selectedItem.isBlank() -> {
-                selectedItem = categoryList.first().name
+            currentCategoryId.isNotBlank() -> {
+                val matchedCategory = categoryList.firstOrNull { it.id == currentCategoryId }
+                selectedItem = matchedCategory?.name.orEmpty()
             }
-
-            categoryList.none { it.name == selectedItem } -> {
-                selectedItem = categoryList.first().name
+            selectedItem.isNotBlank() && categoryList.none { it.name == selectedItem } -> {
+                selectedItem = ""
+            }
+            else -> {
+                selectedItem = ""
             }
         }
     }

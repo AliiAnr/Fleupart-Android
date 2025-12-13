@@ -116,6 +116,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
 
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     // di module build.gradle
     implementation("io.socket:socket.io-client:2.1.2") {
         // required untuk OkHttp

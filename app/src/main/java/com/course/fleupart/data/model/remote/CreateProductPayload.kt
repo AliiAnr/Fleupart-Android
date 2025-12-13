@@ -8,5 +8,4 @@ data class CreateProductPayload(
     val point: Int,
     val price: Long,
     val categoryId: String,
-    val isPreOrder: Boolean
 )

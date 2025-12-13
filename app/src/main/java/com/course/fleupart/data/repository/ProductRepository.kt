@@ -17,6 +17,9 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlin.toString
 
 
 class ProductRepository private constructor(
@@ -38,7 +41,6 @@ class ProductRepository private constructor(
             arrangeTime = payload.arrangeTime.toPlainRequestBody(),
             point = payload.point.toString().toPlainRequestBody(),
             price = payload.price.toString().toPlainRequestBody(),
-            isPreOrder = payload.isPreOrder.toString().toPlainRequestBody(),
             categoryId = payload.categoryId.toPlainRequestBody(),
             files = imageFiles.map { file ->
                 MultipartBody.Part.createFormData(

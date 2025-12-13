@@ -27,7 +27,6 @@ interface ProductService {
         @Part("arrange_time") arrangeTime: RequestBody,
         @Part("point") point: RequestBody,
         @Part("price") price: RequestBody,
-        @Part("pre_order") isPreOrder: RequestBody,
         @Part("category_id") categoryId: RequestBody,
         @Part files: List<MultipartBody.Part>
     ): Response<PersonalizeResponse>
