@@ -69,6 +69,7 @@ import com.course.fleupart.ui.theme.base500
 import com.course.fleupart.ui.theme.primaryLight
 import com.course.fleupart.ui.theme.secColor
 import kotlin.compareTo
+import kotlin.text.category
 
 
 @Composable
@@ -347,7 +348,9 @@ private fun DescFlower(
                     color = Color.Black,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .weight(1f),
                 )
 
                 Row(
@@ -415,8 +418,10 @@ private fun DescFlower(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
+            val categoryName = item.category?.name.orEmpty()
+
             Text(
-                text = "Category: ${item.category.name}",
+                text = if (categoryName.isNullOrBlank()) "Category: -" else "Category: $categoryName",
                 color = base500,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.W700,
