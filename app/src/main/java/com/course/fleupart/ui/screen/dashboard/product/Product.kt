@@ -336,6 +336,7 @@ private fun Product(
                                         ListProduct(
                                             listEditProduct = FakeCategory.editProduct,
                                             listStatusProduct = FakeCategory.productStatus,
+                                            productList = productList,
                                             showProcessingProducts = showProcessingProducts
                                         )
                                     }
@@ -361,6 +362,7 @@ private fun ListProduct(
     modifier: Modifier = Modifier,
     listEditProduct: List<OrderItem>,
     listStatusProduct: List<OrderItemStatus>,
+    productList: List<StoreProduct>,
     showProcessingProducts: Boolean
 ) {
     Box(
@@ -369,21 +371,38 @@ private fun ListProduct(
             .background(Color.White)
             .padding(start = 20.dp, end = 20.dp, top = 20.dp)
     ) {
-        if ((showProcessingProducts && listStatusProduct.isEmpty()) || (!showProcessingProducts && listEditProduct.isEmpty())) {
+//        if ((showProcessingProducts && listStatusProduct.isEmpty()) || (!showProcessingProducts && listEditProduct.isEmpty())) {
+//            EmptyProduct()
+//        } else {
+        if ((showProcessingProducts && productList.isEmpty()) || (!showProcessingProducts && productList.isEmpty())) {
             EmptyProduct()
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+//                if (showProcessingProducts) {
+//                    items(listStatusProduct) {
+//                        OrderItemStatusCard(it)
+//                    }
+//                } else {
+//                    items(listEditProduct) {
+////                        OrderItemCard(it)
+//                    }
+//                }
+
                 if (showProcessingProducts) {
-                    items(listStatusProduct) {
+                    items(productList) {
                         OrderItemStatusCard(it)
                     }
                 } else {
-                    items(listEditProduct) {
-//                        OrderItemCard(it)
+                    items(productList) {
+                        OrderItemCard(item = it)
                     }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
         }
@@ -542,7 +561,10 @@ private fun ListCategory(
                         items = productsInCategory,
                         key = { _, product -> product.id ?: "$categoryName-${product.name}" }
                     ) { index , product ->
-                        OrderItemCard(item = product)
+                        OrderItemCard(
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            item = product
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                         if(index == productsInCategory.lastIndex) {
                             Spacer(modifier = Modifier.height(10.dp))

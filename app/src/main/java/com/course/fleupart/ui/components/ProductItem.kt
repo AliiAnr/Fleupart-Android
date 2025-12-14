@@ -33,12 +33,15 @@ import com.course.fleupart.ui.common.formatCurrency
 import com.course.fleupart.ui.common.formatCurrencyFromString
 import com.course.fleupart.ui.theme.base100
 import com.course.fleupart.ui.theme.base40
+import com.course.fleupart.ui.theme.tert
 
 @Composable
-fun OrderItemCard(item: StoreProduct) {
+fun OrderItemCard(
+    modifier: Modifier = Modifier,
+    item: StoreProduct
+) {
     Row(
-        modifier = Modifier
-            .padding(horizontal = 20.dp)
+        modifier = modifier
             .fillMaxWidth()
             .border(1.dp, base40, shape = RoundedCornerShape(10.dp))
             .padding(horizontal = 18.dp, vertical = 8.dp)
@@ -107,7 +110,7 @@ fun OrderItemCard(item: StoreProduct) {
 }
 
 @Composable
-fun OrderItemStatusCard(item: OrderItemStatus) {
+fun OrderItemStatusCard(item: StoreProduct) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -116,13 +119,29 @@ fun OrderItemStatusCard(item: OrderItemStatus) {
             .height(100.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(id = item.imageRes),
-            contentDescription = item.name,
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(10.dp))
-        )
+
+        if (item.picture[0].path.isNullOrBlank()) {
+            Image(
+                painter = painterResource(id = R.drawable.placeholder),
+                contentDescription = "Flower Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(10.dp))
+            )
+        } else {
+            AsyncImage(
+                model = item.picture[0].path,
+                contentDescription = null,
+                placeholder = painterResource(R.drawable.placeholder),
+                error = painterResource(R.drawable.placeholder),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(10.dp))
+            )
+        }
+
         Spacer(modifier = Modifier.width(8.dp))
         Column(modifier = Modifier.padding(start = 8.dp))
         {
@@ -134,7 +153,7 @@ fun OrderItemStatusCard(item: OrderItemStatus) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = formatCurrency(item.price),
+                text = formatCurrencyFromString(item.price),
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
@@ -146,11 +165,19 @@ fun OrderItemStatusCard(item: OrderItemStatus) {
                 horizontalArrangement = Arrangement.End
             ) {
                 Text(
-                    text = "Status: ${item.status}",
+                    text = "Status: ",
                     color = Color.Black,
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
+
+                Text(
+                    text = "Accepted",
+                    color = tert,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
             }
         }
     }
