@@ -118,7 +118,8 @@ fun NavGraphBuilder.addHomeGraph(
             modifier = modifier,
             onProductDetail = { to ->
                 onProductDetail(to, from)
-            }
+            },
+            homeViewModel = homeViewModel
         )
     }
     composable(HomeSections.Finance.route) { from ->

@@ -29,6 +29,9 @@ data class StoreProduct(
     @field:SerializedName("name")
     val name: String,
 
+    @field:SerializedName("admin_verified_at")
+    val adminVerifiedAt: String? = null,
+
     @field:SerializedName("description")
     val description: String,
 

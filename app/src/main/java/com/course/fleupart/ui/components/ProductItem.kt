@@ -21,32 +21,52 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.course.fleupart.R
+import com.course.fleupart.data.model.remote.StoreProduct
 import com.course.fleupart.ui.common.formatCurrency
+import com.course.fleupart.ui.common.formatCurrencyFromString
 import com.course.fleupart.ui.theme.base100
 import com.course.fleupart.ui.theme.base40
 
 @Composable
-fun OrderItemCard(item: OrderItem) {
+fun OrderItemCard(item: StoreProduct) {
     Row(
         modifier = Modifier
+            .padding(horizontal = 20.dp)
             .fillMaxWidth()
             .border(1.dp, base40, shape = RoundedCornerShape(10.dp))
             .padding(horizontal = 18.dp, vertical = 8.dp)
             .height(100.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(id = item.imageRes),
-            contentDescription = item.name,
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(10.dp))
-        )
+        if (item.picture[0].path.isNullOrBlank()) {
+            Image(
+                painter = painterResource(id = R.drawable.placeholder),
+                contentDescription = "Flower Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(10.dp))
+            )
+        } else {
+            AsyncImage(
+                model = item.picture[0].path,
+                contentDescription = null,
+                placeholder = painterResource(R.drawable.placeholder),
+                error = painterResource(R.drawable.placeholder),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(10.dp))
+            )
+        }
+
         Spacer(modifier = Modifier.width(8.dp))
         Column(modifier = Modifier.padding(start = 8.dp))
         {
@@ -58,7 +78,7 @@ fun OrderItemCard(item: OrderItem) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = formatCurrency(item.price),
+                text = formatCurrencyFromString(item.price),
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
