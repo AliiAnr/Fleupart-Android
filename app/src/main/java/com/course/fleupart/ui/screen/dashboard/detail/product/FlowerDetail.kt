@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -66,6 +68,7 @@ import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base500
 import com.course.fleupart.ui.theme.primaryLight
 import com.course.fleupart.ui.theme.secColor
+import kotlin.compareTo
 
 
 @Composable
@@ -208,6 +211,10 @@ private fun DescFlower(
     onBackClick: () -> Unit
 ) {
 
+    val pictures = item.picture
+    val pagerState = rememberPagerState { maxOf(pictures.size, 1) }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -218,24 +225,51 @@ private fun DescFlower(
                 .fillMaxWidth()
                 .height(250.dp)
         ) {
-            if (item.picture.isEmpty()) {
-                Image(
-                    painter = painterResource(id = R.drawable.placeholder),
-                    contentDescription = "Store Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                )
-            } else {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                val imageUrl = pictures.getOrNull(page)?.path
+                if (imageUrl.isNullOrEmpty()) {
+                    Image(
+                        painter = painterResource(id = R.drawable.placeholder),
+                        contentDescription = "Store Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        placeholder = painterResource(R.drawable.placeholder),
+                        error = painterResource(R.drawable.placeholder),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
 
-                AsyncImage(
-                    model = item.picture.firstOrNull()?.path,
-                    contentDescription = null,
-                    placeholder = painterResource(R.drawable.placeholder),
-                    error = painterResource(R.drawable.placeholder),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
+            if (pictures.size > 1) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    repeat(pictures.size) { index ->
+                        Box(
+                            modifier = Modifier
+                                .width(if (pagerState.currentPage == index) 18.dp else 8.dp)
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(
+                                    if (pagerState.currentPage == index) primaryLight else Color.White.copy(
+                                        alpha = 0.6f
+                                    )
+                                )
+                        )
+                    }
+                }
             }
 
             // Ikon di atas gambar
@@ -444,7 +478,7 @@ fun StoreItemLogo(
                 ),
             verticalAlignment = Alignment.CenterVertically
         ){
-            if (item.picture.isNullOrEmpty()) {
+            if (!item.store.logo.isNotBlank()) {
                 Image(
                     painter = painterResource(id = R.drawable.placeholder),
                     contentDescription = "Store Image",
@@ -457,7 +491,7 @@ fun StoreItemLogo(
                 )
             } else {
                 AsyncImage(
-                    model = item.picture.firstOrNull()?.path,
+                    model = item.store.logo,
                     contentDescription = null,
                     placeholder = painterResource(R.drawable.placeholder),
                     error = painterResource(R.drawable.placeholder),
