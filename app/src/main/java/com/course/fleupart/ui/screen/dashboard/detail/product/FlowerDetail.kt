@@ -460,6 +460,8 @@ fun StoreItemLogo(
     item: StoreProduct,
     onStoreClick: (String, String) -> Unit
 ) {
+    val logo = item.store.logo.orEmpty()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -467,40 +469,33 @@ fun StoreItemLogo(
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row (
-            modifier = Modifier
-                .clickable(
-                    onClick = {
-                        onStoreClick(item.store.id, item.name)
-                    },
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ),
+        Row(
+            modifier = Modifier.clickable(
+                onClick = { onStoreClick(item.store.id, item.name) },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
             verticalAlignment = Alignment.CenterVertically
-        ){
-            if (!item.store.logo.isNotBlank()) {
+        ) {
+            if (logo.isBlank()) {
                 Image(
                     painter = painterResource(id = R.drawable.placeholder),
                     contentDescription = "Store Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(50.dp)
-                        .clip(
-                            RoundedCornerShape(50.dp)
-                        )
+                        .clip(RoundedCornerShape(50.dp))
                 )
             } else {
                 AsyncImage(
-                    model = item.store.logo,
+                    model = logo,
                     contentDescription = null,
                     placeholder = painterResource(R.drawable.placeholder),
                     error = painterResource(R.drawable.placeholder),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(50.dp)
-                        .clip(
-                            RoundedCornerShape(50.dp)
-                        ),
+                        .clip(RoundedCornerShape(50.dp))
                 )
             }
             Spacer(modifier = Modifier.width(14.dp))
@@ -508,10 +503,9 @@ fun StoreItemLogo(
                 text = item.store.name,
                 color = base500,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
         }
-
     }
 }
 
