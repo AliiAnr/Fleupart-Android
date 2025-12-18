@@ -51,6 +51,8 @@ object DetailDestinations {
     const val TIPS_ID_KEY = "tipsId"
 
     const val FLOWER_DETAIL_ROUTE = "flowerDetail"
+
+    const val EDIT_FLOWER_ROUTE = "editFlower"
 }
 
 object QueryKeys {
@@ -112,6 +114,12 @@ class FleupartNavController(
     fun navigateToProductDetail(to: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             navController.navigate(DetailDestinations.ADD_PRODUCT_ROUTE)
+        }
+    }
+
+    fun navigateToEditFlower(id: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate("${DetailDestinations.EDIT_FLOWER_ROUTE}/$id")
         }
     }
 

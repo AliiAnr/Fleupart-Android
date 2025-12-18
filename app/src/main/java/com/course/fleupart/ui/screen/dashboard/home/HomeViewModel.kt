@@ -42,6 +42,10 @@ class HomeViewModel(
     private val _selectedProduct = MutableStateFlow<StoreProduct?>(null)
     val selectedProduct: StateFlow<StoreProduct?> = _selectedProduct.asStateFlow()
 
+    private val _selectedEditProduct = MutableStateFlow<StoreProduct?>(null)
+    val selectedEditProduct: StateFlow<StoreProduct?> = _selectedEditProduct.asStateFlow()
+
+
     private val _dataInitialized = MutableStateFlow(false)
     val dataInitialized: StateFlow<Boolean> = _dataInitialized
 
@@ -85,6 +89,10 @@ class HomeViewModel(
 
     fun setSelectedProduct(storeProduct: StoreProduct) {
         _selectedProduct.value = storeProduct
+    }
+
+    fun setSelectedEditProduct(storeProduct: StoreProduct) {
+        _selectedEditProduct.value = storeProduct
     }
 
     fun refreshData() {

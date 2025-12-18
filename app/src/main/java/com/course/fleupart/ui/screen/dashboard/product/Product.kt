@@ -74,6 +74,7 @@ import kotlin.text.category
 fun Product(
     modifier: Modifier = Modifier,
     onProductDetail: (String) -> Unit,
+    onEditProductDetail: (String) -> Unit,
     homeViewModel: HomeViewModel
 ) {
 
@@ -109,6 +110,7 @@ fun Product(
     Product(
         modifier = modifier,
         onProductDetail = onProductDetail,
+        onEditProductDetail = onEditProductDetail,
         showCircularProgress = showCircularProgress,
         homeViewModel = homeViewModel,
         productList = productData
@@ -119,6 +121,7 @@ fun Product(
 private fun Product(
     modifier: Modifier = Modifier,
     onProductDetail: (String) -> Unit,
+    onEditProductDetail: (String) -> Unit,
     homeViewModel: HomeViewModel,
     productList: List<StoreProduct>,
     showCircularProgress: Boolean
@@ -337,6 +340,8 @@ private fun Product(
                                             listEditProduct = FakeCategory.editProduct,
                                             listStatusProduct = FakeCategory.productStatus,
                                             productList = productList,
+                                            homeViewModel = homeViewModel,
+                                            onEditProductDetail = onEditProductDetail,
                                             showProcessingProducts = showProcessingProducts
                                         )
                                     }
@@ -345,7 +350,8 @@ private fun Product(
                                 1 -> {
                                     ListCategory(
                                         item = productList,
-                                        onProductDetail = onProductDetail
+                                        onEditProductDetail = onEditProductDetail,
+                                        homeViewModel = homeViewModel
                                     )
                                 }
                             }
@@ -363,6 +369,8 @@ private fun ListProduct(
     listEditProduct: List<OrderItem>,
     listStatusProduct: List<OrderItemStatus>,
     productList: List<StoreProduct>,
+    homeViewModel: HomeViewModel,
+    onEditProductDetail: (String) -> Unit,
     showProcessingProducts: Boolean
 ) {
     Box(
@@ -397,7 +405,13 @@ private fun ListProduct(
                     }
                 } else {
                     items(productList) {
-                        OrderItemCard(item = it)
+                        OrderItemCard(
+                            item = it,
+                            onEditItemClick = {
+                                homeViewModel.setSelectedEditProduct(it)
+                                onEditProductDetail(it.id)
+                            }
+                        )
                     }
                 }
 
@@ -518,7 +532,8 @@ fun EmptyProduct(
 private fun ListCategory(
     modifier: Modifier = Modifier,
     item: List<StoreProduct>,
-    onProductDetail: (String) -> Unit
+    homeViewModel: HomeViewModel,
+    onEditProductDetail: (String) -> Unit
 ) {
     val comparator = remember { Comparator<String> { a, b -> a.lowercase().compareTo(b.lowercase()) } }
     val groupedProducts = remember(item) {
@@ -563,7 +578,11 @@ private fun ListCategory(
                     ) { index , product ->
                         OrderItemCard(
                             modifier = Modifier.padding(horizontal = 20.dp),
-                            item = product
+                            item = product,
+                            onEditItemClick = {
+                                homeViewModel.setSelectedEditProduct(storeProduct = product)
+                                onEditProductDetail(product.id)
+                            }
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         if(index == productsInCategory.lastIndex) {

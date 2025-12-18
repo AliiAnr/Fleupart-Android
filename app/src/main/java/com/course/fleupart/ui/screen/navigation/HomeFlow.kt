@@ -88,6 +88,7 @@ fun NavGraphBuilder.addHomeGraph(
     onProductDetail: (String, NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
     onFlowerDetail: (String, NavBackStackEntry) -> Unit,
+    onFlowerEditDetail: (String, NavBackStackEntry) -> Unit,
     onTipsDetail: (Long, NavBackStackEntry) -> Unit,
     onWithdrawDetail: (String, NavBackStackEntry) -> Unit,
     onCompletedOrderDetail: (NavBackStackEntry) -> Unit,
@@ -118,6 +119,9 @@ fun NavGraphBuilder.addHomeGraph(
             modifier = modifier,
             onProductDetail = { to ->
                 onProductDetail(to, from)
+            },
+            onEditProductDetail = { id ->
+                onFlowerEditDetail(id, from)
             },
             homeViewModel = homeViewModel
         )
