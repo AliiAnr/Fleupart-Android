@@ -71,6 +71,7 @@ fun EditFlowerDetail(
     selectedProduct: StoreProduct,
     homeViewModel: HomeViewModel,
     onBackClick: () -> Unit,
+    onEditClick: (String) -> Unit
 ) {
     val productReviewState by homeViewModel.productReviewState.collectAsStateWithLifecycle(
         initialValue = ResultResponse.None
@@ -117,6 +118,7 @@ fun EditFlowerDetail(
         onBackClick = onBackClick,
         item = selectedProduct,
         isLoading = isLoading,
+        onEditClick = onEditClick,
         reviewData = reviewData ?: emptyList(),
         showCircularProgress = showCircularProgress
     )
@@ -126,6 +128,7 @@ fun EditFlowerDetail(
 private fun EditFlowerDetail(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
+    onEditClick: (String) -> Unit,
     isLoading: Boolean,
     reviewData: List<ReviewItem>,
     showCircularProgress: Boolean,
@@ -168,6 +171,7 @@ private fun EditFlowerDetail(
                                 onBackClick = onBackClick,
                                 onStoreClick = { _,_ ->
                                 },
+                                onEditClick = onEditClick,
                                 item = item
                             )
                         }
@@ -201,6 +205,7 @@ private fun DescFlower(
     modifier: Modifier = Modifier,
     item: StoreProduct,
     onStoreClick: (String, String) -> Unit,
+    onEditClick: (String) -> Unit,
     onBackClick: () -> Unit
 ) {
 
@@ -306,14 +311,16 @@ private fun DescFlower(
                             shape = RoundedCornerShape(50.dp)
                         )
                         .clickable(
-                            onClick = { },
+                            onClick = {
+                                onEditClick(item.id)
+                            },
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.share),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.edit_pencil),
                         contentDescription = null,
                         tint = Color.Black,
                         modifier = Modifier

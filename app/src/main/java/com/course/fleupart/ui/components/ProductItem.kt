@@ -44,6 +44,8 @@ fun OrderItemCard(
     item: StoreProduct,
     onEditItemClick: () -> Unit
 ) {
+
+    val firstImage = item.picture.firstOrNull()
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -57,7 +59,7 @@ fun OrderItemCard(
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (item.picture[0].path.isNullOrBlank()) {
+        if (firstImage == null) {
             Image(
                 painter = painterResource(id = R.drawable.placeholder),
                 contentDescription = "Flower Image",
@@ -119,13 +121,21 @@ fun OrderItemCard(
 }
 
 @Composable
-fun OrderItemStatusCard(item: StoreProduct) {
+fun OrderItemStatusCard(item: StoreProduct, onFlowerStatus: (String) -> Unit, onSelectedProduct: (StoreProduct) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, base40, shape = RoundedCornerShape(10.dp))
             .padding(horizontal = 18.dp, vertical = 8.dp)
-            .height(100.dp),
+            .height(100.dp)
+            .clickable(
+                onClick = {
+                    onSelectedProduct(item)
+                    onFlowerStatus(item.id)
+                },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
 

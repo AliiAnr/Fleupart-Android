@@ -21,27 +21,22 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -55,8 +50,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -64,16 +61,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import com.course.fleupart.R
 import com.course.fleupart.data.model.remote.CategoryDataItem
-import com.course.fleupart.data.model.remote.CreateProductResponse
 import com.course.fleupart.data.model.remote.GetAllCategoryResponse
-import com.course.fleupart.data.model.remote.ProductReviewResponse
-import com.course.fleupart.ui.common.CustomBottomSheet
+import com.course.fleupart.data.model.remote.StoreProduct
 import com.course.fleupart.ui.common.NumberPicker
 import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.common.convertMinutesToHours
@@ -81,19 +76,22 @@ import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.components.CustomPopUpDialog
 import com.course.fleupart.ui.components.CustomTextInput
 import com.course.fleupart.ui.components.CustomTopAppBar
-import com.course.fleupart.ui.components.ImagePickerCard
 import com.course.fleupart.ui.components.ImagePickerList
+import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
 import com.course.fleupart.ui.screen.dashboard.product.ProductViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base300
 import com.course.fleupart.ui.theme.primaryLight
-import kotlin.rem
+
 
 @Composable
-fun AddProduct(
+fun EditProduct(
     modifier: Modifier = Modifier,
     productViewModel: ProductViewModel,
+    flowerId: String,
+    selectedEditProduct: StoreProduct,
+    homeViewModel: HomeViewModel,
     onBackClick: () -> Unit
 ) {
 
@@ -113,32 +111,36 @@ fun AddProduct(
         }
     }
 
-    val productState by productViewModel.productState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+    LaunchedEffect(selectedEditProduct) {
+        selectedEditProduct.let {
+            productViewModel.setInitialEditData(it)
+        }
+    }
 
     val categoryState by productViewModel.categoryState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
 
+    val updateState by productViewModel.updateProductState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
     LaunchedEffect(Unit) {
         productViewModel.getAllCategory()
     }
 
-    LaunchedEffect(productState) {
-        when (productState) {
+    LaunchedEffect(updateState) {
+        when (updateState) {
             is ResultResponse.Success -> {
                 showCircularProgress = false
                 showSuccessDialog = true
             }
-
             is ResultResponse.Loading -> {
                 showCircularProgress = true
             }
-
             is ResultResponse.Error -> {
                 showCircularProgress = false
+                Log.e("EditProduct", "Error: ${(updateState as ResultResponse.Error).error}")
             }
-
             else -> {}
         }
     }
+
 
     val categoryList = when (categoryState) {
         is ResultResponse.Success -> (categoryState as ResultResponse.Success<GetAllCategoryResponse>).data.data
@@ -148,33 +150,69 @@ fun AddProduct(
     val isLoading = categoryState is ResultResponse.Loading ||
             (categoryState is ResultResponse.None)
 
+    val isNameChanged = productViewModel.nameValue != (selectedEditProduct?.name ?: "")
+    val isDescChanged = productViewModel.descriptionValue != (selectedEditProduct?.description ?: "")
+    val isPriceChanged = productViewModel.priceValue != (selectedEditProduct?.price ?: "")
+    val isStockChanged = productViewModel.stockValue != (selectedEditProduct?.stock?.toString() ?: "")
+    val isPointChanged = productViewModel.pointValue != (selectedEditProduct?.point?.toString() ?: "")
+    val isTimeChanged = productViewModel.arrangeTimeValue != (selectedEditProduct?.arrangeTime ?: "")
+    val isCategoryChanged = productViewModel.categoryIdValue != (selectedEditProduct?.category?.id ?: "")
 
-    AddProduct(
+    // Image Logic: Changed if new images added OR existing images removed
+    val isNewImagesAdded = productViewModel.productImages.isNotEmpty()
+    val isExistingImagesRemoved = productViewModel.existingImageUrls.size != (selectedEditProduct?.picture?.size ?: 0)
+    val isImageChanged = isNewImagesAdded || isExistingImagesRemoved
+
+    val isChanged = isNameChanged || isDescChanged || isPriceChanged || isStockChanged ||
+            isPointChanged || isTimeChanged || isCategoryChanged || isImageChanged
+
+    val isAllFieldsFilled = productViewModel.nameValue.isNotBlank() &&
+            productViewModel.stockValue.isNotBlank() &&
+            productViewModel.descriptionValue.isNotBlank() &&
+            productViewModel.arrangeTimeValue.isNotBlank() &&
+            productViewModel.pointValue.isNotBlank() &&
+            productViewModel.priceValue.isNotBlank() &&
+            productViewModel.categoryIdValue.isNotBlank() &&
+            (productViewModel.productImages.isNotEmpty() || productViewModel.existingImageUrls.isNotEmpty())
+
+    val isButtonAvailable = !showCircularProgress && isChanged && isAllFieldsFilled
+
+    EditProduct(
         productViewModel = productViewModel,
         showCircularProgress = showCircularProgress,
         isLoading = isLoading,
+        isButtonAvailable = isButtonAvailable,
         showSuccessDialog = showSuccessDialog,
         onSuccessDialogDismiss = {
-            onBackClick()
             showSuccessDialog = false
+            productViewModel.resetUpdateState()
+            productViewModel.clearProductForm()
+            onBackClick()
         },
-        onAddProductClick = productViewModel::createProduct,
+        onSaveClick = {
+            productViewModel.updateProduct()
+        },
         categoryList = categoryList,
-        onBackClick = onBackClick,
+        onBackClick = {
+            productViewModel.resetUpdateState()
+            productViewModel.clearProductForm() // Clean up when leaving
+            onBackClick()
+        },
     )
 }
 
 
 
 @Composable
-private fun AddProduct(
+private fun EditProduct(
     modifier: Modifier = Modifier,
     productViewModel: ProductViewModel,
+    isButtonAvailable: Boolean,
+    onSaveClick: () -> Unit,
     showCircularProgress: Boolean,
     isLoading: Boolean,
     showSuccessDialog: Boolean,
     onSuccessDialogDismiss: () -> Unit,
-    onAddProductClick: () -> Unit,
     categoryList: List<CategoryDataItem>,
     onBackClick: () -> Unit
 ) {
@@ -219,7 +257,7 @@ private fun AddProduct(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 CustomTopAppBar(
-                    title = "Add Product",
+                    title = "Edit Product",
                     showNavigationIcon = true,
                     onBackClick = onBackClick
                 )
@@ -329,9 +367,62 @@ private fun AddProduct(
 
                             item {
                                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                    Text(
+                                        text = "Images",
+                                        color = Color.Black,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.W600,
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    // 1. Existing Images (URLs)
+                                    if (productViewModel.existingImageUrls.isNotEmpty()) {
+                                        LazyRow(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            modifier = Modifier.padding(bottom = 8.dp)
+                                        ) {
+                                            items(productViewModel.existingImageUrls) { url ->
+                                                Box(
+                                                    modifier = Modifier
+                                                        .height(100.dp)
+                                                        .width(100.dp)
+                                                        .clip(RoundedCornerShape(10.dp))
+
+                                                ) {
+                                                    AsyncImage(
+                                                        model = url,
+                                                        contentDescription = "Existing Image",
+                                                        contentScale = ContentScale.Crop,
+                                                        modifier = Modifier.fillMaxSize()
+                                                    )
+                                                    // Delete Button for Existing Image
+
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .align(Alignment.TopEnd)
+                                                            .padding(4.dp)
+                                                            .size(20.dp)
+                                                            .background(Color.Gray.copy(alpha = 0.5f), CircleShape)
+                                                            .clickable { productViewModel.removeExistingImage(url) },
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.close_icon),
+                                                            contentDescription = "Remove Image",
+                                                            tint = Color.Black,
+                                                            modifier = Modifier.size(12.dp)
+                                                        )
+                                                    }
+
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // 2. New Images Picker (URIs)
                                     val imageList = productViewModel.productImages
                                     ImagePickerList(
-                                        label = "Image",
+                                        label = if(productViewModel.existingImageUrls.isEmpty()) "Add Images" else "Add More Images",
                                         imageUri = imageList,
                                         onImagePicked = productViewModel::addProductImage,
                                         onImageRemoved = { removedUri ->
@@ -397,16 +488,8 @@ private fun AddProduct(
                         contentAlignment = Alignment.Center
                     ) {
                         CustomButton(
-                            isAvailable = productViewModel.nameValue.isNotBlank() &&
-                            productViewModel.stockValue.isNotBlank() &&
-                                    productViewModel.descriptionValue.isNotBlank() &&
-                                    productViewModel.arrangeTimeValue.isNotBlank() &&
-                                    productViewModel.pointValue.isNotBlank() &&
-                                    productViewModel.priceValue.isNotBlank() &&
-                                    productViewModel.categoryIdValue.isNotBlank() &&
-                                    productViewModel.productImages.isNotEmpty()
-                            ,
-                            text = "Add Product",
+                            isAvailable = isButtonAvailable,
+                            text = "Save Changes",
                             onClick = {
                                 showConfirmDialog = true
                             }
@@ -454,8 +537,8 @@ private fun AddProduct(
                             )
                         }
                     },
-                    title = "Add Product Successful",
-                    description = "Your product has been added successfully.",
+                    title = "Update Product Successful",
+                    description = "Your product has been updated successfully.",
                 )
             }
 
@@ -475,7 +558,7 @@ private fun AddProduct(
                             modifier = Modifier.height(150.dp)
                         )
                     },
-                    title = "Are you sure you want to add the product?",
+                    title = "Are you sure you want to update the product?",
                     buttons = {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -492,7 +575,7 @@ private fun AddProduct(
                             Button(
                                 onClick = {
                                     focusManager.clearFocus()
-                                   onAddProductClick()
+                                    onSaveClick()
                                     showConfirmDialog = false
                                 },
                                 colors = ButtonDefaults.buttonColors(
@@ -508,41 +591,6 @@ private fun AddProduct(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun PreOrderSwitch(
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Pre-Order",
-            color = Color.Black,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.W600,
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Switch(
-            checked = isChecked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFFBCE455),
-                uncheckedThumbColor = Color.White,
-                uncheckedTrackColor = Color.LightGray,
-                uncheckedBorderColor = Color.LightGray,
-
-            )
-        )
     }
 }
 
@@ -689,145 +737,5 @@ private fun ArrangeTime(
             confirmButton = {},
             dismissButton = {}
         )
-    }
-}
-
-@Composable
-fun CustomDropdownMenu(
-    modifier: Modifier = Modifier,
-    categoryList: List<CategoryDataItem>,
-    productViewModel: ProductViewModel
-) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedItem by remember { mutableStateOf("") }
-    var dropdownWidth by remember { mutableStateOf(0.dp) }
-    val density = LocalDensity.current
-
-    LaunchedEffect(categoryList, productViewModel.categoryIdValue) {
-        val currentCategoryId = productViewModel.categoryIdValue
-        when {
-            categoryList.isEmpty() -> {
-                selectedItem = ""
-                expanded = false
-            }
-            currentCategoryId.isNotBlank() -> {
-                val matchedCategory = categoryList.firstOrNull { it.id == currentCategoryId }
-                selectedItem = matchedCategory?.name.orEmpty()
-            }
-            selectedItem.isNotBlank() && categoryList.none { it.name == selectedItem } -> {
-                selectedItem = ""
-            }
-            else -> {
-                selectedItem = ""
-            }
-        }
-    }
-
-    val hasCategories = categoryList.isNotEmpty()
-    val displayText = selectedItem.ifBlank { "Select category" }
-
-    val menuModifier = (if (dropdownWidth > 0.dp) {
-        Modifier.width(dropdownWidth)
-    } else {
-        Modifier.wrapContentWidth()
-    })
-        .background(Color.White, shape = RoundedCornerShape(12.dp))
-        .border(
-            width = 1.dp,
-            color = primaryLight,
-            shape = RoundedCornerShape(12.dp)
-        )
-
-    Box(
-        modifier = modifier
-            .height(50.dp)
-            .padding(horizontal = 20.dp)
-            .onGloballyPositioned { coordinates ->
-                dropdownWidth = with(density) { coordinates.size.width.toDp() }
-            }
-            .border(
-                width = 1.dp,
-                color = Color.Black,
-                shape = RoundedCornerShape(8.dp)
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    onClick = { expanded = true },
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = displayText,
-                color = if (hasCategories) Color.Black else base300,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(start = 12.dp)
-            )
-
-            Icon(
-                painter = painterResource(id = R.drawable.back_arrow),
-                contentDescription = null,
-                tint = Color.Black,
-                modifier = Modifier
-                    .padding(end = 12.dp)
-                    .graphicsLayer(rotationZ = if (expanded) 270f else 90f)
-            )
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            containerColor = Color.White,
-            shape = RoundedCornerShape(12.dp),
-            tonalElevation = 0.dp,
-            shadowElevation = 0.dp,
-            modifier = menuModifier,
-        ) {
-            if (hasCategories) {
-                categoryList.forEachIndexed { index, categoryItem ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = categoryItem.name,
-                                fontSize = 16.sp,
-                                color = Color.Black,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(start = 16.dp)
-                            )
-                        },
-                        onClick = {
-                            expanded = false
-                            selectedItem = categoryItem.name
-                            productViewModel.setCategoryId(categoryItem.id)
-                        }
-                    )
-                    if (index < categoryList.lastIndex) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 20.dp)
-                        )
-                    }
-                }
-            } else {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = "No categories available",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Black,
-                            modifier = Modifier.padding(start = 16.dp)
-                        )
-                    },
-                    onClick = {},
-                    enabled = false
-                )
-            }
-        }
     }
 }

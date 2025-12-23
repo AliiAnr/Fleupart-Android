@@ -31,6 +31,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.course.fleupart.data.model.remote.Detail
 import com.course.fleupart.data.resource.Resource
 import com.course.fleupart.di.factory.HomeViewModelFactory
 import com.course.fleupart.di.factory.LoginViewModelFactory
@@ -68,7 +69,9 @@ import com.course.fleupart.ui.screen.dashboard.detail.order.DetailOrderItem
 import com.course.fleupart.ui.screen.dashboard.detail.product.AddProduct
 import com.course.fleupart.ui.screen.dashboard.detail.product.DetailProduct
 import com.course.fleupart.ui.screen.dashboard.detail.product.EditFlowerDetail
+import com.course.fleupart.ui.screen.dashboard.detail.product.EditProduct
 import com.course.fleupart.ui.screen.dashboard.detail.product.FlowerDetail
+import com.course.fleupart.ui.screen.dashboard.detail.product.SearchProduct
 import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
 import com.course.fleupart.ui.screen.dashboard.product.ProductViewModel
@@ -187,6 +190,18 @@ fun FleupartApp() {
                     }
 
                     composableWithCompositionLocal(
+                        route = DetailDestinations.SEARCH_PRODUCT
+                    ) { backStackEntry ->
+                        SearchProduct(
+                            homeViewModel = homeViewModel,
+                            onBackClick = fleupartNavController::upPress,
+                            onEditProductDetail = { id ->
+                                fleupartNavController.navigateToEditFlower(id = id, from = backStackEntry)
+                            }
+                        )
+                    }
+
+                    composableWithCompositionLocal(
                         route = MainDestinations.LOGIN_ROUTE
                     ) { backStackEntry ->
                         LoginScreen(
@@ -220,9 +235,53 @@ fun FleupartApp() {
                     }
 
                     composableWithCompositionLocal(
-                        route = DetailDestinations.PRODUCT_STATUS_ROUTE
+                        route = "${DetailDestinations.PRODUCT_STATUS_ROUTE}/{${MainDestinations.FLOWER_ID_KEY}}",
+                        arguments = listOf(
+                            navArgument(MainDestinations.FLOWER_ID_KEY) {
+                                type = NavType.StringType
+                            }
+                        ),
+                        enterTransition = {
+                            // Muncul dari kanan
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        exitTransition = {
+                            // Keluar ke kanan
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popEnterTransition = {
+                            // Jika balik (back), bisa juga dari kiri ke posisi normal
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popExitTransition = {
+                            // Jika back, keluar ke kanan
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        }
                     ) { backStackEntry ->
-                        DetailProduct()
+
+                        val arguments = requireNotNull(backStackEntry.arguments)
+                        val flowerId = arguments.getString(MainDestinations.FLOWER_ID_KEY)
+
+                        val selectedProduct by homeViewModel.selectedProduct.collectAsStateWithLifecycle()
+                        selectedProduct?.let {
+                            DetailProduct(
+                                flowerId = flowerId ?: "",
+                                selectedProduct = it,
+                                onBackClick = fleupartNavController::upPress
+                            )
+                        }
                     }
 
                     composableWithCompositionLocal(
@@ -442,6 +501,31 @@ fun FleupartApp() {
                             navArgument(MainDestinations.FLOWER_ID_KEY) {
                                 type = NavType.StringType
                             }
+                        )
+                    ) { backStackEntry ->
+                        val arguments = requireNotNull(backStackEntry.arguments)
+                        val flowerId = arguments.getString(MainDestinations.FLOWER_ID_KEY)
+
+                        val selectedEditProduct by homeViewModel.selectedEditProduct.collectAsStateWithLifecycle()
+                        selectedEditProduct?.let {
+                            EditFlowerDetail (
+                                flowerId = flowerId ?: "",
+                                selectedProduct = it,
+                                homeViewModel = homeViewModel,
+                                onBackClick = fleupartNavController::upPress,
+                                onEditClick = { id ->
+                                    fleupartNavController.navigateToEditProduct(id = id, from = backStackEntry)
+                                }
+                            )
+                        }
+                    }
+
+                    composableWithCompositionLocal(
+                        route = "${DetailDestinations.EDIT_PRODUCT_ROUTE}/{${MainDestinations.FLOWER_ID_KEY}}",
+                        arguments = listOf(
+                            navArgument(MainDestinations.FLOWER_ID_KEY) {
+                                type = NavType.StringType
+                            }
                         ),
                         enterTransition = {
                             slideInHorizontally(
@@ -473,12 +557,14 @@ fun FleupartApp() {
 
                         val selectedEditProduct by homeViewModel.selectedEditProduct.collectAsStateWithLifecycle()
                         selectedEditProduct?.let {
-                            EditFlowerDetail (
+                            EditProduct(
+                                productViewModel = productViewModel,
                                 flowerId = flowerId ?: "",
-                                selectedProduct = it,
+                                selectedEditProduct = it,
                                 homeViewModel = homeViewModel,
                                 onBackClick = fleupartNavController::upPress
                             )
+
                         }
                     }
 
@@ -507,8 +593,10 @@ fun FleupartApp() {
                             onProfileDetail = fleupartNavController::navigateToProfileDetail,
                             onOrderDetail = fleupartNavController::navigateToOrderDetail,
                             onTipsDetail = fleupartNavController::navigateToTipsDetail,
+                            onSearchDetail = fleupartNavController::navigateToSearchDetail,
                             onCompletedOrderDetail = fleupartNavController::navigateToCompletedOrderDetail,
                             onWithdrawDetail = fleupartNavController::navigateToWithdrawDetail,
+                            onFlowerStatus = fleupartNavController::navigateToProductStatus,
                             orderViewModel = orderViewModel,
                             profileViewModel = profileViewModel,
                             homeViewModel = homeViewModel
@@ -644,9 +732,11 @@ fun MainContainer(
     onFlowerEditDetail: (String, NavBackStackEntry) -> Unit,
     onTipsDetail: (Long, NavBackStackEntry) -> Unit,
     onOrderDetail: (NavBackStackEntry) -> Unit,
+    onSearchDetail: (String, NavBackStackEntry) -> Unit,
     onCompletedOrderDetail: (NavBackStackEntry) -> Unit,
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
     onWithdrawDetail: (String, NavBackStackEntry) -> Unit,
+    onFlowerStatus: (String, NavBackStackEntry) -> Unit,
     orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel,
     homeViewModel: HomeViewModel
@@ -702,9 +792,11 @@ fun MainContainer(
                 onFlowerDetail = onFlowerDetail,
                 onFlowerEditDetail = onFlowerEditDetail,
                 onOrderDetail = onOrderDetail,
+                onSearchDetail = onSearchDetail,
                 onTipsDetail = onTipsDetail,
                 onCompletedOrderDetail = onCompletedOrderDetail,
                 onWithdrawDetail = onWithdrawDetail,
+                onFlowerStatus = onFlowerStatus,
                 orderViewModel = orderViewModel,
                 profileViewModel = profileViewModel,
                 homeViewModel = homeViewModel,

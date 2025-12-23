@@ -32,6 +32,7 @@ object MainDestinations {
 object DetailDestinations {
     const val PRODUCT_STATUS_ROUTE = "productStatus"
     const val ADD_PRODUCT_ROUTE = "addProduct"
+    const val EDIT_PRODUCT_ROUTE = "editProduct"
     const val WITHDRAW_BALANCE_ROUTE = "withdrawBalance"
     const val BALANCE_AMOUNT_ROUTE = "balanceAmount"
     const val ADD_BANK_ACCOUNT_ROUTE = "addBankAccount"
@@ -42,6 +43,8 @@ object DetailDestinations {
     const val UPDATE_DETAIL_ROUTE = "updateDetail"
 
     const val STORE_VIEW_ROUTE = "storeView"
+
+    const val SEARCH_PRODUCT = "searchProduk"
 
     const val ORDER_DETAIL_ROUTE = "orderDetail"
 
@@ -120,6 +123,24 @@ class FleupartNavController(
     fun navigateToEditFlower(id: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             navController.navigate("${DetailDestinations.EDIT_FLOWER_ROUTE}/$id")
+        }
+    }
+
+    fun navigateToEditProduct(id: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate("${DetailDestinations.EDIT_PRODUCT_ROUTE}/$id")
+        }
+    }
+
+    fun navigateToProductStatus(id: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate("${DetailDestinations.PRODUCT_STATUS_ROUTE}/$id")
+        }
+    }
+
+    fun navigateToSearchDetail(to: String, from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(to)
         }
     }
 

@@ -59,6 +59,39 @@ class ProductRepository private constructor(
         }
     }.flowOn(Dispatchers.IO)
 
+    fun updateProductWithCategory(
+        productId: String,
+        payload: CreateProductPayload,
+        imageFiles: List<File>
+    ): Flow<ResultResponse<PersonalizeResponse>> = flow {
+        emit(ResultResponse.Loading)
+
+        val response = productService.updateProductWithCategory(
+            productId = productId.toPlainRequestBody(),
+            name = payload.name.toPlainRequestBody(),
+            stock = payload.stock.toString().toPlainRequestBody(),
+            description = payload.description.toPlainRequestBody(),
+            arrangeTime = payload.arrangeTime.toPlainRequestBody(),
+            point = payload.point.toString().toPlainRequestBody(),
+            price = payload.price.toString().toPlainRequestBody(),
+            categoryId = payload.categoryId.toPlainRequestBody(),
+            files = imageFiles.map { file ->
+                MultipartBody.Part.createFormData(
+                    name = "files",
+                    filename = file.name,
+                    body = file.asRequestBody("image/jpeg".toMediaType())
+                )
+            }
+        )
+
+        if (response.isSuccessful) {
+            response.body()?.let { emit(ResultResponse.Success(it)) }
+                ?: emit(ResultResponse.Error("Empty response body"))
+        } else {
+            emit(ResultResponse.Error(response.errorBody()?.string() ?: "Unknown error"))
+        }
+    }.flowOn(Dispatchers.IO)
+
     fun getAllCategory(): Flow<ResultResponse<GetAllCategoryResponse>> = flow {
         emit(ResultResponse.Loading)
         try {

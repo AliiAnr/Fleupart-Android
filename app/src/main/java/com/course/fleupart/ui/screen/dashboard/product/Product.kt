@@ -63,7 +63,9 @@ import com.course.fleupart.ui.components.OrderItemCard
 import com.course.fleupart.ui.components.OrderItemStatus
 import com.course.fleupart.ui.components.OrderItemStatusCard
 import com.course.fleupart.ui.components.SearchBar
+import com.course.fleupart.ui.components.SearchBarForNavigation
 import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
+import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base100
 import com.course.fleupart.ui.theme.base20
@@ -75,6 +77,8 @@ fun Product(
     modifier: Modifier = Modifier,
     onProductDetail: (String) -> Unit,
     onEditProductDetail: (String) -> Unit,
+    onFlowerStatus: (String) -> Unit,
+    onSearchDetail: (String) -> Unit,
     homeViewModel: HomeViewModel
 ) {
 
@@ -113,6 +117,8 @@ fun Product(
         onEditProductDetail = onEditProductDetail,
         showCircularProgress = showCircularProgress,
         homeViewModel = homeViewModel,
+        onSearchDetail = onSearchDetail,
+        onFlowerStatus = onFlowerStatus,
         productList = productData
     )
 }
@@ -122,6 +128,8 @@ private fun Product(
     modifier: Modifier = Modifier,
     onProductDetail: (String) -> Unit,
     onEditProductDetail: (String) -> Unit,
+    onFlowerStatus: (String) -> Unit,
+    onSearchDetail: (String) -> Unit,
     homeViewModel: HomeViewModel,
     productList: List<StoreProduct>,
     showCircularProgress: Boolean
@@ -240,11 +248,10 @@ private fun Product(
                                                 .background(Color.White)
                                                 .padding(vertical = 12.dp)
                                         ) {
-                                            SearchBar(
-                                                placeholder = "Search your product",
-                                                query = "",
-                                                onQueryChange = {},
-                                                onSearch = {}
+                                            SearchBarForNavigation(
+                                                onNavigate = {
+                                                    onSearchDetail(DetailDestinations.SEARCH_PRODUCT)
+                                                }
                                             )
                                             Spacer(modifier = Modifier.height(12.dp))
                                             Row(
@@ -339,6 +346,10 @@ private fun Product(
                                         ListProduct(
                                             listEditProduct = FakeCategory.editProduct,
                                             listStatusProduct = FakeCategory.productStatus,
+                                            onFlowerStatus = onFlowerStatus,
+                                            onSelectedProduct = { storeProduct ->
+                                                homeViewModel.setSelectedProduct(storeProduct)
+                                            },
                                             productList = productList,
                                             homeViewModel = homeViewModel,
                                             onEditProductDetail = onEditProductDetail,
@@ -368,7 +379,9 @@ private fun ListProduct(
     modifier: Modifier = Modifier,
     listEditProduct: List<OrderItem>,
     listStatusProduct: List<OrderItemStatus>,
+    onSelectedProduct : (StoreProduct) -> Unit,
     productList: List<StoreProduct>,
+    onFlowerStatus: (String) -> Unit,
     homeViewModel: HomeViewModel,
     onEditProductDetail: (String) -> Unit,
     showProcessingProducts: Boolean
@@ -400,11 +413,11 @@ private fun ListProduct(
 //                }
 
                 if (showProcessingProducts) {
-                    items(productList) {
-                        OrderItemStatusCard(it)
+                    items(productList, key = { it.id ?: it.name }) {
+                        OrderItemStatusCard(item = it, onFlowerStatus = onFlowerStatus, onSelectedProduct = onSelectedProduct)
                     }
                 } else {
-                    items(productList) {
+                    items(productList, key = { it.id ?: it.name }) {
                         OrderItemCard(
                             item = it,
                             onEditItemClick = {
