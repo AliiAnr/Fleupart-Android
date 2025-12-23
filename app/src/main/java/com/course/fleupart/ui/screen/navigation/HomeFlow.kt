@@ -95,6 +95,7 @@ fun NavGraphBuilder.addHomeGraph(
     onCompletedOrderDetail: (NavBackStackEntry) -> Unit,
     onOrderDetail: (NavBackStackEntry) -> Unit,
     onFlowerStatus: (String, NavBackStackEntry) -> Unit,
+    onNavigateOut: (String, Boolean) -> Unit,
     orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel,
     homeViewModel: HomeViewModel,
@@ -164,6 +165,7 @@ fun NavGraphBuilder.addHomeGraph(
             onProfileDetailClick = { to ->
                 onProfileDetail(to, from)
             },
+            onNavigateOut = onNavigateOut,
             profileViewModel = profileViewModel,
             id = 1
         )

@@ -298,7 +298,7 @@ object FakeCategory {
         AccountList("Privacy", R.drawable.privacy),
         AccountList("Security", R.drawable.security),
         AccountList("Feedback", R.drawable.feedback),
-        AccountList("Logout", R.drawable.logout),
+//        AccountList("Logout", R.drawable.logout),
     )
 
 }

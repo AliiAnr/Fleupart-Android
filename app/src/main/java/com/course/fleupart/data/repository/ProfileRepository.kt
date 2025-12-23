@@ -56,6 +56,10 @@ class ProfileRepository private constructor(
         dataStoreManager.saveStoreDetail(storeDetail)
     }
 
+    suspend fun logout() {
+        dataStoreManager.clearUserDataExceptOnboarding()
+    }
+
     fun getStoreProducts(storeId: String): Flow<ResultResponse<StoreProductsResponse>> = flow {
         emit(ResultResponse.Loading)
         try {

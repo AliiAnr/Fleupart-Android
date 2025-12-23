@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.course.fleupart.data.model.remote.ApiUpdateResponse
+import com.course.fleupart.data.model.remote.LogoutResponse
 import com.course.fleupart.data.model.remote.StoreAddressData
 import com.course.fleupart.data.model.remote.StoreAddressResponse
 import com.course.fleupart.data.model.remote.StoreBannerRequest
@@ -23,6 +24,7 @@ import com.course.fleupart.data.resource.Resource
 import com.course.fleupart.ui.common.ImageCompressor
 import com.course.fleupart.ui.common.ResultResponse
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,11 +70,16 @@ class ProfileViewModel(
     private val _dataInitialized = MutableStateFlow(false)
     val dataInitialized: StateFlow<Boolean> = _dataInitialized
 
+    private val _logoutState: MutableStateFlow<ResultResponse<LogoutResponse>> =
+        MutableStateFlow(ResultResponse.None)
+    val logoutState: StateFlow<ResultResponse<LogoutResponse>> = _logoutState.asStateFlow()
+
     var storeAddressValue: MutableState<StoreAddressData?> = mutableStateOf(null)
 
     var storeInformationValue: MutableState<StoreDetailData?> = mutableStateOf(null)
 
     var storeProductsValue: MutableState<StoreProductsResponse?> = mutableStateOf(null)
+
 
     var nameValue by mutableStateOf("")
         private set
@@ -187,6 +194,19 @@ class ProfileViewModel(
                 fetchStoreDetailFromRemote()
             }
         }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            _logoutState.value = ResultResponse.Loading
+//            profileRepository.logout()
+            delay(1500)
+            _logoutState.value = ResultResponse.Success(LogoutResponse(success = true))
+        }
+    }
+
+    fun resetLogoutState() {
+        _logoutState.value = ResultResponse.None
     }
 
     private fun fetchStoreDetailFromRemote() {

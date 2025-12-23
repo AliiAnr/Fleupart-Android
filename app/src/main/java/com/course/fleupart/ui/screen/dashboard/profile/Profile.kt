@@ -1,9 +1,13 @@
 package com.course.fleupart.ui.screen.dashboard.profile
 
+import android.app.Dialog
+import android.graphics.drawable.ColorDrawable
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,11 +24,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -32,6 +39,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,12 +48,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.course.fleupart.R
@@ -55,24 +68,31 @@ import com.course.fleupart.data.model.remote.StoreDetailResponse
 import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.components.AccountList
 import com.course.fleupart.ui.components.CustomButton
+import com.course.fleupart.ui.components.CustomPopUpDialog
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.FakeCategory
 import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
+import com.course.fleupart.ui.screen.navigation.MainDestinations
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base40
 import com.course.fleupart.ui.theme.primaryLight
+import kotlin.math.log
+import androidx.core.graphics.drawable.toDrawable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Profile(
     modifier: Modifier,
     onProfileDetailClick: (String) -> Unit,
+    onNavigateOut: (String, Boolean) -> Unit,
     profileViewModel: ProfileViewModel,
     id: Long = 0L,
 ) {
 
     var showCircularProgress by remember { mutableStateOf(true) }
+
+    var logoutLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         profileViewModel.loadInitialData()
@@ -83,6 +103,26 @@ fun Profile(
     val storeDetailState by profileViewModel.storeDetailState.collectAsStateWithLifecycle(
         initialValue = ResultResponse.None
     )
+
+    val logoutState by profileViewModel.logoutState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+
+    LaunchedEffect(logoutState) {
+        when(logoutState) {
+            is ResultResponse.Loading -> {
+                logoutLoading = true
+            }
+            is ResultResponse.Success -> {
+                logoutLoading = false
+                profileViewModel.resetLogoutState()
+                onNavigateOut(MainDestinations.WELCOME_ROUTE, true)
+            }
+            else -> {
+
+            }
+        }
+    }
 
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -156,8 +196,12 @@ fun Profile(
         onProfileDetailClick = onProfileDetailClick,
         storeDetailData = storeDetailData ?: StoreDetailData(),
         showCircularProgress = showCircularProgress,
+        logoutLoading = logoutLoading,
         onRefresh = {
             profileViewModel.refreshData()
+        },
+        onLogout = {
+            profileViewModel.logout()
         }
     )
 }
@@ -172,7 +216,11 @@ private fun Profile(
     pullToRefreshState: PullToRefreshState,
     showCircularProgress: Boolean,
     onRefresh: () -> Unit,
+    onLogout: () -> Unit,
+    logoutLoading: Boolean,
 ) {
+
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     FleupartSurface(
         modifier = modifier.fillMaxSize(),
@@ -186,8 +234,7 @@ private fun Profile(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .statusBarsPadding()
-                ,
+                    .statusBarsPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
 
@@ -254,10 +301,119 @@ private fun Profile(
                                     onProfileDetailClick = onProfileDetailClick
                                 )
                             }
+
+                            item {
+                                Spacer(modifier = Modifier.height(20.dp))
+                                CustomButton(
+                                    text = "Logout",
+                                    onClick = {
+                                        showConfirmDialog = true
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
+
+            // inside Profile.kt where logoutLoading is handled
+            if (logoutLoading) {
+                Dialog(
+                    onDismissRequest = { /* block dismiss */ },
+                    properties = DialogProperties(
+                        usePlatformDefaultWidth = false,
+                        decorFitsSystemWindows = false
+                    )
+                ) {
+                    val dialogWindowProvider = LocalView.current.parent as DialogWindowProvider
+                    SideEffect {
+                        dialogWindowProvider.window.setDimAmount(0f)
+                        dialogWindowProvider.window.setBackgroundDrawable(
+                            android.graphics.Color.TRANSPARENT.toDrawable()
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.3f))
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) { /* block clicks */ },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = primaryLight)
+                    }
+                }
+            }
+
+
+            // inside your composable
+            if (showConfirmDialog) {
+                Dialog(
+                    onDismissRequest = { showConfirmDialog = false },
+                    properties = DialogProperties(
+                        usePlatformDefaultWidth = false,
+                        decorFitsSystemWindows = false
+                    )
+                ) {
+                    val dialogWindowProvider = LocalView.current.parent as DialogWindowProvider
+                    SideEffect {
+                        dialogWindowProvider.window.setDimAmount(0f)
+                        dialogWindowProvider.window.setBackgroundDrawable(
+                            android.graphics.Color.TRANSPARENT.toDrawable()
+                        )
+                    }
+//
+                        CustomPopUpDialog(
+                            onDismiss = { showConfirmDialog = false },
+                            isShowIcon = true,
+                            isShowTitle = true,
+                            isShowDescription = false,
+                            isShowButton = true,
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.think),
+                                    contentDescription = null,
+                                    tint = Color.Unspecified,
+                                    modifier = Modifier.height(150.dp)
+                                )
+                            },
+                            title = "Are you sure you want to Logout?",
+                            buttons = {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    OutlinedButton(
+                                        onClick = { showConfirmDialog = false },
+                                        border = BorderStroke(1.dp, primaryLight),
+                                        shape = RoundedCornerShape(28.dp),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 6.dp)
+                                    ) {
+                                        Text("Cancel", color = primaryLight)
+                                    }
+                                    Button(
+                                        onClick = {
+                                            onLogout()
+                                            showConfirmDialog = false
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = primaryLight),
+                                        shape = RoundedCornerShape(28.dp),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(start = 6.dp)
+                                    ) {
+                                        Text("Confirm", color = Color.White)
+                                    }
+                                }
+                            },
+                        )
+                }
+            }
+
         }
     }
 }

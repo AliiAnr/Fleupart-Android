@@ -610,6 +610,7 @@ fun FleupartApp() {
                             onCompletedOrderDetail = fleupartNavController::navigateToCompletedOrderDetail,
                             onWithdrawDetail = fleupartNavController::navigateToWithdrawDetail,
                             onFlowerStatus = fleupartNavController::navigateToProductStatus,
+                            onNavigateOut = fleupartNavController::navigateToNonBottomBarRoute,
                             orderViewModel = orderViewModel,
                             profileViewModel = profileViewModel,
                             homeViewModel = homeViewModel
@@ -750,6 +751,7 @@ fun MainContainer(
     onProfileDetail: (String, NavBackStackEntry) -> Unit,
     onWithdrawDetail: (String, NavBackStackEntry) -> Unit,
     onFlowerStatus: (String, NavBackStackEntry) -> Unit,
+    onNavigateOut: (String, Boolean) -> Unit,
     orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel,
     homeViewModel: HomeViewModel
@@ -810,6 +812,7 @@ fun MainContainer(
                 onCompletedOrderDetail = onCompletedOrderDetail,
                 onWithdrawDetail = onWithdrawDetail,
                 onFlowerStatus = onFlowerStatus,
+                onNavigateOut = onNavigateOut,
                 orderViewModel = orderViewModel,
                 profileViewModel = profileViewModel,
                 homeViewModel = homeViewModel,

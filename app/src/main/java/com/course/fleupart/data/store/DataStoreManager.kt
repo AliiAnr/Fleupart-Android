@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlin.collections.remove
 import kotlin.text.get
 import kotlin.text.set
 
@@ -132,6 +133,21 @@ class DataStoreManager(private val context: Context) {
             preferences.clear()
         }
     }
+
+    // Kotlin
+    suspend fun clearUserDataExceptOnboarding() {
+        val keepOnboarding = onboardingCompleted.first()
+        context.dataStore.edit { prefs ->
+            prefs.remove(USER_LOGGED_IN_KEY)
+            prefs.remove(USER_TOKEN_KEY)
+            prefs.remove(USER_DATA_KEY)
+            prefs.remove(PERSONALIZED_KEY)
+            prefs.remove(STORE_DETAIL_KEY)
+            prefs.remove(ADDRESSES_KEY)
+            prefs[ONBOARDING_COMPLETED_KEY] = keepOnboarding
+        }
+    }
+
 
     // Keys untuk DataStore
     companion object {
