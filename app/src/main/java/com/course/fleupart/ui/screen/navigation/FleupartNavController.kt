@@ -56,6 +56,8 @@ object DetailDestinations {
     const val FLOWER_DETAIL_ROUTE = "flowerDetail"
 
     const val EDIT_FLOWER_ROUTE = "editFlower"
+
+    const val SEARCH_POPULAR_FLOWER = "searchPopularFlower"
 }
 
 object QueryKeys {

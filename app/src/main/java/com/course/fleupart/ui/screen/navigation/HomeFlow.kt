@@ -111,6 +111,9 @@ fun NavGraphBuilder.addHomeGraph(
             onTipsDetail = { to ->
                 onTipsDetail(to, from)
             },
+            onSearchDetail = { to ->
+                onSearchDetail(to, from)
+            },
             homeViewModel = homeViewModel,
             orderViewModel = orderViewModel,
             modifier = modifier

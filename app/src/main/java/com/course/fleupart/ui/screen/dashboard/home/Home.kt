@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.course.fleupart.R
+import com.course.fleupart.data.model.remote.Detail
 import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreProduct
 import com.course.fleupart.data.model.remote.StoreProductResponse
@@ -68,6 +69,7 @@ import com.course.fleupart.ui.components.FlowerItem
 import com.course.fleupart.ui.components.ProductListLoading
 import com.course.fleupart.ui.components.TipsItem
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
+import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base100
 import com.course.fleupart.ui.theme.base20
@@ -82,6 +84,7 @@ fun Home(
     onSnackClick: (Long, String) -> Unit,
     onTipsDetail: (Long) -> Unit,
     onFlowerDetail: (String) -> Unit,
+    onSearchDetail: (String) -> Unit,
     homeViewModel: HomeViewModel,
     orderViewModel: OrderViewModel
 ) {
@@ -220,6 +223,7 @@ fun Home(
         },
         onTipsDetail = onTipsDetail,
         onFlowerDetail = onFlowerDetail,
+        onSearchDetail = onSearchDetail,
         onSelectedProduct = { storeProduct ->
             homeViewModel.setSelectedProduct(storeProduct)
         }
@@ -240,6 +244,7 @@ private fun Home(
     pullToRefreshState: PullToRefreshState,
     storeProductList: List<StoreProduct>,
     onSnackClick: (Long, String) -> Unit,
+    onSearchDetail: (String) -> Unit,
     onRefresh: () -> Unit,
     onTipsDetail: (Long) -> Unit,
     onFlowerDetail: (String) -> Unit,
@@ -327,7 +332,7 @@ private fun Home(
                                 PopularProduct(
                                     flowerList = storeProductList,
                                     onNavigate = {
-
+                                        onSearchDetail(DetailDestinations.SEARCH_POPULAR_FLOWER)
                                     },
                                     onFlowerClick = onFlowerDetail,
                                     onSelectedProduct = onSelectedProduct

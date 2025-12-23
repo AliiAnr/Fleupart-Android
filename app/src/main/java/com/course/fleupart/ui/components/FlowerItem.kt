@@ -232,3 +232,110 @@ fun MerchantFlowerItem(
         }
     }
 }
+
+
+@Composable
+fun SearchMerchantFlowerItem(
+    onFlowerClick: () -> Unit,
+    item: StoreProduct
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                onClick = {
+                    onFlowerClick()
+                },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Gambar item
+
+        if (item.picture.isNullOrEmpty()) {
+//            Log.e("MerchantFlowerItem", "Image URL is null or empty")
+            Image(
+                painter = painterResource(id = R.drawable.placeholder),  // Use a placeholder image
+                contentDescription = "Store Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(110.dp)
+                    .clip(RoundedCornerShape(10.dp))
+            )
+        } else {
+//            Log.d("MerchantFlowerItem", "Image URL: ${item.picture}")
+//            AsyncImage(
+//                model = ImageRequest.Builder(LocalContext.current)
+//                    .data(item.picture.firstOrNull()?.path)
+//                    .crossfade(true)
+//                    .memoryCachePolicy(CachePolicy.ENABLED)
+//                    .build(),
+//                contentDescription = "Store Image",
+////                contentScale = ContentScale.Crop,
+//                placeholder = painterResource(id = R.drawable.placeholder),
+//                error = painterResource(id = R.drawable.placeholder),
+//                modifier = Modifier
+//                    .size(110.dp)
+//                    .clip(RoundedCornerShape(10.dp))
+//            )
+            AsyncImage(
+                model = item.picture.firstOrNull()?.path,
+                contentDescription = null,
+                placeholder = painterResource(R.drawable.placeholder),
+                error       = painterResource(R.drawable.placeholder),
+                contentScale = ContentScale.Crop,
+                modifier    = Modifier.size(110.dp).clip(RoundedCornerShape(10.dp)),
+            )
+        }
+
+        Spacer(modifier = Modifier.width(18.dp))
+
+        // Detail item
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = item.name ?: "Flower Name",
+                fontSize = 14.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Medium,
+            )
+            Text(
+                text = item.description ?: "Description",
+                fontSize = 12.sp,
+                lineHeight = 18.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = base500,
+                modifier = Modifier.height(38.dp)
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.star),
+                    contentDescription = "Rating",
+                    tint = secColor,
+                    modifier = Modifier.size(12.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "${item.rating} | ${item.reviewCount}",
+                    fontSize = 10.sp,
+                    color = base100
+                )
+            }
+
+            Text(
+                text = formatCurrencyFromString(item.price ?: "0000"),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
+        }
+    }
+}

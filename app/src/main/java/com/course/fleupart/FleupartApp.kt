@@ -64,6 +64,7 @@ import com.course.fleupart.ui.screen.dashboard.detail.finance.DetailCompletedOrd
 import com.course.fleupart.ui.screen.dashboard.detail.finance.SalesReport
 import com.course.fleupart.ui.screen.dashboard.detail.finance.WithdrawBalance
 import com.course.fleupart.ui.screen.dashboard.detail.home.DetailTest
+import com.course.fleupart.ui.screen.dashboard.detail.home.SearchPopularFlower
 import com.course.fleupart.ui.screen.dashboard.detail.home.TipsDetail
 import com.course.fleupart.ui.screen.dashboard.detail.order.DetailOrderItem
 import com.course.fleupart.ui.screen.dashboard.detail.product.AddProduct
@@ -198,6 +199,18 @@ fun FleupartApp() {
                             onEditProductDetail = { id ->
                                 fleupartNavController.navigateToEditFlower(id = id, from = backStackEntry)
                             }
+                        )
+                    }
+
+                    composableWithCompositionLocal(
+                        route = DetailDestinations.SEARCH_POPULAR_FLOWER
+                    ) { backStackEntry ->
+                        SearchPopularFlower(
+                            homeViewModel = homeViewModel,
+                            onFlowerDetail = { id ->
+                                fleupartNavController.navigateToFlowerDetail(id = id, from = backStackEntry)
+                            },
+                            onBackClick = fleupartNavController::upPress,
                         )
                     }
 
