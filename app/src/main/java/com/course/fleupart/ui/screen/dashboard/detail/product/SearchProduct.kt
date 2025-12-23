@@ -34,6 +34,7 @@ import com.course.fleupart.ui.components.OrderItemCard
 import com.course.fleupart.ui.components.SearchBar
 import com.course.fleupart.ui.components.SearchBarForNavigation
 import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
+import com.course.fleupart.ui.screen.dashboard.product.EmptyProduct
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.primaryLight
@@ -139,7 +140,7 @@ private fun SearchProduct (
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
-                    .background(base20),
+                    .background(Color.White),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 CustomTopAppBar(
@@ -177,7 +178,13 @@ private fun SearchProduct (
                     ) {
                         CircularProgressIndicator(color = primaryLight)
                     }
-                } else {
+                } else if (filtered.isEmpty()) {
+                    EmptyProduct(
+                        title = "No product found",
+                        description = "Try another keyword"
+                    )
+                }
+                else {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
