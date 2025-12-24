@@ -103,23 +103,32 @@ private fun SearchPopularProduct(
         onBackClick: () -> Unit,
 ) {
 
+    val bestRatedProducts by remember(productData) {
+        mutableStateOf(
+            productData.sortedWith(
+                compareByDescending<StoreProduct> { it.rating }
+                    .thenByDescending { it.reviewCount }
+            )
+        )
+    }
+
     val focusManager = LocalFocusManager.current
     var query by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
-    var filtered by remember { mutableStateOf(productData) }
+    var filtered by remember { mutableStateOf(bestRatedProducts) }
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
 
-    LaunchedEffect(query, productData) {
+    LaunchedEffect(query, bestRatedProducts) {
         isLoading = true
         delay(1500)
         filtered = if (query.isBlank()) {
-            productData
+            bestRatedProducts
         } else {
-            productData.filter { product ->
+            bestRatedProducts.filter { product ->
                 product.name?.contains(query, ignoreCase = true) == true
             }
         }

@@ -699,6 +699,16 @@ private fun PopularProduct(
     onSelectedProduct: (StoreProduct) -> Unit,
     onFlowerClick: (String) -> Unit
 ) {
+
+    val bestRatedProducts by remember(flowerList) {
+        mutableStateOf(
+            flowerList.sortedWith(
+                compareByDescending<StoreProduct> { it.rating }
+                    .thenByDescending { it.reviewCount }
+            )
+        )
+    }
+
     Column(
         modifier = Modifier
             .background(Color.White)
@@ -728,7 +738,7 @@ private fun PopularProduct(
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(flowerList, key = { it.id }) { flower ->
+            items(bestRatedProducts, key = { it.id }) { flower ->
                 FlowerItem(
                     onFlowerClick = onFlowerClick,
                     item = flower,
