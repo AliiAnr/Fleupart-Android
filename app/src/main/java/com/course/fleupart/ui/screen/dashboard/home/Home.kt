@@ -21,12 +21,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -38,15 +36,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -56,15 +50,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.course.fleupart.R
-import com.course.fleupart.data.model.remote.Detail
-import com.course.fleupart.data.model.remote.StoreDetailData
 import com.course.fleupart.data.model.remote.StoreProduct
 import com.course.fleupart.data.model.remote.StoreProductResponse
 import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.common.formatCurrency
 import com.course.fleupart.ui.common.loadingFx
 import com.course.fleupart.ui.components.FakeCategory
-import com.course.fleupart.ui.components.Flower
 import com.course.fleupart.ui.components.FlowerItem
 import com.course.fleupart.ui.components.ProductListLoading
 import com.course.fleupart.ui.components.TipsItem
@@ -75,7 +66,6 @@ import com.course.fleupart.ui.theme.base100
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base300
 import com.course.fleupart.ui.theme.primaryLight
-import com.google.android.datatransport.ProductData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
