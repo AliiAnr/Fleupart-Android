@@ -157,23 +157,7 @@ fun Home(
 //        }
 //    }
 //
-//    LaunchedEffect(filteredOrdersState) {
-//        when (filteredOrdersState) {
-//            is ResultResponse.Success -> {
-//                isFilteredOrdersLoading = false
-//            }
-//
-//            is ResultResponse.Loading -> {
-//                isFilteredOrdersLoading = true
-//            }
-//
-//            is ResultResponse.Error -> {
-//                isFilteredOrdersLoading = false
-//            }
-//
-//            else -> {}
-//        }
-//    }
+
 
 
     val productData: List<StoreProduct> = when (storeProductState) {
