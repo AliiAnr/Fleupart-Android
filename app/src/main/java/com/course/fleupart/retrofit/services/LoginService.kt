@@ -15,7 +15,5 @@ interface LoginService {
 
     @GET("api/seller/profile")
     suspend fun getUser(): Response<GetUserResponse>
-//
-//    @PUT("api/buyer/username")
-//    suspend fun setUsername(@Body username: NameRequest): Response<PersonalizeResponse>
+
 }
