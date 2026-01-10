@@ -330,7 +330,8 @@ fun FleupartApp() {
                     ) { backStackEntry ->
                         AddProduct(
                             onBackClick = fleupartNavController::upPress,
-                            productViewModel = productViewModel
+                            productViewModel = productViewModel,
+                            homeViewModel = homeViewModel
                         )
                     }
 

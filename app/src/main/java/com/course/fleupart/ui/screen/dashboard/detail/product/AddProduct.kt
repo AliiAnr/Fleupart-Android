@@ -83,6 +83,7 @@ import com.course.fleupart.ui.components.CustomTextInput
 import com.course.fleupart.ui.components.CustomTopAppBar
 import com.course.fleupart.ui.components.ImagePickerCard
 import com.course.fleupart.ui.components.ImagePickerList
+import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
 import com.course.fleupart.ui.screen.dashboard.product.ProductViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
@@ -94,6 +95,7 @@ import kotlin.rem
 fun AddProduct(
     modifier: Modifier = Modifier,
     productViewModel: ProductViewModel,
+    homeViewModel: HomeViewModel,
     onBackClick: () -> Unit
 ) {
 
@@ -156,6 +158,7 @@ fun AddProduct(
         showSuccessDialog = showSuccessDialog,
         onSuccessDialogDismiss = {
             onBackClick()
+            homeViewModel.refreshData()
             showSuccessDialog = false
         },
         onAddProductClick = productViewModel::createProduct,
