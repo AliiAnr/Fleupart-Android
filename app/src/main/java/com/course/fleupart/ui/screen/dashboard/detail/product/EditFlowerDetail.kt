@@ -61,6 +61,7 @@ import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base500
+import com.course.fleupart.ui.theme.err
 import com.course.fleupart.ui.theme.primaryLight
 import com.course.fleupart.ui.theme.secColor
 
@@ -303,29 +304,58 @@ private fun DescFlower(
                     )
                 }
 
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            Color.White,
-                            shape = RoundedCornerShape(50.dp)
-                        )
-                        .clickable(
-                            onClick = {
-                                onEditClick(item.id)
-                            },
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.edit_pencil),
-                        contentDescription = null,
-                        tint = Color.Black,
+                Row() {
+                    Box(
                         modifier = Modifier
-                            .size(20.dp)
-                    )
+                            .size(40.dp)
+                            .background(
+                                Color.White,
+                                shape = RoundedCornerShape(50.dp)
+                            )
+                            .clickable(
+                                onClick = {
+                                    onEditClick(item.id)
+                                },
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.edit_pencil),
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier
+                                .size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                Color.White,
+                                shape = RoundedCornerShape(50.dp)
+                            )
+                            .clickable(
+                                onClick = {
+                                    //delete product
+                                },
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.delete_product),
+                            contentDescription = null,
+                            tint = err,
+                            modifier = Modifier
+                                .size(20.dp)
+                        )
+                    }
                 }
             }
         }
