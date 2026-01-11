@@ -95,6 +95,7 @@ class ProductViewModel(
     private val productImageFiles = mutableStateListOf<File>()
 
 
+    // Kotlin
     fun setInitialEditData(product: StoreProduct) {
         currentEditingProductId = product.id
         setName(product.name)
@@ -103,7 +104,8 @@ class ProductViewModel(
         setStock(product.stock.toString())
         setPoint(product.point.toString())
         setArrangeTime(product.arrangeTime)
-        setCategoryId(product.category.id)
+        // Protect against null category
+        setCategoryId(product.category?.id.orEmpty())
         setPreOrder(product.preOrder)
 
         _productImages.clear()
@@ -118,6 +120,7 @@ class ProductViewModel(
         existingImageUrls.addAll(urls)
         prepareExistingImageCache(urls)
     }
+
 
     private fun snapshotCurrentImageFiles(): List<File> {
         val retainedExisting = existingImageUrls.mapNotNull { cachedExistingImageFiles[it] }
