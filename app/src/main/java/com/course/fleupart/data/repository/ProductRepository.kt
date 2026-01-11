@@ -2,6 +2,7 @@ package com.course.fleupart.data.repository
 
 import android.content.Context
 import com.course.fleupart.data.model.remote.CreateProductPayload
+import com.course.fleupart.data.model.remote.DeleteProductRequest
 import com.course.fleupart.data.model.remote.GetAllCategoryResponse
 import com.course.fleupart.data.model.remote.PersonalizeResponse
 import com.course.fleupart.retrofit.api.ApiConfig
@@ -82,6 +83,23 @@ class ProductRepository private constructor(
                     body = file.asRequestBody("image/jpeg".toMediaType())
                 )
             }
+        )
+
+        if (response.isSuccessful) {
+            response.body()?.let { emit(ResultResponse.Success(it)) }
+                ?: emit(ResultResponse.Error("Empty response body"))
+        } else {
+            emit(ResultResponse.Error(response.errorBody()?.string() ?: "Unknown error"))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    fun deleteProduct(
+        deleteProductRequest: DeleteProductRequest
+    ): Flow<ResultResponse<PersonalizeResponse>> = flow {
+        emit(ResultResponse.Loading)
+
+        val response = productService.deleteProduct(
+            productId = deleteProductRequest
         )
 
         if (response.isSuccessful) {

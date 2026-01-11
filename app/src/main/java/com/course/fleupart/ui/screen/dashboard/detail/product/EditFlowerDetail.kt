@@ -342,6 +342,7 @@ private fun DescFlower(
                             .clickable(
                                 onClick = {
                                     //delete product
+
                                 },
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }
