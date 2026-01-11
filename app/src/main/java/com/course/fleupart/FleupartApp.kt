@@ -45,6 +45,7 @@ import com.course.fleupart.ui.components.FleupartBottomBar
 import com.course.fleupart.ui.components.HomeSections
 import com.course.fleupart.ui.screen.authentication.login.LoginScreen
 import com.course.fleupart.ui.screen.authentication.login.LoginScreenViewModel
+import com.course.fleupart.ui.screen.authentication.newpassword.NewPasswordScreen
 import com.course.fleupart.ui.screen.authentication.onDataBoarding.AddressScreen
 import com.course.fleupart.ui.screen.authentication.onDataBoarding.CitizenScreen
 import com.course.fleupart.ui.screen.authentication.onDataBoarding.OnDataBoardingViewModel
@@ -533,6 +534,14 @@ fun FleupartApp() {
                                 }
                             )
                         }
+                    }
+
+                    composableWithCompositionLocal(
+                        route = MainDestinations.NEW_PASSWORD_ROUTE
+                    ) { backStackEntry ->
+                        NewPasswordScreen(
+                            onBackClick = fleupartNavController::upPress
+                        )
                     }
 
                     composableWithCompositionLocal(

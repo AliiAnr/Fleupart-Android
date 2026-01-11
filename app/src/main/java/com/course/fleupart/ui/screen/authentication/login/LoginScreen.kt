@@ -282,7 +282,7 @@ private fun LoginScreen(
                         text = "Forgot Password?",
                         modifier = Modifier
                             .clickable {
-//                            navController.navigate(Graph.FORGOT_PASSWORD)
+                                navigateToRoute(MainDestinations.NEW_PASSWORD_ROUTE, false)
                             }
                             .align(Alignment.End)
                             .padding(bottom = 35.dp),
