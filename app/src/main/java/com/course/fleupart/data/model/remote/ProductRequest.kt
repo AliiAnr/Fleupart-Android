@@ -24,5 +24,6 @@ data class ProductRequest(
 )
 
 data class DeleteProductRequest(
+    @SerializedName("product_id")
     val productId: String
 )

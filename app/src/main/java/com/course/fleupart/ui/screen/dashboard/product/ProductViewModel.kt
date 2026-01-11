@@ -55,6 +55,10 @@ class ProductViewModel(
         MutableStateFlow<ResultResponse<PersonalizeResponse>>(ResultResponse.None)
     val productState: StateFlow<ResultResponse<PersonalizeResponse>> = _productState
 
+    private val _deleteProductState =
+        MutableStateFlow<ResultResponse<PersonalizeResponse>>(ResultResponse.None)
+    val deleteProductState: StateFlow<ResultResponse<PersonalizeResponse>> = _deleteProductState
+
     var errorMessage = MutableStateFlow("")
     var existingImageUrls = mutableStateListOf<String>()
         private set
@@ -358,10 +362,10 @@ class ProductViewModel(
                         productId = productId
                     )
                 ).collect { result ->
-                    _productState.value = result
+                    _deleteProductState.value = result
                 }
             } catch (e: Exception) {
-                _productState.value = ResultResponse.Error("Delete product failed: ${e.message}")
+                _deleteProductState.value = ResultResponse.Error("Delete product failed: ${e.message}")
             }
         }
     }
@@ -511,6 +515,10 @@ class ProductViewModel(
         categoryIdValue = ""
         _productState.value = ResultResponse.None
         _categoryState.value = ResultResponse.None
+    }
+
+    fun clearDeleteProductState() {
+        _deleteProductState.value = ResultResponse.None
     }
 
     private suspend fun downloadImageToCache(url: String): File? = withContext(Dispatchers.IO) {

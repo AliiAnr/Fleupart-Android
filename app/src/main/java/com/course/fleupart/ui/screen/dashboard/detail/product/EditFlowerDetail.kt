@@ -1,6 +1,7 @@
 package com.course.fleupart.ui.screen.dashboard.detail.product
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,9 +25,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,7 +61,9 @@ import com.course.fleupart.data.model.remote.StoreProduct
 import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.common.formatCurrencyFromString
 import com.course.fleupart.ui.common.loadingFx
+import com.course.fleupart.ui.components.CustomPopUpDialog
 import com.course.fleupart.ui.screen.dashboard.home.HomeViewModel
+import com.course.fleupart.ui.screen.dashboard.product.ProductViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base500
@@ -71,6 +77,7 @@ fun EditFlowerDetail(
     flowerId: String,
     selectedProduct: StoreProduct,
     homeViewModel: HomeViewModel,
+    productViewModel: ProductViewModel,
     onBackClick: () -> Unit,
     onEditClick: (String) -> Unit
 ) {
@@ -78,7 +85,13 @@ fun EditFlowerDetail(
         initialValue = ResultResponse.None
     )
 
+    val deleteProductState by productViewModel.deleteProductState.collectAsStateWithLifecycle(
+        initialValue = ResultResponse.None
+    )
+
     var showCircularProgress by remember { mutableStateOf(false) }
+
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         homeViewModel.getProductReview(productId = flowerId)
@@ -105,6 +118,25 @@ fun EditFlowerDetail(
         }
     }
 
+    LaunchedEffect(deleteProductState) {
+        when (deleteProductState) {
+            is ResultResponse.Success -> {
+                showCircularProgress = false
+                showSuccessDialog =  true
+            }
+
+            is ResultResponse.Loading -> {
+                showCircularProgress = true
+            }
+
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+            }
+
+            else -> {}
+        }
+    }
+
     val isLoading =
         productReviewState is ResultResponse.Loading ||
                 (productReviewState is ResultResponse.None)
@@ -119,6 +151,18 @@ fun EditFlowerDetail(
         onBackClick = onBackClick,
         item = selectedProduct,
         isLoading = isLoading,
+        onDeleteProduct = {
+            Log.e("Delete Product", "onDeleteProduct: ${selectedProduct.id}")
+            productViewModel.deleteProduct(
+                productId = selectedProduct.id
+            )
+        },
+        showSuccessDialog = showSuccessDialog,
+        onSuccessDialogDismiss = {
+            // logic reset past data
+            productViewModel.clearDeleteProductState()
+            onBackClick()
+        },
         onEditClick = onEditClick,
         reviewData = reviewData ?: emptyList(),
         showCircularProgress = showCircularProgress
@@ -130,13 +174,18 @@ private fun EditFlowerDetail(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     onEditClick: (String) -> Unit,
+    onDeleteProduct: () -> Unit,
     isLoading: Boolean,
     reviewData: List<ReviewItem>,
     showCircularProgress: Boolean,
+    showSuccessDialog: Boolean,
+    onSuccessDialogDismiss: () -> Unit,
     item: StoreProduct
 ) {
 
     val focusManager = LocalFocusManager.current
+
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     FleupartSurface (
         modifier = modifier.fillMaxSize(),
@@ -172,6 +221,10 @@ private fun EditFlowerDetail(
                                 onBackClick = onBackClick,
                                 onStoreClick = { _,_ ->
                                 },
+                                showConfirmDialog = {
+                                    showConfirmDialog = true
+                                },
+                                onDeleteProduct = onDeleteProduct,
                                 onEditClick = onEditClick,
                                 item = item
                             )
@@ -197,6 +250,82 @@ private fun EditFlowerDetail(
                     CircularProgressIndicator(color = primaryLight)
                 }
             }
+
+            if (showSuccessDialog) {
+                CustomPopUpDialog(
+                    onDismiss = {
+                        onSuccessDialogDismiss()
+                    },
+                    isShowIcon = true,
+                    isShowTitle = true,
+                    isShowDescription = true,
+                    isShowButton = false,
+                    icon = {
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ceklist),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                            )
+                        }
+                    },
+                    title = "Delete Product Successful",
+                    description = "Your product has been deleted successfully.",
+                )
+            }
+
+            if (showConfirmDialog) {
+                CustomPopUpDialog(
+                    onDismiss = { showConfirmDialog = false },
+                    isShowIcon = true,
+                    isShowTitle = true,
+                    isShowDescription = false,
+                    isShowButton = true,
+                    icon = {
+
+                        Icon(
+                            painter = painterResource(id = R.drawable.think),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier.height(150.dp)
+                        )
+                    },
+                    title = "Are you sure you want to delete the product?",
+                    buttons = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            OutlinedButton(
+                                onClick = { showConfirmDialog = false },
+                                border = BorderStroke(1.dp, primaryLight),
+                                shape = RoundedCornerShape(28.dp),
+                                modifier = Modifier.weight(1f).padding(end = 6.dp)
+                            ) {
+                                Text("Cancel", color = primaryLight)
+                            }
+                            Button(
+                                onClick = {
+                                    focusManager.clearFocus()
+                                    onDeleteProduct()
+                                    showConfirmDialog = false
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = primaryLight
+                                ),
+                                shape = RoundedCornerShape(28.dp),
+                                modifier = Modifier.weight(1f).padding(start = 6.dp)
+                            ) {
+                                Text("Confirm", color = Color.White)
+                            }
+                        }
+                    }
+                )
+            }
         }
     }
 }
@@ -206,7 +335,9 @@ private fun DescFlower(
     modifier: Modifier = Modifier,
     item: StoreProduct,
     onStoreClick: (String, String) -> Unit,
+    showConfirmDialog: () -> Unit,
     onEditClick: (String) -> Unit,
+    onDeleteProduct: () -> Unit,
     onBackClick: () -> Unit
 ) {
 
@@ -341,8 +472,7 @@ private fun DescFlower(
                             )
                             .clickable(
                                 onClick = {
-                                    //delete product
-
+                                    showConfirmDialog()
                                 },
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }

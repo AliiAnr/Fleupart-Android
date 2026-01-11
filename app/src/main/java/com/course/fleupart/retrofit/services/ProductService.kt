@@ -10,6 +10,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -50,7 +51,7 @@ interface ProductService {
     @GET("api/category")
     suspend fun getAllCategory(): Response<GetAllCategoryResponse>
 
-    @DELETE("api/product")
+    // Kotlin
+    @HTTP(method = "DELETE", path = "api/product", hasBody = true)
     suspend fun deleteProduct(@Body productId: DeleteProductRequest): Response<PersonalizeResponse>
-
 }

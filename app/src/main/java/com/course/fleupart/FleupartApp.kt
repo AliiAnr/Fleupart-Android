@@ -526,6 +526,7 @@ fun FleupartApp() {
                                 flowerId = flowerId ?: "",
                                 selectedProduct = it,
                                 homeViewModel = homeViewModel,
+                                productViewModel = productViewModel,
                                 onBackClick = fleupartNavController::upPress,
                                 onEditClick = { id ->
                                     fleupartNavController.navigateToEditProduct(id = id, from = backStackEntry)
