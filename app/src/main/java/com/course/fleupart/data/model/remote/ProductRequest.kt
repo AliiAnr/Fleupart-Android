@@ -22,3 +22,7 @@ data class ProductRequest(
 	@field:SerializedName("point")
 	val point: Int
 )
+
+data class DeleteProductRequest(
+    val product_id: String
+)

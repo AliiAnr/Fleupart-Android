@@ -1,12 +1,14 @@
 package com.course.fleupart.retrofit.services
 
 import com.course.fleupart.data.model.remote.AddressDataRequest
+import com.course.fleupart.data.model.remote.DeleteProductRequest
 import com.course.fleupart.data.model.remote.GetAllCategoryResponse
 import com.course.fleupart.data.model.remote.PersonalizeResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -47,4 +49,8 @@ interface ProductService {
 
     @GET("api/category")
     suspend fun getAllCategory(): Response<GetAllCategoryResponse>
+
+    @DELETE("api/product")
+    suspend fun deleteProduct(@Body productId: DeleteProductRequest): Response<PersonalizeResponse>
+
 }
