@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -399,6 +400,7 @@ private fun StoreProfileDetail(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.White)
+                        .navigationBarsPadding()
                         .height(90.dp),
                     contentAlignment = Alignment.Center
                 ) {
