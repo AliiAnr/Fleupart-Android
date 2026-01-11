@@ -24,5 +24,5 @@ data class ProductRequest(
 )
 
 data class DeleteProductRequest(
-    val product_id: String
+    val productId: String
 )

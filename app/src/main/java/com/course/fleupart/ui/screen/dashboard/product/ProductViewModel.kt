@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.course.fleupart.data.model.remote.ApiUpdateResponse
 import com.course.fleupart.data.model.remote.CreateProductPayload
+import com.course.fleupart.data.model.remote.DeleteProductRequest
 import com.course.fleupart.data.model.remote.GetAllCategoryResponse
 import com.course.fleupart.data.model.remote.PersonalizeResponse
 import com.course.fleupart.data.model.remote.StoreProduct
@@ -345,6 +346,22 @@ class ProductViewModel(
                 _productState.value = ResultResponse.Error("Create product failed: ${e.message}")
             } finally {
                 filesSnapshot.forEach { if (it.exists()) it.delete() }
+            }
+        }
+    }
+
+    fun deleteProduct(productId: String) {
+        viewModelScope.launch {
+            try {
+                productRepository.deleteProduct(
+                    deleteProductRequest = DeleteProductRequest(
+                        productId = productId
+                    )
+                ).collect { result ->
+                    _productState.value = result
+                }
+            } catch (e: Exception) {
+                _productState.value = ResultResponse.Error("Delete product failed: ${e.message}")
             }
         }
     }
