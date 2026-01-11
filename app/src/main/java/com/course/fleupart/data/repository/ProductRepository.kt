@@ -5,6 +5,7 @@ import com.course.fleupart.data.model.remote.CreateProductPayload
 import com.course.fleupart.data.model.remote.DeleteProductRequest
 import com.course.fleupart.data.model.remote.GetAllCategoryResponse
 import com.course.fleupart.data.model.remote.PersonalizeResponse
+import com.course.fleupart.data.model.remote.UpdateProductPayload
 import com.course.fleupart.retrofit.api.ApiConfig
 import com.course.fleupart.retrofit.services.ProductService
 import com.course.fleupart.ui.common.ResultResponse
@@ -28,6 +29,42 @@ class ProductRepository private constructor(
 ) {
 
     private val productService: ProductService = ApiConfig.getProductService(context)
+
+    private fun String?.toPlainRequestBodyOrNull(): RequestBody? =
+        this?.toRequestBody("text/plain".toMediaType())
+
+    fun updateProductWithCategoryNew(
+        payload: UpdateProductPayload,
+        imageFiles: List<File>
+    ): Flow<ResultResponse<PersonalizeResponse>> = flow {
+        emit(ResultResponse.Loading)
+
+        val response = productService.updateProductWithCategoryNew(
+            productId = payload.productId.toPlainRequestBody(),
+            name = payload.name.toPlainRequestBodyOrNull(),
+            stock = payload.stock?.toString().toPlainRequestBodyOrNull(),
+            description = payload.description.toPlainRequestBodyOrNull(),
+            arrangeTime = payload.arrangeTime.toPlainRequestBodyOrNull(),
+            point = payload.point?.toString().toPlainRequestBodyOrNull(),
+            price = payload.price?.toString().toPlainRequestBodyOrNull(),
+            preOrder = payload.preOrder?.toString().toPlainRequestBodyOrNull(),
+            categoryId = payload.categoryId.toPlainRequestBodyOrNull(),
+            files = imageFiles.takeIf { it.isNotEmpty() }?.map { file ->
+                MultipartBody.Part.createFormData(
+                    name = "files",
+                    filename = file.name,
+                    body = file.asRequestBody("image/jpeg".toMediaType())
+                )
+            }
+        )
+
+        if (response.isSuccessful) {
+            response.body()?.let { emit(ResultResponse.Success(it)) }
+                ?: emit(ResultResponse.Error("Empty response body"))
+        } else {
+            emit(ResultResponse.Error(response.errorBody()?.string() ?: "Unknown error"))
+        }
+    }.flowOn(Dispatchers.IO)
 
     fun createProductWithCategory(
         payload: CreateProductPayload,

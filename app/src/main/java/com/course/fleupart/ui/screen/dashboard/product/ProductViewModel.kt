@@ -14,6 +14,7 @@ import com.course.fleupart.data.model.remote.DeleteProductRequest
 import com.course.fleupart.data.model.remote.GetAllCategoryResponse
 import com.course.fleupart.data.model.remote.PersonalizeResponse
 import com.course.fleupart.data.model.remote.StoreProduct
+import com.course.fleupart.data.model.remote.UpdateProductPayload
 import com.course.fleupart.data.repository.ProductRepository
 import com.course.fleupart.data.resource.Resource
 import com.course.fleupart.ui.common.ImageCompressor
@@ -145,6 +146,90 @@ class ProductViewModel(
             downloadImageToCache(url)?.let { cachedExistingImageFiles[url] = it }
         }
         return cachedExistingImageFiles.isNotEmpty()
+    }
+
+    fun updateProductNew() {
+        val payload = buildUpdateProductPayload(requireNewImages = false) ?: return
+        if (currentEditingProductId.isBlank()) {
+            errorMessage.value = "Invalid product id"
+            return
+        }
+
+        viewModelScope.launch {
+//            if (existingImageUrls.isNotEmpty()) {
+//                ensureExistingImageFiles()
+//            }
+//            val files = snapshotCurrentImageFiles()
+//            if (files.isEmpty()) {
+//                errorMessage.value = "Please keep at least one product image"
+//                Log.e("ProductViewModel", "updateProduct: Please keep at least one product image")
+//                return@launch
+//            }
+
+            val files = productImageFiles.toList()
+
+            productRepository.updateProductWithCategoryNew(
+                payload = payload,
+                imageFiles = files
+            ).collect { result -> _updateProductState.value = result }
+        }
+    }
+
+    private fun buildUpdateProductPayload(requireNewImages: Boolean = true): UpdateProductPayload? {
+        val stock = stockValue.toIntOrNull()
+        val point = pointValue.toIntOrNull()
+        val price = priceValue.toLongOrNull()
+        val hasAnyImage = productImageFiles.isNotEmpty() || existingImageUrls.isNotEmpty()
+
+        return when {
+            nameValue.isBlank() -> {
+                errorMessage.value = "Name is required"
+                null
+            }
+            stock == null || stock <= 0 -> {
+                errorMessage.value = "Stock must be a positive number"
+                null
+            }
+            descriptionValue.isBlank() -> {
+                errorMessage.value = "Description is required"
+                null
+            }
+            arrangeTimeValue.isBlank() -> {
+                errorMessage.value = "Arrange time is required"
+                null
+            }
+            point == null || point < 0 -> {
+                errorMessage.value = "Point must be zero or greater"
+                null
+            }
+            price == null || price <= 0 -> {
+                errorMessage.value = "Price must be a positive number"
+                null
+            }
+            categoryIdValue.isBlank() -> {
+                errorMessage.value = "Category is required"
+                null
+            }
+            requireNewImages && productImageFiles.isEmpty() -> {
+                errorMessage.value = "Please add at least one product image"
+                null
+            }
+            !requireNewImages && !hasAnyImage -> {
+                errorMessage.value = "Please keep at least one product image"
+                null
+            }
+            else -> UpdateProductPayload(
+                productId = currentEditingProductId,
+                name = nameValue,
+                stock = stock,
+                description = descriptionValue,
+                arrangeTime = arrangeTimeValue,
+                point = point,
+                price = price,
+                preOrder = isPreOrderValue,
+                categoryId = categoryIdValue
+            )
+        }
     }
 
 

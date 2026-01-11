@@ -84,7 +84,6 @@ import com.course.fleupart.ui.theme.base20
 import com.course.fleupart.ui.theme.base300
 import com.course.fleupart.ui.theme.primaryLight
 
-
 @Composable
 fun EditProduct(
     modifier: Modifier = Modifier,
@@ -124,6 +123,11 @@ fun EditProduct(
         productViewModel.getAllCategory()
     }
 
+    val originalPrice = remember(selectedEditProduct) {
+        runCatching { selectedEditProduct?.price?.toBigDecimal()?.stripTrailingZeros()?.toPlainString() }
+            .getOrDefault(selectedEditProduct?.price ?: "")
+    }
+
     LaunchedEffect(updateState) {
         when (updateState) {
             is ResultResponse.Success -> {
@@ -152,7 +156,7 @@ fun EditProduct(
 
     val isNameChanged = productViewModel.nameValue != (selectedEditProduct?.name ?: "")
     val isDescChanged = productViewModel.descriptionValue != (selectedEditProduct?.description ?: "")
-    val isPriceChanged = productViewModel.priceValue != (selectedEditProduct?.price ?: "")
+    val isPriceChanged = productViewModel.priceValue != originalPrice
     val isStockChanged = productViewModel.stockValue != (selectedEditProduct?.stock?.toString() ?: "")
     val isPointChanged = productViewModel.pointValue != (selectedEditProduct?.point?.toString() ?: "")
     val isTimeChanged = productViewModel.arrangeTimeValue != (selectedEditProduct?.arrangeTime ?: "")
@@ -184,13 +188,14 @@ fun EditProduct(
         isButtonAvailable = isButtonAvailable,
         showSuccessDialog = showSuccessDialog,
         onSuccessDialogDismiss = {
-            showSuccessDialog = false
             productViewModel.resetUpdateState()
             productViewModel.clearProductForm()
+            homeViewModel.refreshDataAfterUpdate()
+            onBackClick()
             onBackClick()
         },
         onSaveClick = {
-            productViewModel.updateProduct()
+            productViewModel.updateProductNew()
         },
         categoryList = categoryList,
         onBackClick = {

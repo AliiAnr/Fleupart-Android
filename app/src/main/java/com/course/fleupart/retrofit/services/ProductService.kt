@@ -48,6 +48,21 @@ interface ProductService {
         @Part files: List<MultipartBody.Part>
     ): Response<PersonalizeResponse>
 
+    @Multipart
+    @PUT("api/product/with-category")
+    suspend fun updateProductWithCategoryNew(
+        @Part("productId") productId: RequestBody,
+        @Part("name") name: RequestBody? = null,
+        @Part("stock") stock: RequestBody? = null,
+        @Part("description") description: RequestBody? = null,
+        @Part("arrange_time") arrangeTime: RequestBody? = null,
+        @Part("point") point: RequestBody? = null,
+        @Part("price") price: RequestBody? = null,
+        @Part("pre_order") preOrder: RequestBody? = null,
+        @Part("category_id") categoryId: RequestBody? = null,
+        @Part files: List<MultipartBody.Part>? = null
+    ): Response<PersonalizeResponse>
+
     @GET("api/category")
     suspend fun getAllCategory(): Response<GetAllCategoryResponse>
 

@@ -122,6 +122,26 @@ class HomeViewModel(
         }
     }
 
+    fun refreshDataAfterUpdate() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            try {
+                // Update store detail first
+                loadStoreDetail()
+
+                // Now use the latest storeId to fetch products once
+                storeDetail.value?.id?.let { storeId ->
+                    homeRepository.getAllStoreProduct(storeId = storeId)
+                        .collect { result -> _storeProductState.value = result }
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error refreshing data: ${e.message}")
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
+    }
+
     private fun loadStoreDetail() {
         viewModelScope.launch {
             _storeDetailState.value = ResultResponse.Loading

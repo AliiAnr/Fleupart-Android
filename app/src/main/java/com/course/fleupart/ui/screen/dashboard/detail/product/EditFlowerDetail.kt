@@ -161,7 +161,7 @@ fun EditFlowerDetail(
         onSuccessDialogDismiss = {
             // logic reset past data
             productViewModel.clearDeleteProductState()
-            homeViewModel.refreshData()
+            homeViewModel.refreshDataAfterUpdate()
             onBackClick()
         },
         onEditClick = onEditClick,

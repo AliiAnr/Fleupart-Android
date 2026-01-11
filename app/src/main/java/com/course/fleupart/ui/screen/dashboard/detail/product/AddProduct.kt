@@ -158,7 +158,7 @@ fun AddProduct(
         showSuccessDialog = showSuccessDialog,
         onSuccessDialogDismiss = {
             onBackClick()
-            homeViewModel.refreshData()
+            homeViewModel.refreshDataAfterUpdate()
         },
         onAddProductClick = productViewModel::createProduct,
         categoryList = categoryList,

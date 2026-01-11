@@ -9,3 +9,15 @@ data class CreateProductPayload(
     val price: Long,
     val categoryId: String,
 )
+
+data class UpdateProductPayload(
+    val productId: String,
+    val name: String? = null,
+    val stock: Int? = null,
+    val description: String? = null,
+    val arrangeTime: String? = null,
+    val point: Int? = null,
+    val price: Long? = null,
+    val preOrder: Boolean? = null,
+    val categoryId: String? = null
+)
