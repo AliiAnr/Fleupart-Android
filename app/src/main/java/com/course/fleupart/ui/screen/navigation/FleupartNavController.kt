@@ -123,6 +123,12 @@ class FleupartNavController(
         }
     }
 
+    fun navigateToSalesReport(from: NavBackStackEntry) {
+        if (from.lifecycleIsResumed()) {
+            navController.navigate(DetailDestinations.SALES_REPORT_ROUTE)
+        }
+    }
+
     fun navigateToEditFlower(id: String, from: NavBackStackEntry) {
         if (from.lifecycleIsResumed()) {
             navController.navigate("${DetailDestinations.EDIT_FLOWER_ROUTE}/$id")

@@ -31,6 +31,7 @@ uiTextGoogleFonts = "1.8.3"
 uiTooling = "1.8.3"
 ycharts = "2.1.0'"
 ychartsVersion = "1.0.1"
+foundation = "1.10.0"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -75,6 +76,7 @@ ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
 ycharts = { module = "implementation 'co.yml:ycharts", version.ref = "ycharts" }
 yml-ycharts = { module = "co.yml:ycharts", version.ref = "coYcharts" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

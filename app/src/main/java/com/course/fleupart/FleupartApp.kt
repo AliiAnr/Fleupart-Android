@@ -593,10 +593,34 @@ fun FleupartApp() {
                     }
 
                     composableWithCompositionLocal(
-                        route = DetailDestinations.SALES_REPORT_ROUTE
+                        route = DetailDestinations.SALES_REPORT_ROUTE,
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popEnterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        },
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(durationMillis = 350)
+                            )
+                        }
                     ) { backStackEntry ->
                         SalesReport(
-
+                            onBackClick = fleupartNavController::upPress
                         )
                     }
 
@@ -621,6 +645,7 @@ fun FleupartApp() {
                             onCompletedOrderDetail = fleupartNavController::navigateToCompletedOrderDetail,
                             onWithdrawDetail = fleupartNavController::navigateToWithdrawDetail,
                             onFlowerStatus = fleupartNavController::navigateToProductStatus,
+                            onSalesReport = fleupartNavController::navigateToSalesReport,
                             onNavigateOut = fleupartNavController::navigateToNonBottomBarRoute,
                             orderViewModel = orderViewModel,
                             profileViewModel = profileViewModel,
@@ -763,6 +788,7 @@ fun MainContainer(
     onWithdrawDetail: (String, NavBackStackEntry) -> Unit,
     onFlowerStatus: (String, NavBackStackEntry) -> Unit,
     onNavigateOut: (String, Boolean) -> Unit,
+    onSalesReport: (NavBackStackEntry) -> Unit,
     orderViewModel: OrderViewModel,
     profileViewModel: ProfileViewModel,
     homeViewModel: HomeViewModel
@@ -823,6 +849,7 @@ fun MainContainer(
                 onCompletedOrderDetail = onCompletedOrderDetail,
                 onWithdrawDetail = onWithdrawDetail,
                 onFlowerStatus = onFlowerStatus,
+                onSalesReport = onSalesReport,
                 onNavigateOut = onNavigateOut,
                 orderViewModel = orderViewModel,
                 profileViewModel = profileViewModel,

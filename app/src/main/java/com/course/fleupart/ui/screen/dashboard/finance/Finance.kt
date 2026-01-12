@@ -75,6 +75,7 @@ fun Finance(
     modifier: Modifier = Modifier,
     onCompletedOrderDetail: () -> Unit,
     onWithdrawDetail: (String) -> Unit,
+    onSalesReport: () -> Unit,
     orderViewModel: OrderViewModel,
 ) {
 
@@ -133,6 +134,7 @@ fun Finance(
         isRefreshing = isRefreshing,
         onWithdrawDetail = onWithdrawDetail,
         onRecentSalesClick = {},
+        onSalesReport = onSalesReport,
         onCompletedOrderDetail = {
             onCompletedOrderDetail()
             orderViewModel.setSelectedCompletedOrderItem(it)
@@ -154,6 +156,7 @@ private fun Finance(
     storeOrdersCount: Int,
     isRefreshing: Boolean,
     onWithdrawDetail: (String) -> Unit,
+    onSalesReport: () -> Unit,
     onRecentSalesClick: () -> Unit,
     onCompletedOrderDetail: (OrderDataItem) -> Unit,
     onRefresh: () -> Unit,
@@ -277,6 +280,7 @@ private fun Finance(
                                             SalesDataSection(
                                                 recentSalesList = completedPaidOrders,
                                                 allOrdersCount = storeOrdersCount,
+                                                onSalesReport = onSalesReport,
                                                 onCompletedOrderDetail = onCompletedOrderDetail
                                             )
                                         }
@@ -336,6 +340,7 @@ private fun WithdrawDataSection(
 private fun SalesDataSection(
     modifier: Modifier = Modifier,
     recentSalesList: List<OrderDataItem>,
+    onSalesReport: () -> Unit,
     onCompletedOrderDetail: (OrderDataItem) -> Unit,
     allOrdersCount: Int
 ) {
@@ -352,9 +357,7 @@ private fun SalesDataSection(
             item {
                 Spacer(modifier = Modifier.height(12.dp))
                 SalesReportSection(
-                    onViewSalesClick = {
-
-                    },
+                    onViewSalesClick = onSalesReport,
                     allOrdersCount = allOrdersCount
                 )
             }
@@ -563,7 +566,7 @@ private fun RecentWithdrawItem(
 @Composable
 private fun SalesReportSection(
     modifier: Modifier = Modifier,
-    onViewSalesClick: (Int) -> Unit,
+    onViewSalesClick: () -> Unit,
     allOrdersCount: Int
 ) {
     Row(
@@ -575,6 +578,13 @@ private fun SalesReportSection(
             modifier = Modifier
                 .border(border = BorderStroke(1.dp, base40), shape = RoundedCornerShape(14.dp))
                 .padding(22.dp)
+                .clickable(
+                    onClick = {
+                        onViewSalesClick()
+                    },
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                )
         ) {
             Column(
                 verticalArrangement = Arrangement.Center,

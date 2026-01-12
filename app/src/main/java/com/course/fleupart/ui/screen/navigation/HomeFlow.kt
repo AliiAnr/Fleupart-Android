@@ -94,6 +94,7 @@ fun NavGraphBuilder.addHomeGraph(
     onSearchDetail: (String, NavBackStackEntry) -> Unit,
     onCompletedOrderDetail: (NavBackStackEntry) -> Unit,
     onOrderDetail: (NavBackStackEntry) -> Unit,
+    onSalesReport: (NavBackStackEntry) -> Unit,
     onFlowerStatus: (String, NavBackStackEntry) -> Unit,
     onNavigateOut: (String, Boolean) -> Unit,
     orderViewModel: OrderViewModel,
@@ -148,6 +149,9 @@ fun NavGraphBuilder.addHomeGraph(
             onWithdrawDetail = { to ->
                 onWithdrawDetail(to, from)
             },
+            onSalesReport = {
+                onSalesReport(from)
+            }
         )
     }
     composable(HomeSections.Order.route) { from ->
