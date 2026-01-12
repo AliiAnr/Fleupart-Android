@@ -61,6 +61,7 @@ import com.course.fleupart.ui.components.FakeCategory
 import com.course.fleupart.ui.components.RecentSales
 import com.course.fleupart.ui.components.WithdrawData
 import com.course.fleupart.ui.screen.dashboard.order.OrderViewModel
+import com.course.fleupart.ui.screen.dashboard.product.EmptyProduct
 import com.course.fleupart.ui.screen.navigation.DetailDestinations
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.screen.navigation.MainDestinations
@@ -373,12 +374,23 @@ private fun SalesDataSection(
                 )
             }
 
-            items(items = recentSalesList) { item ->
-                RecentSalesItem(
-                    item = item,
-                    onCompletedOrderDetail = onCompletedOrderDetail
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+            if (recentSalesList.isNotEmpty()) {
+                items(items = recentSalesList) { item ->
+                    RecentSalesItem(
+                        item = item,
+                        onCompletedOrderDetail = onCompletedOrderDetail
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            } else {
+                item {
+                    Spacer(modifier = Modifier.height(50.dp))
+                    EmptyProduct(
+                        title = "No Recent Sales",
+                        description = "No recent sales found."
+
+                    )
+                }
             }
 
 
