@@ -9,12 +9,11 @@
     <string name="back_page">BACK</string>
     <string name="start">Get Started</string>
 
-    <string name="title_ob_1">Welcome to Fleura!</string>
-    <string name="title_ob_2">Explore many flower option!</string>
-    <string name="title_ob_3">Easy and fast ordering!</string>
+    <string name="title_ob_1">Welcome to Fleupart!</string>
+    <string name="title_ob_2">Showcase Your Products!</string>
+    <string name="title_ob_3">Grow Your Business!</string>
 
-
-    <string name="desc_ob_1">Customize your bouquets with just a few taps and make every moment special</string>
-    <string name="desc_ob_2">Discover a world of beautiful flowers and elegant bouquets, perfect for every occasion</string>
-    <string name="desc_ob_3">Experience seamless ordering and timely delivery bringing everything you need right to your doorstep</string>
+    <string name="desc_ob_1">Join our seller partner network to expand your market reach and manage your bouquet shop digitally</string>
+    <string name="desc_ob_2">Upload your best creations and attract customers with stunning product displays</string>
+    <string name="desc_ob_3">Monitor incoming orders efficiently and manage your revenue in real-time</string>
 </resources>
