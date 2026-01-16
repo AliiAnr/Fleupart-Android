@@ -376,7 +376,7 @@ private fun LoginScreen(
                         )
                     ) {
                         Text(
-                            text = "Email atau Kata sandi salah!",
+                            text = "Invalid email or password.",
                             color = Color.Red,
                             fontSize = 16.sp,
                             modifier = Modifier.padding(top = 10.dp)
