@@ -90,14 +90,17 @@ fun LoginScreen(
 
                 if (isStoreExist) {
                     // CASE A: Toko sudah ada -> Langsung Masuk Dashboard
+                    Log.e("LoginScreen", "Store sudah ada")
                     loginViewModel.setPersonalizeCompleted()
                     navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
                     onDataBoardingViewModel.resetDataBoardingValue()
                     loginViewModel.resetState()
                 } else {
+                    Log.e("LoginScreen", "Store belum ada")
                     // CASE B: Toko belum ada -> Auto-Register menggunakan nama User
                     // Kita ambil nama user dari state yang sudah di-load sebelumnya
                     val currentUserResponse = loginViewModel.userState.value
+                    Log.e("LoginScreen", "User detail: $currentUserResponse")
                     if (currentUserResponse is ResultResponse.Success) {
                         val userName = currentUserResponse.data.data.name
                         loginViewModel.updateStore(userName ?: "Store Name")
@@ -178,9 +181,10 @@ fun LoginScreen(
                     } else {
                         navigateToRoute(MainDestinations.PHOTO_ROUTE, true)
                     }
+                    loginViewModel.resetState()
+                    onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
                 }
-                loginViewModel.resetState()
-                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
+
             }
 
             is ResultResponse.Loading -> {
@@ -199,7 +203,6 @@ fun LoginScreen(
     LaunchedEffect(addressState) {
         when (addressState) {
             is ResultResponse.Success -> {
-                showCircularProgress = false
                 val address = (addressState as ResultResponse.Success).data.data
                 Log.e("AddressScreen", "Address detail: $address")
                 if (address.isNotEmpty() && address.first().isAddressCompleted()) {
