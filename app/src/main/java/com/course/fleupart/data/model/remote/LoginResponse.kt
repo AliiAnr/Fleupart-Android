@@ -12,6 +12,11 @@ data class LoginRequest(
     val password: String
 )
 
+data class UpdateStoreRequest(
+    @field:SerializedName("name")
+    val name: String,
+)
+
 data class LoginResponse(
 
     @field:SerializedName("data")

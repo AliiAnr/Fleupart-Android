@@ -57,6 +57,9 @@ fun AddressScreen(
         initialValue = ResultResponse.None
     )
 
+    val storeCheckState by loginViewModel.storeCheckState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+    val updateStoreState by loginViewModel.updateStoreState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+
     val userState by loginViewModel.userState.collectAsStateWithLifecycle(
         initialValue = ResultResponse.None
     )
@@ -88,14 +91,15 @@ fun AddressScreen(
                 val detail = (userState as ResultResponse.Success).data.data
                 Log.e("AddressScreen", "User detail: $detail")
                 if (detail.isProfileComplete()) {
-                    loginViewModel.setPersonalizeCompleted()
-                    navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
-                    onDataBoardingViewModel.resetDataBoardingValue()
+//                    loginViewModel.setPersonalizeCompleted()
+//                    navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
+//                    onDataBoardingViewModel.resetDataBoardingValue()
+                    loginViewModel.checkStore()
                 } else {
                     navigateToRoute(MainDestinations.CITIZEN_ROUTE, true)
                     onDataBoardingViewModel.resetDataBoardingValue()
                 }
-                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
+//                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
 
             is ResultResponse.Loading -> {
@@ -107,6 +111,55 @@ fun AddressScreen(
                 onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
 
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(storeCheckState) {
+        when (storeCheckState) {
+            is ResultResponse.Success -> {
+                val isStoreExist = (storeCheckState as ResultResponse.Success).data
+
+                if (isStoreExist) {
+                    // CASE A: Toko sudah ada, Profil sudah lengkap -> Dashboard
+                    loginViewModel.setPersonalizeCompleted()
+                    navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
+                    onDataBoardingViewModel.resetDataBoardingValue()
+                    loginViewModel.resetState()
+                } else {
+                    // CASE B: Toko belum ada -> Auto-Register Store
+                    val currentUser = loginViewModel.userState.value
+                    val storeName = if (currentUser is ResultResponse.Success) {
+                        currentUser.data.data.name ?: "My Store"
+                    } else {
+                        "My Store"
+                    }
+                    loginViewModel.updateStore(storeName)
+                }
+            }
+            is ResultResponse.Loading -> showCircularProgress = true
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+                Log.e("AddressScreen", "Check store failed: ${(storeCheckState as ResultResponse.Error).error}")
+            }
+            else -> {}
+        }
+    }
+
+    // 3. UPDATE STORE SUCCESS -> DASHBOARD
+    LaunchedEffect(updateStoreState) {
+        when (updateStoreState) {
+            is ResultResponse.Success -> {
+                loginViewModel.setPersonalizeCompleted()
+                navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
+                onDataBoardingViewModel.resetDataBoardingValue()
+                loginViewModel.resetState()
+            }
+            is ResultResponse.Loading -> showCircularProgress = true
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+                Log.e("AddressScreen", "Update store failed: ${(updateStoreState as ResultResponse.Error).error}")
+            }
             else -> {}
         }
     }

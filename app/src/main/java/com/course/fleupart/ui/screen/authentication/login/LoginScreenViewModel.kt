@@ -32,6 +32,16 @@ class LoginScreenViewModel(
         MutableStateFlow<ResultResponse<GetUserResponse>>(ResultResponse.None)
     val userState: StateFlow<ResultResponse<GetUserResponse>> = _userState
 
+
+    private val _updateStoreState = MutableStateFlow<ResultResponse<PersonalizeResponse>>(
+        ResultResponse.None)
+    val updateStoreState: StateFlow<ResultResponse<PersonalizeResponse>> = _updateStoreState
+
+
+    // State untuk Check Store (Boolean: True=Ada, False=Belum Ada)
+    private val _storeCheckState = MutableStateFlow<ResultResponse<Boolean>>(ResultResponse.None)
+    val storeCheckState: StateFlow<ResultResponse<Boolean>> = _storeCheckState
+
     private val _personalizeState =
         MutableStateFlow<ResultResponse<PersonalizeResponse>>(ResultResponse.None)
     val personalizeState: StateFlow<ResultResponse<PersonalizeResponse>> = _personalizeState
@@ -162,6 +172,29 @@ class LoginScreenViewModel(
         } else {
             emailError = ""
             true
+        }
+    }
+
+    fun checkStore() {
+        viewModelScope.launch {
+            _storeCheckState.value = ResultResponse.Loading
+            loginRepository.checkStoreStatus().collect { result ->
+                _storeCheckState.value = result
+            }
+        }
+    }
+
+    fun updateStore(name: String) {
+        viewModelScope.launch {
+            try {
+                _updateStoreState.value = ResultResponse.Loading
+                    loginRepository.updateStore(name = name)
+                    .collect { result ->
+                        _updateStoreState.value = result
+                    }
+            } catch (e: Exception) {
+                _updateStoreState.value = ResultResponse.Error("Failed to update store: ${e.message}")
+            }
         }
     }
 

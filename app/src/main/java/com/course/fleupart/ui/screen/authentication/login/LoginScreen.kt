@@ -76,9 +76,64 @@ fun LoginScreen(
 
     val userState by loginViewModel.userState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
 
+    val storeCheckState by loginViewModel.storeCheckState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+    val updateStoreState by loginViewModel.updateStoreState.collectAsStateWithLifecycle(initialValue = ResultResponse.None)
+
     val addressState by onDataBoardingViewModel.userAddressData.collectAsStateWithLifecycle(
         initialValue = ResultResponse.None
     )
+
+    LaunchedEffect(storeCheckState) {
+        when (storeCheckState) {
+            is ResultResponse.Success -> {
+                val isStoreExist = (storeCheckState as ResultResponse.Success).data
+
+                if (isStoreExist) {
+                    // CASE A: Toko sudah ada -> Langsung Masuk Dashboard
+                    loginViewModel.setPersonalizeCompleted()
+                    navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
+                    onDataBoardingViewModel.resetDataBoardingValue()
+                    loginViewModel.resetState()
+                } else {
+                    // CASE B: Toko belum ada -> Auto-Register menggunakan nama User
+                    // Kita ambil nama user dari state yang sudah di-load sebelumnya
+                    val currentUserResponse = loginViewModel.userState.value
+                    if (currentUserResponse is ResultResponse.Success) {
+                        val userName = currentUserResponse.data.data.name
+                        loginViewModel.updateStore(userName ?: "Store Name")
+                    } else {
+                        // Fallback jika data user hilang (jarang terjadi di flow ini)
+                        showInvalidMessage = true
+                    }
+                }
+            }
+            is ResultResponse.Loading -> showCircularProgress = true
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+                // Handle error (misal koneksi)
+            }
+            else -> {}
+        }
+    }
+
+    // 2. LOGIC SETELAH UPDATE STORE (Khusus pengguna pertama kali)
+    LaunchedEffect(updateStoreState) {
+        when (updateStoreState) {
+            is ResultResponse.Success -> {
+                // Berhasil buat toko -> Masuk Dashboard
+                loginViewModel.setPersonalizeCompleted()
+                navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
+                onDataBoardingViewModel.resetDataBoardingValue()
+                loginViewModel.resetState()
+            }
+            is ResultResponse.Loading -> showCircularProgress = true
+            is ResultResponse.Error -> {
+                showCircularProgress = false
+                Log.e("LoginScreen", "Gagal update store: ${(updateStoreState as ResultResponse.Error).error}")
+            }
+            else -> {}
+        }
+    }
 
     LaunchedEffect(loginState) {
         when (loginState) {
@@ -148,14 +203,15 @@ fun LoginScreen(
                 val address = (addressState as ResultResponse.Success).data.data
                 Log.e("AddressScreen", "Address detail: $address")
                 if (address.isNotEmpty() && address.first().isAddressCompleted()) {
-                    loginViewModel.setPersonalizeCompleted()
-                    navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
-                    onDataBoardingViewModel.resetDataBoardingValue()
+//                    loginViewModel.setPersonalizeCompleted()
+//                    navigateToRoute(MainDestinations.DASHBOARD_ROUTE, true)
+//                    onDataBoardingViewModel.resetDataBoardingValue()
+                    loginViewModel.checkStore()
                 } else {
                     navigateToRoute(MainDestinations.ADDRESS_ROUTE, true)
+                    loginViewModel.resetState()
+                    onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
                 }
-                loginViewModel.resetState()
-                onDataBoardingViewModel.setPersonalizeState(ResultResponse.None)
             }
 
             is ResultResponse.Loading -> {

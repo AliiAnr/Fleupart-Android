@@ -5,6 +5,7 @@ import com.course.fleupart.data.model.remote.GetUserResponse
 import com.course.fleupart.data.model.remote.LoginRequest
 import com.course.fleupart.data.model.remote.LoginResponse
 import com.course.fleupart.data.model.remote.PersonalizeResponse
+import com.course.fleupart.data.model.remote.UpdateStoreRequest
 import com.course.fleupart.data.store.DataStoreManager
 import com.course.fleupart.retrofit.api.ApiConfig
 import com.course.fleupart.ui.common.ResultResponse
@@ -57,6 +58,45 @@ class LoginRepository private constructor(
             emit(ResultResponse.Error(e.localizedMessage ?: "Network error"))
         }
     }.flowOn(Dispatchers.IO)
+
+    fun updateStore(name: String): Flow<ResultResponse<PersonalizeResponse>> = flow {
+        emit(ResultResponse.Loading)
+        try {
+            val response = loginService.updateStore(request = UpdateStoreRequest(name = name))
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    emit(ResultResponse.Success(it))
+                } ?: emit(ResultResponse.Error("Empty response body"))
+            } else {
+                emit(ResultResponse.Error("Error: ${response.errorBody()?.string() ?: "Unknown error"}"))
+            }
+        } catch (e: Exception) {
+            emit(ResultResponse.Error(e.localizedMessage ?: "Network error"))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    fun checkStoreStatus(): Flow<ResultResponse<Boolean>> = flow {
+        emit(ResultResponse.Loading)
+        try {
+            val response = loginService.getStoreCheck()
+            if (response.isSuccessful) {
+                // Return TRUE jika toko sudah ada (200 OK)
+                emit(ResultResponse.Success(true))
+            } else {
+                // Cek jika error 500 dan message berisi "Store not Found"
+                val errorBody = response.errorBody()?.string() ?: ""
+                if (response.code() == 500 && errorBody.contains("Store not Found", ignoreCase = true)) {
+                    // Return FALSE jika toko belum ada (Perlu Register Store)
+                    emit(ResultResponse.Success(false))
+                } else {
+                    emit(ResultResponse.Error("Error: $errorBody"))
+                }
+            }
+        } catch (e: Exception) {
+            emit(ResultResponse.Error(e.localizedMessage ?: "Network error"))
+        }
+    }.flowOn(Dispatchers.IO)
+
 
 //    fun setUsername(username: String): Flow<ResultResponse<PersonalizeResponse>> = flow {
 //        emit(ResultResponse.Loading)
