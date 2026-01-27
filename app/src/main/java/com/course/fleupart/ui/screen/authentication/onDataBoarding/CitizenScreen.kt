@@ -217,7 +217,6 @@ private fun CitizenScreen(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ) {
-                            // Do nothing - this prevents clicks from passing through
                         }
                 ) {
                     CircularProgressIndicator(color = primaryLight)
