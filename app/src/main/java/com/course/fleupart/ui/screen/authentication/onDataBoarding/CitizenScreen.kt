@@ -1,7 +1,6 @@
 package com.course.fleupart.ui.screen.authentication.onDataBoarding
 
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -37,7 +36,6 @@ import com.course.fleupart.ui.common.ResultResponse
 import com.course.fleupart.ui.components.CustomButton
 import com.course.fleupart.ui.components.CustomTextField
 import com.course.fleupart.ui.components.CustomTopAppBar
-import com.course.fleupart.ui.screen.authentication.login.LoginScreenViewModel
 import com.course.fleupart.ui.screen.navigation.FleupartSurface
 import com.course.fleupart.ui.screen.navigation.MainDestinations
 import com.course.fleupart.ui.theme.primaryLight

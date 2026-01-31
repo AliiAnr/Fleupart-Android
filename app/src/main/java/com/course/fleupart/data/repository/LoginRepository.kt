@@ -98,23 +98,6 @@ class LoginRepository private constructor(
     }.flowOn(Dispatchers.IO)
 
 
-//    fun setUsername(username: String): Flow<ResultResponse<PersonalizeResponse>> = flow {
-//        emit(ResultResponse.Loading)
-//
-//        try {
-//            val response = loginService.setUsername(NameRequest(username))
-//            if (response.isSuccessful) {
-//                response.body()?.let {
-//                    emit(ResultResponse.Success(it))
-//                } ?: emit(ResultResponse.Error("Empty response body"))
-//            } else {
-//                emit(ResultResponse.Error("Error: ${response.errorBody()?.string() ?: "Unknown error"}"))
-//            }
-//        } catch (e: Exception) {
-//            emit(ResultResponse.Error(e.localizedMessage ?: "Network error"))
-//        }
-//    }.flowOn(Dispatchers.IO)
-
     fun isUserLoggedIn(): Flow<Boolean> = dataStoreManager.isUserLoggedIn
 
     fun getUserToken(): Flow<String?> = dataStoreManager.userToken
